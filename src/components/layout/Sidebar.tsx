@@ -414,15 +414,23 @@ export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
                 )}
             </div>
 
-            {/* Premium Upgrade Banner (for free users) */}
+            {/* Premium Status Banner */}
             {!isCollapsed && (
-                <div className={styles.premiumBanner}>
-                    <div className={styles.premiumIcon}>🥓</div>
-                    <div className={styles.premiumContent}>
-                        <span className={styles.premiumTitle}>Go Premium</span>
-                        <span className={styles.premiumDesc}>Unlimited folders & more</span>
+                <div className={`${styles.premiumBanner} ${isPremiumUser ? styles.isPremium : ''}`}>
+                    <div className={styles.premiumIcon}>
+                        {isPremiumUser ? '👑' : '🥓'}
                     </div>
-                    <button className={styles.premiumBtn}>Upgrade</button>
+                    <div className={styles.premiumContent}>
+                        <span className={styles.premiumTitle}>
+                            {isPremiumUser ? 'Premium User' : 'Go Premium'}
+                        </span>
+                        <span className={styles.premiumDesc}>
+                            {isPremiumUser ? 'Unlimited Access' : 'Unlimited folders & more'}
+                        </span>
+                    </div>
+                    {!isPremiumUser && (
+                        <button className={styles.premiumBtn}>Upgrade</button>
+                    )}
                 </div>
             )}
 

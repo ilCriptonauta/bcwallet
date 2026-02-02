@@ -511,6 +511,13 @@
     background: linear-gradient(135deg, rgba(155, 34, 38, 0.2), rgba(217, 72, 15, 0.2));
     border: 1px solid rgba(233, 196, 106, 0.2);
     border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+}
+
+.premiumBanner.isPremium {
+    background: linear-gradient(135deg, rgba(233, 196, 106, 0.15), rgba(42, 157, 143, 0.15));
+    border-color: var(--bacon-gold);
+    box-shadow: 0 0 15px rgba(233, 196, 106, 0.1);
 }
 
 .premiumIcon {
