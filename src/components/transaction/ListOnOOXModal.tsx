@@ -7,8 +7,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useGetAccount } from '@multiversx/sdk-dapp/out/react/account/useGetAccount';
-import { sendTransactions } from '@multiversx/sdk-dapp/services/transactions/sendTransactions';
-import { Address } from '@multiversx/sdk-core';
+import { getAccountProvider } from '@multiversx/sdk-dapp/out/providers/helpers/accountProvider';
+import { refreshAccount } from '@multiversx/sdk-dapp/out/utils/account/refreshAccount';
+import { Address, Transaction, ApiNetworkProvider } from '@multiversx/sdk-core';
 import { NFT } from '@/types';
 import { NETWORK_CONFIG } from '@/lib/constants';
 import styles from './ListOnOOXModal.module.css';
@@ -178,23 +179,27 @@ export function ListOnOOXModal({ isOpen, onClose, nft }: ListOnOOXModalProps) {
             const txData = dataParts.join('@');
 
             // 3. Send Transaction
-            // Using sendTransactions from sdk-dapp to handle all providers
-            const tx = {
-                value: '0',
-                data: txData,
-                receiver: address, // Send to Self for ESDTNFTTransfer
-                gasLimit: 15000000,
-            };
+            await refreshAccount();
+            const provider = getAccountProvider();
 
-            await sendTransactions({
-                transactions: [tx],
-                transactionsDisplayInfo: {
-                    processingMessage: 'Listing NFT on OOX...',
-                    errorMessage: 'An error has occurred during listing',
-                    successMessage: 'NFT Listing Successful'
-                },
-                redirectAfterSign: false
+            // Construct message/transaction
+            const tx = new Transaction({
+                value: BigInt(0),
+                data: Buffer.from(txData),
+                receiver: new Address(address),
+                gasLimit: BigInt(15000000),
+                sender: new Address(address),
+                chainID: '1',
+                version: 1
             });
+
+            // Sign (returns signed transactions, but modifies in place too usually)
+            // Note: Web Wallet will redirect here and flow stops.
+            await provider.signTransactions([tx]);
+
+            // Broadcast using API Provider (only reaches here if provider supports inline signing, e.g. Extension)
+            const apiProvider = new ApiNetworkProvider(NETWORK_CONFIG.apiUrl);
+            await apiProvider.sendTransaction(tx);
 
             onClose();
 
