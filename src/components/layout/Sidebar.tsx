@@ -143,19 +143,17 @@ export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: Si
         }
     };
 
-    // Get folder count - use external counts if provided, otherwise fallback
-    const getFolderCount = (folderId: string): number => {
+    // Get folder count - only show counts when logged in
+    const getFolderCount = (folderId: string): number | undefined => {
+        // Don't show counts when not logged in
+        if (!address) {
+            return undefined;
+        }
         if (folderCounts[folderId] !== undefined) {
             return folderCounts[folderId];
         }
-        // Fallback mock numbers for now
-        const defaultCounts: Record<string, number> = {
-            'all': 142,
-            'favorites': 23,
-            'high-rarity': 8,
-            'spam': 45,
-        };
-        return defaultCounts[folderId] || 0;
+        // Return 0 for folders without external counts when logged in
+        return 0;
     };
 
     // Drag and Drop Handlers
@@ -319,7 +317,9 @@ export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: Si
                                 {!isCollapsed && (
                                     <>
                                         <span className={styles.folderName}>{folder.name}</span>
-                                        <span className={styles.folderCount}>{getFolderCount(folder.id)}</span>
+                                        {getFolderCount(folder.id) !== undefined && (
+                                            <span className={styles.folderCount}>{getFolderCount(folder.id)}</span>
+                                        )}
                                     </>
                                 )}
                             </button>
@@ -362,7 +362,9 @@ export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: Si
                                         {!isCollapsed && (
                                             <>
                                                 <span className={styles.folderName}>{folder.name}</span>
-                                                <span className={styles.folderCount}>{getFolderCount(folder.id)}</span>
+                                                {getFolderCount(folder.id) !== undefined && (
+                                                    <span className={styles.folderCount}>{getFolderCount(folder.id)}</span>
+                                                )}
                                             </>
                                         )}
                                     </button>
