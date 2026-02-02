@@ -18,6 +18,10 @@
     margin-left: var(--sidebar-collapsed-width);
 }
 
+.main.fullWidth {
+    margin-left: 0;
+}
+
 .content {
     padding: var(--space-6);
     max-width: var(--max-content-width);
