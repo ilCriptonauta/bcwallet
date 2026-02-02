@@ -1,0 +1,302 @@
+/* =====================================================
+   🥓 BACON WALLET - NFTs Page Styles
+   ===================================================== */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.headerLeft {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+}
+
+.title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--bacon-text-primary);
+    margin: 0;
+}
+
+.count {
+    font-size: var(--text-sm);
+    color: var(--bacon-text-muted);
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* View Controls */
+.viewControls {
+    display: flex;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    background: var(--bacon-bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.viewBtn {
+    padding: var(--space-2);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--bacon-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.viewBtn:hover {
+    color: var(--bacon-text-primary);
+}
+
+.viewBtn.active {
+    background: var(--bacon-bg-tertiary);
+    color: var(--bacon-gold);
+}
+
+.refreshBtn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bacon-bg-secondary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-md);
+    color: var(--bacon-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.refreshBtn:hover {
+    background: var(--bacon-bg-tertiary);
+    border-color: var(--bacon-gold);
+    color: var(--bacon-gold);
+}
+
+.refreshBtn:active svg {
+    animation: spin 0.5s ease;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Filters Bar */
+.filtersBar {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--bacon-bg-secondary);
+    border-radius: var(--radius-lg);
+}
+
+.searchContainer {
+    flex: 1;
+    position: relative;
+    max-width: 400px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bacon-text-muted);
+    pointer-events: none;
+}
+
+.searchInput {
+    width: 100%;
+    padding: var(--space-2) var(--space-4);
+    padding-left: var(--space-10);
+    padding-right: var(--space-8);
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    color: var(--bacon-text-primary);
+    background: var(--bacon-bg-primary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+.searchInput:focus {
+    border-color: var(--bacon-gold);
+    box-shadow: 0 0 0 2px rgba(233, 196, 106, 0.1);
+}
+
+.searchInput::placeholder {
+    color: var(--bacon-text-muted);
+}
+
+.clearSearch {
+    position: absolute;
+    right: var(--space-2);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bacon-bg-tertiary);
+    border: none;
+    border-radius: 50%;
+    font-size: var(--text-lg);
+    color: var(--bacon-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.clearSearch:hover {
+    background: var(--bacon-red);
+    color: var(--bacon-text-primary);
+}
+
+/* Collection Filter */
+.collectionFilter {
+    min-width: 200px;
+}
+
+.select {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    color: var(--bacon-text-primary);
+    background: var(--bacon-bg-primary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-md);
+    outline: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.select:focus {
+    border-color: var(--bacon-gold);
+}
+
+/* Selection Bar */
+.selectionBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    background: linear-gradient(135deg, rgba(155, 34, 38, 0.2), rgba(217, 72, 15, 0.2));
+    border: 1px solid rgba(233, 196, 106, 0.3);
+    border-radius: var(--radius-lg);
+    animation: slideDown var(--transition-fast) ease;
+}
+
+.selectionCount {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--bacon-gold);
+}
+
+.selectionActions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.selectionBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bacon-glass-bg);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-primary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    color: var(--bacon-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.selectionBtn:hover {
+    background: var(--bacon-glass-bg-hover);
+    border-color: var(--bacon-gold);
+}
+
+.clearBtn {
+    background: transparent;
+    border-color: transparent;
+    color: var(--bacon-text-muted);
+}
+
+.clearBtn:hover {
+    background: var(--bacon-bg-tertiary);
+    color: var(--bacon-text-primary);
+    border-color: transparent;
+}
+
+/* Animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .headerRight {
+        justify-content: space-between;
+    }
+
+    .filtersBar {
+        flex-direction: column;
+    }
+
+    .searchContainer {
+        max-width: 100%;
+    }
+
+    .collectionFilter {
+        min-width: auto;
+    }
+
+    .selectionBar {
+        flex-direction: column;
+        gap: var(--space-3);
+        text-align: center;
+    }
+
+    .selectionActions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}

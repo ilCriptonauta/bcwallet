@@ -1,0 +1,314 @@
+/* =====================================================
+   🥓 BACON WALLET - Tag Selection Modal Styles
+   ===================================================== */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bacon-bg-secondary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--bacon-shadow-xl);
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--bacon-glass-border);
+}
+
+.title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--bacon-text-primary);
+    margin: 0;
+}
+
+.closeBtn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--bacon-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.closeBtn:hover {
+    background: var(--bacon-bg-tertiary);
+    color: var(--bacon-text-primary);
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+}
+
+.sectionTitle {
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--bacon-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-3);
+    margin-top: var(--space-4);
+}
+
+.sectionTitle:first-child {
+    margin-top: 0;
+}
+
+.tagList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.tagItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bacon-bg-tertiary);
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.tagItem:hover {
+    border-color: var(--bacon-glass-border);
+    transform: translateY(-1px);
+}
+
+.tagItem.selected {
+    border-color: var(--bacon-gold);
+    background: rgba(233, 196, 106, 0.15);
+}
+
+.tagColor {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.tagName {
+    font-size: var(--text-sm);
+    color: var(--bacon-text-secondary);
+}
+
+.tagItem.selected .tagName {
+    color: var(--bacon-text-primary);
+    font-weight: var(--font-medium);
+}
+
+.tagCheck {
+    font-size: var(--text-xs);
+    color: var(--bacon-gold);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.tagItem.selected .tagCheck {
+    opacity: 1;
+}
+
+/* Create New Tag Form */
+.createForm {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--bacon-glass-border);
+}
+
+.inputGroup {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.input {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    background: var(--bacon-bg-primary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-md);
+    color: var(--bacon-text-primary);
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.input:focus {
+    border-color: var(--bacon-gold);
+}
+
+.createBtn {
+    padding: 0 var(--space-4);
+    background: var(--bacon-bg-tertiary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-md);
+    color: var(--bacon-text-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.createBtn:hover:not(:disabled) {
+    background: var(--bacon-gold);
+    color: var(--bacon-bg-primary);
+    border-color: var(--bacon-gold);
+}
+
+.createBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.emptyState {
+    padding: var(--space-8) var(--space-4);
+    text-align: center;
+    color: var(--bacon-text-muted);
+}
+
+.emptyIcon {
+    font-size: var(--text-3xl);
+    margin-bottom: var(--space-2);
+    display: block;
+}
+
+.emptyText {
+    font-size: var(--text-sm);
+}
+
+/* Colors Row */
+.colorRow {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-2);
+    padding-bottom: var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.colorOption {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+
+.colorOption:hover {
+    transform: scale(1.1);
+}
+
+.colorOption.selectedColor {
+    border-color: var(--bacon-text-primary);
+    transform: scale(1.1);
+}
+
+/* Folder List Styles */
+.folderList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.folderItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--bacon-bg-tertiary);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+    color: var(--bacon-text-secondary);
+}
+
+.folderItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--bacon-glass-border);
+}
+
+.folderItem.selectedFolder {
+    background: rgba(233, 196, 106, 0.1);
+    border-color: var(--bacon-gold);
+    color: var(--bacon-text-primary);
+}
+
+.folderIcon {
+    font-size: var(--text-lg);
+}
+
+.folderName {
+    flex: 1;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.check {
+    color: var(--bacon-gold);
+    font-size: var(--text-sm);
+}
+
+.divider {
+    height: 1px;
+    background: var(--bacon-glass-border);
+    margin: var(--space-4) 0;
+}

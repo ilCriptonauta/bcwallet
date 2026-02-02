@@ -1,0 +1,210 @@
+/* =====================================================
+   🥓 BACON WALLET - Header Styles
+   ===================================================== */
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-6);
+    background: var(--bacon-glass-bg);
+    backdrop-filter: blur(var(--bacon-glass-blur));
+    -webkit-backdrop-filter: blur(var(--bacon-glass-blur));
+    border-bottom: 1px solid var(--bacon-glass-border);
+    z-index: var(--z-sticky);
+}
+
+/* Left Section - Logo */
+.left {
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.logo:hover {
+    transform: scale(1.02);
+}
+
+.logoIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bacon-gold);
+    animation: sizzle 2s ease-in-out infinite;
+}
+
+.logoText {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    background: linear-gradient(135deg, var(--bacon-gold), var(--bacon-orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Center Section - Search */
+.center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    max-width: 500px;
+}
+
+.searchContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.searchToggle {
+    display: none;
+    padding: var(--space-2);
+    background: transparent;
+    border: none;
+    color: var(--bacon-text-secondary);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.searchToggle:hover {
+    color: var(--bacon-text-primary);
+}
+
+.searchInput {
+    width: 100%;
+    padding: var(--space-2) var(--space-4);
+    padding-left: var(--space-10);
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    color: var(--bacon-text-primary);
+    background: var(--bacon-bg-secondary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-full);
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+.searchInput::placeholder {
+    color: var(--bacon-text-muted);
+}
+
+.searchInput:focus {
+    border-color: var(--bacon-gold);
+    box-shadow: 0 0 0 3px rgba(233, 196, 106, 0.1);
+}
+
+.searchContainer::before {
+    content: '';
+    position: absolute;
+    left: var(--space-4);
+    width: 16px;
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6560' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    pointer-events: none;
+}
+
+/* Right Section */
+.right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-width: 200px;
+    justify-content: flex-end;
+}
+
+.networkBadge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bacon-bg-secondary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    color: var(--bacon-text-secondary);
+}
+
+.networkDot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.networkName {
+    font-weight: var(--font-medium);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .header {
+        padding: 0 var(--space-4);
+    }
+
+    .left {
+        min-width: auto;
+    }
+
+    .logoText {
+        display: none;
+    }
+
+    .center {
+        flex: 0;
+    }
+
+    .searchContainer {
+        width: auto;
+    }
+
+    .searchToggle {
+        display: flex;
+    }
+
+    .searchInput {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        width: 0;
+        opacity: 0;
+        padding: 0;
+        margin-top: var(--space-2);
+        transition: all var(--transition-base);
+    }
+
+    .searchContainer::before {
+        display: none;
+    }
+
+    .searchOpen .searchInput {
+        width: calc(100vw - var(--space-8));
+        opacity: 1;
+        padding: var(--space-3) var(--space-4);
+    }
+
+    .networkBadge {
+        display: none;
+    }
+
+    .right {
+        min-width: auto;
+        gap: var(--space-2);
+    }
+}

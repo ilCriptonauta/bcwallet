@@ -1,0 +1,211 @@
+/* =====================================================
+   🥓 BACON WALLET - NFT Grid Styles
+   ===================================================== */
+
+.container {
+    width: 100%;
+}
+
+/* Grid Layouts */
+.grid {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.grid2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.grid5 {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.grid6 {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+/* Responsive Grid */
+@media (max-width: 1400px) {
+
+    .grid5,
+    .grid6 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+
+    .grid4,
+    .grid5,
+    .grid6 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+
+    .grid3,
+    .grid4,
+    .grid5,
+    .grid6 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+
+    .grid2,
+    .grid3,
+    .grid4,
+    .grid5,
+    .grid6 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
+    }
+}
+
+/* Skeleton Card */
+.skeletonCard {
+    background: var(--bacon-bg-secondary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.skeletonImage {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(90deg,
+            var(--bacon-bg-tertiary) 25%,
+            var(--bacon-bg-secondary) 50%,
+            var(--bacon-bg-tertiary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeletonInfo {
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.skeletonTitle {
+    height: 14px;
+    width: 80%;
+    background: var(--bacon-bg-tertiary);
+    border-radius: var(--radius-sm);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.skeletonSubtitle {
+    height: 10px;
+    width: 50%;
+    background: var(--bacon-bg-tertiary);
+    border-radius: var(--radius-sm);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Empty State */
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-16);
+    text-align: center;
+}
+
+.emptyIcon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.5;
+}
+
+.emptyText {
+    font-size: var(--text-lg);
+    color: var(--bacon-text-muted);
+}
+
+/* Load More */
+.loadMore {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-8);
+}
+
+.loader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--bacon-text-secondary);
+}
+
+.loaderIcon {
+    animation: sizzle 1s ease-in-out infinite;
+}
+
+.loadMoreBtn {
+    padding: var(--space-3) var(--space-6);
+    background: var(--bacon-glass-bg);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--bacon-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.loadMoreBtn:hover {
+    background: var(--bacon-glass-bg-hover);
+    border-color: var(--bacon-gold);
+}
+
+/* Animations */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes sizzle {
+
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    25% {
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+    75% {
+        transform: scale(1.1) rotate(5deg);
+    }
+}

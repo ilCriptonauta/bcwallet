@@ -1,0 +1,369 @@
+/* =====================================================
+   🥓 BACON WALLET - Wallet Button Styles
+   ===================================================== */
+
+.wrapper {
+    position: relative;
+}
+
+.connectBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: linear-gradient(135deg, var(--bacon-gold), var(--bacon-orange));
+    border: none;
+    border-radius: var(--radius-full);
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--bacon-bg-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--bacon-shadow-glow-gold);
+}
+
+.connectBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(233, 196, 106, 0.4);
+}
+
+.connectBtn:active {
+    transform: translateY(0);
+}
+
+.connectIcon {
+    font-size: var(--text-base);
+}
+
+/* Connected State */
+.connectedBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bacon-glass-bg);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-full);
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    color: var(--bacon-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    backdrop-filter: blur(10px);
+}
+
+.connectedBtn:hover {
+    background: var(--bacon-glass-bg-hover);
+    border-color: var(--bacon-gold);
+}
+
+.avatar {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bacon-red), var(--bacon-orange));
+    border-radius: 50%;
+    font-size: var(--text-sm);
+}
+
+.address {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--bacon-text-secondary);
+}
+
+.chevron {
+    color: var(--bacon-text-muted);
+    transition: transform var(--transition-fast);
+}
+
+.connectedBtn:hover .chevron {
+    color: var(--bacon-gold);
+}
+
+/* Dropdown Menu (when connected) */
+.dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 200px;
+    background: var(--bacon-bg-secondary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    z-index: 1000;
+    animation: slideDown 0.2s ease-out;
+}
+
+.dropdownHeader {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--bacon-border-color);
+    background: var(--bacon-bg-tertiary);
+}
+
+.dropdownBalance {
+    font-size: var(--text-md);
+    font-weight: var(--font-bold);
+    color: var(--bacon-gold);
+}
+
+.dropdownItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: none;
+    border: none;
+    color: var(--bacon-text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.dropdownItem:hover {
+    background: var(--bacon-bg-tertiary);
+    color: var(--bacon-text-primary);
+}
+
+.dropdownItem svg {
+    flex-shrink: 0;
+}
+
+/* Modal Overlay */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: var(--space-4);
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal {
+    background: var(--bacon-bg-secondary);
+    border: 1px solid var(--bacon-glass-border);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--shadow-xl);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--bacon-border-color);
+}
+
+.modalTitle {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--bacon-text-primary);
+    margin: 0;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: var(--bacon-text-tertiary);
+    cursor: pointer;
+    padding: var(--space-1);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeBtn:hover {
+    background: var(--bacon-bg-tertiary);
+    color: var(--bacon-text-primary);
+}
+
+.modalContent {
+    padding: var(--space-4);
+}
+
+/* Provider List */
+.providerList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.providerBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-4);
+    background: var(--bacon-bg-tertiary);
+    border: 1px solid var(--bacon-border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+}
+
+.providerBtn:hover {
+    border-color: var(--bacon-gold);
+    background: rgba(233, 196, 106, 0.1);
+}
+
+.providerIcon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bacon-bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.providerInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.providerName {
+    font-weight: var(--font-semibold);
+    color: var(--bacon-text-primary);
+    font-size: var(--text-md);
+}
+
+.providerDesc {
+    font-size: var(--text-xs);
+    color: var(--bacon-text-tertiary);
+}
+
+.providerArrow {
+    color: var(--bacon-text-tertiary);
+}
+
+.providerBtn:hover .providerArrow {
+    color: var(--bacon-gold);
+}
+
+/* Loading State */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    gap: var(--space-4);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--bacon-border-color);
+    border-top-color: var(--bacon-gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading p {
+    color: var(--bacon-text-secondary);
+    font-size: var(--text-sm);
+}
+
+/* QR Code */
+.qrContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-6);
+    gap: var(--space-4);
+}
+
+.qrContainer svg {
+    background: white;
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+}
+
+.qrText {
+    color: var(--bacon-text-secondary);
+    font-size: var(--text-sm);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .connectBtn {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .connectBtn span:not(.connectIcon) {
+        display: none;
+    }
+
+    .address {
+        display: none;
+    }
+
+    .modal {
+        max-width: 100%;
+        margin: var(--space-4);
+    }
+}

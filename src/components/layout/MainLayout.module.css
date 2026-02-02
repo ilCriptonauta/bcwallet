@@ -1,0 +1,41 @@
+/* =====================================================
+   🥓 BACON WALLET - Main Layout Styles
+   ===================================================== */
+
+.layout {
+    min-height: 100vh;
+    background: var(--bacon-bg-primary);
+}
+
+.main {
+    margin-top: var(--header-height);
+    margin-left: var(--sidebar-width);
+    min-height: calc(100vh - var(--header-height));
+    transition: margin-left var(--transition-base);
+}
+
+.main.sidebarCollapsed {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+.content {
+    padding: var(--space-6);
+    max-width: var(--max-content-width);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
+        margin-bottom: 80px;
+        /* Space for bottom nav */
+    }
+
+    .main.sidebarCollapsed {
+        margin-left: 0;
+    }
+
+    .content {
+        padding: var(--space-4);
+    }
+}
