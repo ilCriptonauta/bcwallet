@@ -18,14 +18,8 @@ export function MainLayout({ children }: MainLayoutProps) {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const { address } = useGetAccount();
 
-    const MOCK_ADDRESS = 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem';
-    const isDevelopment = process.env.NODE_ENV === 'development';
-
-    // In dev, we use mock address unless real address is connected
-    const effectiveAddress = address || (isDevelopment ? MOCK_ADDRESS : null);
-
-    // Sidebar visibility: show if we're "logged in" (real or mock)
-    const showSidebar = Boolean(effectiveAddress);
+    // Sidebar visibility: show if we're naturally logged in
+    const showSidebar = Boolean(address);
 
     // For centring purposes, we check if the sidebar is actually being shown
     // If not, we use full-width mode.

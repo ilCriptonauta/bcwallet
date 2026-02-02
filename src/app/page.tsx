@@ -19,14 +19,8 @@ const formatCompact = (val: number) => {
 };
 
 export default function HomePage() {
-  const { isLoggedIn: sdkIsLoggedIn } = useGetLoginInfo();
-  const { address: sdkAddress } = useGetAccount();
-
-  // In development, we can simulate login with the provided mock account
-  const MOCK_ADDRESS = 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem';
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const address = sdkAddress || (isDevelopment ? MOCK_ADDRESS : null);
-  const isLoggedIn = sdkIsLoggedIn || (isDevelopment && Boolean(MOCK_ADDRESS));
+  const { address } = useGetAccount();
+  const { isLoggedIn } = useGetLoginInfo();
 
   // Data fetching
   const { data: account } = useAccount(address);
