@@ -1,0 +1,29 @@
+.footer {
+    width: 100%;
+    padding: var(--space-8) 0;
+    margin-top: var(--space-12);
+    text-align: center;
+    border-top: 1px solid var(--bacon-glass-border);
+}
+
+.text {
+    font-size: var(--text-sm);
+    color: var(--bacon-text-muted);
+    font-weight: var(--font-medium);
+}
+
+.brandLink {
+    background: linear-gradient(135deg, var(--bacon-gold), var(--bacon-orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--font-bold);
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+    position: relative;
+    display: inline-block;
+}
+
+.brandLink:hover {
+    opacity: 0.8;
+}
