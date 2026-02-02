@@ -9,7 +9,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useGetAccount } from '@multiversx/sdk-dapp/out/react/account/useGetAccount';
 import { getAccountProvider } from '@multiversx/sdk-dapp/out/providers/helpers/accountProvider';
 import { refreshAccount } from '@multiversx/sdk-dapp/out/utils/account/refreshAccount';
-import { Address, Transaction, ApiNetworkProvider } from '@multiversx/sdk-core';
+import { Address, Transaction } from '@multiversx/sdk-core';
+import * as api from '@/services/mx-api';
 import { NFT } from '@/types';
 import { NETWORK_CONFIG } from '@/lib/constants';
 import styles from './ListOnOOXModal.module.css';
@@ -193,15 +194,24 @@ export function ListOnOOXModal({ isOpen, onClose, nft }: ListOnOOXModalProps) {
                 version: 1
             });
 
-            // Sign (returns signed transactions, but modifies in place too usually)
-            // Note: Web Wallet will redirect here and flow stops.
-            await provider.signTransactions([tx]);
+            // Sign (returns signed transactions array)
+            const signedTransactions = await provider.signTransactions([tx]);
 
-            // Broadcast using API Provider (only reaches here if provider supports inline signing, e.g. Extension)
-            const apiProvider = new ApiNetworkProvider(NETWORK_CONFIG.apiUrl);
-            await apiProvider.sendTransaction(tx);
+            // If no signed transactions returned (e.g. Web Wallet redirect or error), stop
+            if (!signedTransactions || signedTransactions.length === 0) {
+                return; // Web Wallet will redirect, execution stops
+            }
 
+            // For Extension/xPortal, we get the signed transaction back
+            // We must broadcast THIS signed object, not the original 'tx'
+            const signedTx = signedTransactions[0];
+
+            // Broadcast using our API service
+            await api.broadcastTransaction(signedTx.toPlainObject ? signedTx.toPlainObject() : signedTx);
+
+            setIsLoading(false);
             onClose();
+            // Optional: Show success toast/message here
 
         } catch (err: any) {
             console.error('Listing error:', err);

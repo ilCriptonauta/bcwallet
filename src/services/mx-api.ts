@@ -309,6 +309,17 @@ export async function getTransaction(txHash: string): Promise<Transaction> {
     return apiFetch<Transaction>(`/transactions/${txHash}`);
 }
 
+/**
+ * Broadcast a signed transaction to the network
+ */
+export async function broadcastTransaction(transaction: any): Promise<string> {
+    const response = await apiFetch<{ txHash: string }>('/transactions', {
+        method: 'POST',
+        body: JSON.stringify(transaction),
+    });
+    return response.txHash;
+}
+
 // ---- Spam Detection ----
 
 // Known spam patterns and suspicious traits
