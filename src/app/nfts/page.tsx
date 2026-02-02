@@ -23,7 +23,7 @@ import styles from './page.module.css';
 export default function NFTsPage() {
     // State
     const { address: walletAddress } = useGetAccount();
-    const address = walletAddress || 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem';
+    const address = walletAddress;
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCollection, setSelectedCollection] = useState<string | null>('all');
     const [selectedNFTs, setSelectedNFTs] = useState<Set<string>>(new Set());
@@ -73,7 +73,7 @@ export default function NFTsPage() {
         removeTagFromNFT,
         getTagsForNFT,
         autoDetectSpam,
-    } = useFolders({ isPremium: false, address: address || 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem' });
+    } = useFolders({ isPremium: false, address: address });
 
     // No longer need event listener as we use shared context for folder selection
 
@@ -179,6 +179,29 @@ export default function NFTsPage() {
         // Otherwise show the total count from blockchain
         return totalCount;
     }, [selectedFolderId, totalCount, filteredNfts.length, selectedCollection, collectionCounts, searchQuery, allNfts]);
+
+    // If no address, show connect wallet state
+    if (!address) {
+        return (
+            <div className={styles.container}>
+                <div className={styles.header}>
+                    <h1 className={styles.title}>All NFTs</h1>
+                </div>
+                <div style={{
+                    padding: '48px',
+                    textAlign: 'center',
+                    background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '12px',
+                    marginTop: '24px',
+                    border: '1px solid var(--border-color)'
+                }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔐</div>
+                    <h2 style={{ marginBottom: '8px' }}>Wallet Not Connected</h2>
+                    <p style={{ color: 'var(--text-secondary)' }}>Connect your wallet to view your NFT collection</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>

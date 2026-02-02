@@ -9,7 +9,7 @@ import styles from './page.module.css';
 
 export default function TokensPage() {
     const { address: walletAddress } = useGetAccount();
-    const address = walletAddress || 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem';
+    const address = walletAddress;
     const { data: tokens, isLoading } = useTokens(address);
     const [sendToken, setSendToken] = useState<api.Token | null>(null);
 
