@@ -53,8 +53,11 @@ export const API_ENDPOINTS = {
 
 // ---- Smart Contract Addresses ----
 export const CONTRACT_ADDRESSES = {
-    subscription: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT || '',
-    baconPass: process.env.NEXT_PUBLIC_BACON_PASS_COLLECTION || 'BACONPASS-xxxx',
+    // Contract for EGLD payments (Premium Upgrade)
+    subscription: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT || 'erd1qqqqqqqqqqqqqpgq...',
+
+    // Collection that grants Premium access automatically
+    baconPass: process.env.NEXT_PUBLIC_BACON_PASS_COLLECTION || 'CHBONX-3e0201',
 };
 
 // ---- App Constants ----

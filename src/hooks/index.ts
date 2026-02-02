@@ -25,6 +25,8 @@ interface AccountData {
     balanceFormatted: string;
     herotag: string | null;
     shard: number;
+    hasBaconPass: boolean;
+    isPremium: boolean;
 }
 
 export function useAccount(address: string | null): UseAsyncState<AccountData> {
@@ -42,13 +44,19 @@ export function useAccount(address: string | null): UseAsyncState<AccountData> {
         setError(null);
 
         try {
-            const account = await api.getAccount(address);
+            const [account, hasPass] = await Promise.all([
+                api.getAccount(address),
+                api.checkBaconPass(address)
+            ]);
+
             setData({
                 address: account.address,
                 balance: account.balance,
                 balanceFormatted: api.formatEGLD(account.balance),
                 herotag: account.username || null,
                 shard: account.shard,
+                hasBaconPass: hasPass,
+                isPremium: hasPass, // Premium if pass is owned
             });
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch account'));

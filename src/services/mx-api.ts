@@ -4,7 +4,7 @@
    ===================================================== */
 
 import { NFT, NFTCollection, PaginatedResponse } from '@/types';
-import { NETWORK_CONFIG, APP_CONFIG } from '@/lib/constants';
+import { NETWORK_CONFIG, APP_CONFIG, CONTRACT_ADDRESSES } from '@/lib/constants';
 
 // ---- Types ----
 interface AccountInfo {
@@ -104,6 +104,23 @@ export async function getHerotag(address: string): Promise<string | null> {
         return account.username || null;
     } catch {
         return null;
+    }
+}
+
+// (removed)
+
+/**
+ * Check if address owns a Bacon Pass
+ */
+export async function checkBaconPass(address: string): Promise<boolean> {
+    try {
+        const result = await getNFTs(address, {
+            collections: [CONTRACT_ADDRESSES.baconPass],
+            size: 1
+        });
+        return result.count > 0;
+    } catch {
+        return false;
     }
 }
 

@@ -14,6 +14,7 @@ export interface WalletInfo {
   shard: number;
   isPremium: boolean;
   premiumExpiry?: number;
+  hasBaconPass?: boolean;
 }
 
 // ---- NFT Types ----

@@ -9,6 +9,7 @@ import { useState, ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useFolders } from '@/hooks/useFolders';
+import { useAccount } from '@/hooks';
 import { Folder } from '@/types/folders';
 import { useGetAccount } from '@multiversx/sdk-dapp/out/react/account/useGetAccount';
 import {
@@ -62,7 +63,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
-    const { address } = useGetAccount();
+    const { address } = useGetAccount(); // Keep SDK hook for address source if needed, or use context
+    const { data } = useAccount(address);
     const pathname = usePathname();
     const [isCreating, setIsCreating] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
@@ -73,6 +75,7 @@ export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
     const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
 
     // Folder management hook
+    // Pass real premium status
     const {
         systemFolders,
         customFolders,
@@ -86,9 +89,14 @@ export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
         folderLimit,
         folderCounts,
     } = useFolders({
-        isPremium: false,
+        isPremium: !!data?.isPremium,
         address: address || 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem'
     });
+
+    // ... (rest of component logic)
+
+    // Premium Banner - Only show if NOT premium
+    const isPremiumUser = !!data?.isPremium;
 
     // Check active nav item
     const getActiveNav = () => {
