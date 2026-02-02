@@ -8,6 +8,16 @@
 import { useState } from 'react';
 import { NFT } from '@/types';
 import { Tag } from '@/types/folders';
+import {
+    HeartIcon,
+    SettingsIcon,
+    DownloadIcon,
+    SendIcon,
+    TrashIcon,
+    TagIcon,
+    ShoppingBagIcon,
+    XIcon
+} from '@/components/ui/Icons';
 import styles from './NFTCard.module.css';
 
 interface NFTCardProps {
@@ -25,6 +35,8 @@ interface NFTCardProps {
     tags?: Tag[];
     showActions?: boolean;
     isDraggable?: boolean;
+    isMenuOpen?: boolean;
+    onToggleMenu?: (open: boolean) => void;
 }
 
 export function NFTCard({
@@ -42,20 +54,39 @@ export function NFTCard({
     tags = [],
     showActions = true,
     isDraggable = true,
+    isMenuOpen = false,
+    onToggleMenu,
 }: NFTCardProps) {
     const [imageError, setImageError] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
 
-    // Get the best available image URL
-    const getImageUrl = (): string => {
-        if (nft.media && nft.media.length > 0) {
-            return nft.media[0].thumbnailUrl || nft.media[0].url;
+    // Find the best media to display (prefers animations if available)
+    const getBestMedia = () => {
+        if (!nft.media || nft.media.length === 0) {
+            return { url: nft.thumbnailUrl || nft.url || '', isVideo: false };
         }
-        return nft.thumbnailUrl || nft.url || '';
+
+        // Try to find a video first
+        const videoMedia = nft.media.find(m => m.fileType?.startsWith('video/'));
+        if (videoMedia) {
+            return { url: videoMedia.url, isVideo: true, thumbnail: videoMedia.thumbnailUrl || nft.thumbnailUrl };
+        }
+
+        // Try to find a GIF
+        const gifMedia = nft.media.find(m => m.fileType === 'image/gif');
+        if (gifMedia) {
+            return { url: gifMedia.url, isVideo: false };
+        }
+
+        // Fallback to first thumbnail/url
+        return {
+            url: nft.media[0].thumbnailUrl || nft.media[0].url || nft.thumbnailUrl || nft.url || '',
+            isVideo: false
+        };
     };
 
-    const imageUrl = getImageUrl();
+    const media = getBestMedia();
 
     const handleImageError = () => {
         setImageError(true);
@@ -104,51 +135,37 @@ export function NFTCard({
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            {/* Image Container */}
+            {/* Media Container */}
             <div className={styles.imageContainer}>
-                {!imageError && imageUrl ? (
-                    <img
-                        src={imageUrl}
-                        alt={nft.name}
-                        className={styles.image}
-                        onError={handleImageError}
-                        loading="lazy"
-                    />
+                {!imageError && media.url ? (
+                    media.isVideo ? (
+                        <video
+                            src={media.url}
+                            poster={media.thumbnail}
+                            className={styles.image}
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            onError={handleImageError}
+                        />
+                    ) : (
+                        <img
+                            src={media.url}
+                            alt={nft.name}
+                            className={styles.image}
+                            onError={handleImageError}
+                            loading="lazy"
+                        />
+                    )
                 ) : (
                     <div className={styles.placeholder}>
                         <span>🖼️</span>
                     </div>
                 )}
 
-                {/* Favorite Button - Always visible if favorited, or on hover */}
-                {onToggleFavorite && (isFavorite || isHovered) && (
-                    <button
-                        className={`${styles.favoriteBtn} ${isFavorite ? styles.favorited : ''}`}
-                        onClick={(e) => handleAction(e, () => onToggleFavorite(nft))}
-                        title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                    >
-                        <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill={isFavorite ? 'currentColor' : 'none'}
-                            stroke="currentColor"
-                            strokeWidth="2"
-                        >
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                        </svg>
-                    </button>
-                )}
-
-                {/* Spam indicator */}
-                {isSpam && (
-                    <div className={styles.spamBadge}>
-                        <span>🚫</span>
-                    </div>
-                )}
-
                 {/* Selection Checkbox */}
-                {isHovered && (
+                {isHovered && !isMenuOpen && (
                     <div className={styles.checkbox}>
                         <input
                             type="checkbox"
@@ -159,70 +176,62 @@ export function NFTCard({
                     </div>
                 )}
 
-                {/* Quick Actions Overlay */}
-                {showActions && isHovered && (
-                    <div className={styles.actionsOverlay}>
-                        {onDownload && (
-                            <button
-                                className={styles.actionBtn}
-                                onClick={(e) => handleAction(e, () => onDownload(nft))}
-                                title="Download"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                    <polyline points="7,10 12,15 17,10" />
-                                    <line x1="12" y1="15" x2="12" y2="3" />
-                                </svg>
-                            </button>
-                        )}
-                        {onSend && (
-                            <button
-                                className={styles.actionBtn}
-                                onClick={(e) => handleAction(e, () => onSend(nft))}
-                                title="Send"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <line x1="22" y1="2" x2="11" y2="13" />
-                                    <polygon points="22,2 15,22 11,13 2,9 22,2" />
-                                </svg>
-                            </button>
-                        )}
-                        {onMarkSpam && !isSpam && (
-                            <button
-                                className={styles.actionBtn}
-                                onClick={(e) => handleAction(e, () => onMarkSpam(nft))}
-                                title="Mark as spam"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <polyline points="3 6 5 6 21 6" />
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                </svg>
-                            </button>
-                        )}
-                        {onManageTags && (
-                            <button
-                                className={styles.actionBtn}
-                                onClick={(e) => handleAction(e, () => onManageTags(nft))}
-                                title="Manage Tags"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                                    <line x1="7" y1="7" x2="7.01" y2="7" />
-                                </svg>
-                            </button>
-                        )}
-                        {onList && (
-                            <button
-                                className={`${styles.actionBtn} ${styles.actionPrimary}`}
-                                onClick={(e) => handleAction(e, () => onList(nft))}
-                                title="List on OOX"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                                    <line x1="7" y1="7" x2="7.01" y2="7" />
-                                </svg>
-                            </button>
-                        )}
+                {/* Bottom Right Actions (Heart & Gear) */}
+                <div className={`${styles.bottomActions} ${(isHovered || isFavorite || isMenuOpen) ? styles.visible : ''}`}>
+                    {onToggleFavorite && (
+                        <button
+                            className={`${styles.smallActionBtn} ${isFavorite ? styles.favorited : ''}`}
+                            onClick={(e) => handleAction(e, () => onToggleFavorite(nft))}
+                            title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                        >
+                            <HeartIcon size={16} fill={isFavorite ? 'currentColor' : 'none'} />
+                        </button>
+                    )}
+                    <button
+                        className={`${styles.smallActionBtn} ${isMenuOpen ? styles.active : ''}`}
+                        onClick={(e) => handleAction(e, () => onToggleMenu?.(!isMenuOpen))}
+                        title="Actions"
+                    >
+                        {isMenuOpen ? <XIcon size={16} /> : <SettingsIcon size={16} />}
+                    </button>
+                </div>
+
+                {/* Actions Menu Overlay */}
+                {isMenuOpen && (
+                    <div className={styles.menuOverlay} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.menuTitle}>Actions</div>
+                        <div className={styles.menuGrid}>
+                            {onDownload && (
+                                <button className={styles.menuItem} onClick={() => { onDownload(nft); onToggleMenu?.(false); }}>
+                                    <div className={styles.menuIcon}><DownloadIcon size={18} /></div>
+                                    <span>Download</span>
+                                </button>
+                            )}
+                            {onSend && (
+                                <button className={styles.menuItem} onClick={() => { onSend(nft); onToggleMenu?.(false); }}>
+                                    <div className={styles.menuIcon}><SendIcon size={18} /></div>
+                                    <span>Send</span>
+                                </button>
+                            )}
+                            {onManageTags && (
+                                <button className={styles.menuItem} onClick={() => { onManageTags(nft); onToggleMenu?.(false); }}>
+                                    <div className={styles.menuIcon}><TagIcon size={18} /></div>
+                                    <span>Tags</span>
+                                </button>
+                            )}
+                            {onList && (
+                                <button className={`${styles.menuItem} ${styles.menuPrimary}`} onClick={() => { onList(nft); onToggleMenu?.(false); }}>
+                                    <div className={styles.menuIcon}><ShoppingBagIcon size={18} /></div>
+                                    <span>List</span>
+                                </button>
+                            )}
+                            {onMarkSpam && !isSpam && (
+                                <button className={`${styles.menuItem} ${styles.menuDanger}`} onClick={() => { onMarkSpam(nft); onToggleMenu?.(false); }}>
+                                    <div className={styles.menuIcon}><TrashIcon size={18} /></div>
+                                    <span>Spam</span>
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
 

@@ -5,7 +5,7 @@
    Displays a responsive grid of NFT cards
    ===================================================== */
 
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import { NFT } from '@/types';
 import { Tag } from '@/types/folders';
 import { NFTCard } from './NFTCard';
@@ -65,6 +65,13 @@ export function NFTGrid({
 }: NFTGridProps) {
     const observerRef = useRef<IntersectionObserver | null>(null);
     const loadMoreRef = useRef<HTMLDivElement>(null);
+    const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+
+    // Close menu when selecting an NFT
+    const handleSelectNFT = useCallback((nft: NFT) => {
+        setMenuOpenId(null);
+        onSelectNFT?.(nft);
+    }, [onSelectNFT]);
 
     // Infinite scroll setup
     const handleObserver = useCallback(
@@ -76,6 +83,15 @@ export function NFTGrid({
         },
         [hasMore, isLoading, onLoadMore]
     );
+
+    // Close menu when clicking away
+    useEffect(() => {
+        const handleClickAway = () => setMenuOpenId(null);
+        if (menuOpenId) {
+            window.addEventListener('click', handleClickAway);
+        }
+        return () => window.removeEventListener('click', handleClickAway);
+    }, [menuOpenId]);
 
     useEffect(() => {
         if (observerRef.current) {
@@ -127,7 +143,7 @@ export function NFTGrid({
                     <NFTCard
                         key={nft.identifier}
                         nft={nft}
-                        onSelect={onSelectNFT}
+                        onSelect={handleSelectNFT}
                         onDownload={onDownloadNFT}
                         onSend={onSendNFT}
                         onList={onListNFT}
@@ -138,6 +154,8 @@ export function NFTGrid({
                         isFavorite={favoriteNFTs.has(nft.identifier)}
                         isSpam={spamNFTs.has(nft.identifier)}
                         tags={getTagsForNFT ? getTagsForNFT(nft.identifier) : []}
+                        isMenuOpen={menuOpenId === nft.identifier}
+                        onToggleMenu={(open) => setMenuOpenId(open ? nft.identifier : null)}
                     />
                 ))}
 

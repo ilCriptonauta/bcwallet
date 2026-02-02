@@ -236,8 +236,18 @@
 }
 
 .folderIcon {
-    font-size: var(--text-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    font-size: var(--text-base);
+    transition: transform var(--transition-fast);
+}
+
+.folderItem:hover .folderIcon {
+    transform: scale(1.1);
 }
 
 .folderName {

@@ -95,3 +95,25 @@
     font-size: var(--text-xs);
     color: var(--text-secondary);
 }
+
+.sendTokenBtn {
+    background: rgba(233, 196, 106, 0.1);
+    color: var(--bacon-gold);
+    border: 1px solid rgba(233, 196, 106, 0.2);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.sendTokenBtn:hover {
+    background: var(--bacon-gradient-gold);
+    color: var(--bacon-bg-primary);
+    border-color: transparent;
+    transform: scale(1.05);
+}

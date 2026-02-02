@@ -92,17 +92,7 @@ export function useNFTs(
 
     const optionsRef = useRef({ collections, search });
 
-    // Reset when options change
-    useEffect(() => {
-        const optionsChanged =
-            JSON.stringify(optionsRef.current) !== JSON.stringify({ collections, search });
-
-        if (optionsChanged) {
-            optionsRef.current = { collections, search };
-            setData([]);
-            setPage(0);
-        }
-    }, [collections, search]);
+    // Options tracking removed - refetch effect below handles this cleanly
 
     const fetchNFTs = useCallback(async (reset = false) => {
         if (!address) {
@@ -126,8 +116,8 @@ export function useNFTs(
             setHasMore(result.hasMore);
             setTotalCount(result.count);
 
-            if (!reset && result.items.length > 0) {
-                setPage(p => p + 1);
+            if (result.items.length > 0) {
+                setPage(reset ? 1 : p => p + 1);
             }
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Failed to fetch NFTs'));
@@ -153,7 +143,7 @@ export function useNFTs(
     }, [address, collections, search]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return {
-        data: data.length > 0 ? data : null,
+        data: data,
         isLoading,
         error,
         refetch,

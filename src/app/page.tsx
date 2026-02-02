@@ -5,12 +5,14 @@
    Simplified version for initial UI development
    ===================================================== */
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useGetAccount } from '@multiversx/sdk-dapp/out/react/account/useGetAccount';
 import { useGetLoginInfo } from '@multiversx/sdk-dapp/out/react/loginInfo/useGetLoginInfo';
 import { useAccount, useNFTs, useNFTCountByCollection, useTransactions } from '@/hooks';
 import { useFolders } from '@/hooks/useFolders';
 import * as api from '@/services/mx-api';
+import { SendModal } from '@/components/transaction/SendModal';
 import styles from './page.module.css';
 
 // Helpers
@@ -29,6 +31,7 @@ export default function HomePage() {
   const { data: collections } = useNFTCountByCollection(address);
   const { customFolders, folderLimit } = useFolders({ address, isPremium: false });
   const { data: transactions } = useTransactions(address, 5);
+  const [isSendOpen, setIsSendOpen] = useState(false);
 
   const collectionCount = collections ? Object.keys(collections).length : 0;
   const username = account?.herotag || (address ? api.shortenAddress(address) : 'Sizzler');
@@ -132,9 +135,12 @@ export default function HomePage() {
       <div className={styles.section}>
         <h2 className={styles.sectionTitle}>Quick Actions</h2>
         <div className={styles.actionsGrid}>
-          <button className={styles.actionBtn}>
+          <button
+            className={styles.actionBtn}
+            onClick={() => setIsSendOpen(true)}
+          >
             <span className={styles.actionIcon}>📤</span>
-            <span>Send NFT</span>
+            <span>Send EGLD</span>
           </button>
           <button className={styles.actionBtn}>
             <span className={styles.actionIcon}>🏷️</span>
@@ -169,7 +175,7 @@ export default function HomePage() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{ fontSize: '20px' }}>
-                    {tx.sender === address ? '↗️' : 'sw'}
+                    {tx.sender === address ? '↗️' : '↙️'}
                   </span>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
@@ -196,6 +202,11 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      <SendModal
+        isOpen={isSendOpen}
+        onClose={() => setIsSendOpen(false)}
+      />
     </div>
   );
 }

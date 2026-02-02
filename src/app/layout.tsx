@@ -5,6 +5,8 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { MvxProvider } from '@/contexts/MvxProvider';
+import { NFTsProvider } from '@/contexts/NFTsContext';
+import { FoldersProvider } from '@/contexts/FoldersContext';
 import { MainLayout } from '@/components/layout/MainLayout';
 
 export const metadata: Metadata = {
@@ -44,9 +46,13 @@ export default function RootLayout({
       </head>
       <body>
         <MvxProvider>
-          <MainLayout>
-            {children}
-          </MainLayout>
+          <NFTsProvider>
+            <FoldersProvider>
+              <MainLayout>
+                {children}
+              </MainLayout>
+            </FoldersProvider>
+          </NFTsProvider>
         </MvxProvider>
       </body>
     </html>

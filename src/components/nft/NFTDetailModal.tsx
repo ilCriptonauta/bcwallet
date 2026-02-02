@@ -61,12 +61,25 @@ export function NFTDetailModal({
         setTimeout(() => setCopied(false), 2000);
     }, []);
 
-    const getMediaUrl = (): string => {
-        if (!nft) return '';
-        if (nft.media && nft.media.length > 0) {
-            return nft.media[0].originalUrl || nft.media[0].url;
-        }
-        return nft.url || '';
+    const getMediaData = () => {
+        if (!nft) return { url: '', isVideo: false, poster: '' };
+
+        const mediaArr = nft.media || [];
+
+        // Try to find a video first
+        const video = mediaArr.find(m => m.fileType?.startsWith('video/'));
+        if (video) return { url: video.originalUrl || video.url, isVideo: true, poster: video.thumbnailUrl };
+
+        // Try to find a GIF
+        const gif = mediaArr.find(m => m.fileType === 'image/gif');
+        if (gif) return { url: gif.originalUrl || gif.url, isVideo: false, poster: '' };
+
+        // Fallback to highest quality image
+        const url = mediaArr.length > 0
+            ? mediaArr[0].originalUrl || mediaArr[0].url
+            : nft.url || '';
+
+        return { url, isVideo: false, poster: '' };
     };
 
     const getThumbnailUrl = (): string => {
@@ -122,7 +135,7 @@ export function NFTDetailModal({
 
     if (!isOpen || !nft) return null;
 
-    const mediaUrl = getMediaUrl();
+    const mediaData = getMediaData();
     const thumbnailUrl = getThumbnailUrl();
     const attributes = parseAttributes();
 
@@ -157,80 +170,37 @@ export function NFTDetailModal({
                                     </div>
                                 </div>
                             )}
-                            <img
-                                src={mediaUrl}
-                                alt={nft.name}
-                                className={`${styles.media} ${imageLoaded ? styles.loaded : ''}`}
-                                onLoad={() => setImageLoaded(true)}
-                                onError={(e) => {
-                                    console.error('Failed to load high-res image, falling back');
-                                    setImageLoaded(true); // Hide placeholder even on error to show whatever we have
-                                    // Optionally set a fallback image source if mediaUrl failed
-                                    if (e.currentTarget.src !== thumbnailUrl) {
-                                        e.currentTarget.src = thumbnailUrl;
-                                    }
-                                }}
-                            />
+                            {mediaData.isVideo ? (
+                                <video
+                                    src={mediaData.url}
+                                    poster={mediaData.poster}
+                                    className={`${styles.media} ${imageLoaded ? styles.loaded : ''}`}
+                                    autoPlay
+                                    muted
+                                    loop
+                                    playsInline
+                                    onLoadedData={() => setImageLoaded(true)}
+                                    onError={() => setImageLoaded(true)}
+                                />
+                            ) : (
+                                <img
+                                    src={mediaData.url}
+                                    alt={nft.name}
+                                    className={`${styles.media} ${imageLoaded ? styles.loaded : ''}`}
+                                    onLoad={() => setImageLoaded(true)}
+                                    onError={(e) => {
+                                        console.error('Failed to load high-res image, falling back');
+                                        setImageLoaded(true); // Hide placeholder even on error to show whatever we have
+                                        // Optionally set a fallback image source if mediaUrl failed
+                                        if (e.currentTarget.src !== thumbnailUrl) {
+                                            e.currentTarget.src = thumbnailUrl;
+                                        }
+                                    }}
+                                />
+                            )}
                         </div>
 
-                        {/* Quick Actions */}
-                        <div className={styles.quickActions}>
-                            {onDownload && (
-                                <button
-                                    className={styles.actionBtn}
-                                    onClick={() => onDownload(nft)}
-                                    title="Download high-resolution image"
-                                >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                        <polyline points="7 10 12 15 17 10" />
-                                        <line x1="12" y1="15" x2="12" y2="3" />
-                                    </svg>
-                                    <span>Download HD</span>
-                                </button>
-                            )}
-                            {onSend && (
-                                <button
-                                    className={styles.actionBtn}
-                                    onClick={() => onSend(nft)}
-                                    title="Send NFT to another address"
-                                >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <line x1="22" y1="2" x2="11" y2="13" />
-                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                                    </svg>
-                                    <span>Send</span>
-                                </button>
-                            )}
-                            {onList && (
-                                <button
-                                    className={`${styles.actionBtn} ${styles.primaryBtn}`}
-                                    onClick={() => onList(nft)}
-                                    title="List on OOX Marketplace"
-                                >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                                        <line x1="7" y1="7" x2="7.01" y2="7" />
-                                    </svg>
-                                    <span>List on OOX</span>
-                                </button>
-                            )}
-                            {onManageTags && (
-                                <button
-                                    className={styles.actionBtn}
-                                    onClick={() => onManageTags(nft)}
-                                    title="Manage folders and tags"
-                                >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <rect x="3" y="3" width="7" height="7" rx="1" />
-                                        <rect x="14" y="3" width="7" height="7" rx="1" />
-                                        <rect x="14" y="14" width="7" height="7" rx="1" />
-                                        <rect x="3" y="14" width="7" height="7" rx="1" />
-                                    </svg>
-                                    <span>Organize</span>
-                                </button>
-                            )}
-                        </div>
+                        {/* Quick actions removed as requested */}
                     </div>
 
                     {/* Right: Details */}

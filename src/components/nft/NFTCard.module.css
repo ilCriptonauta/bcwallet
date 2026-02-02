@@ -33,55 +33,142 @@
     filter: grayscale(0%);
 }
 
-/* Favorite Button */
-.favoriteBtn {
+/* Bottom Actions (Heart & Gear) */
+.bottomActions {
     position: absolute;
-    top: var(--space-2);
-    left: 50%;
-    transform: translateX(-50%);
-    width: 36px;
-    height: 36px;
+    bottom: var(--space-2);
+    right: var(--space-2);
+    display: flex;
+    gap: var(--space-1);
+    z-index: 20;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all var(--transition-fast);
+}
+
+.bottomActions.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.smallActionBtn {
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);
     border: 1px solid var(--bacon-glass-border);
-    border-radius: 50%;
-    color: var(--bacon-text-muted);
+    border-radius: var(--radius-md);
+    color: var(--bacon-text-primary);
     cursor: pointer;
     transition: all var(--transition-fast);
-    z-index: 15;
-    animation: fadeIn 0.15s ease;
 }
 
-@keyframes fadeIn {
+.smallActionBtn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: var(--bacon-gold);
+    color: var(--bacon-gold);
+    transform: scale(1.1);
+}
+
+.smallActionBtn.favorited {
+    color: #EF4444;
+}
+
+.smallActionBtn.active {
+    background: var(--bacon-gold);
+    color: var(--bacon-bg-primary);
+    border-color: var(--bacon-gold);
+}
+
+/* Actions Menu Overlay */
+.menuOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3);
+    animation: fadeInMenu 0.2s ease-out;
+}
+
+@keyframes fadeInMenu {
     from {
         opacity: 0;
-        transform: translateX(-50%) scale(0.8);
+        backdrop-filter: blur(0);
     }
 
     to {
         opacity: 1;
-        transform: translateX(-50%) scale(1);
+        backdrop-filter: blur(4px);
     }
 }
 
-.favoriteBtn:hover {
+.menuTitle {
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    color: var(--bacon-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.menuGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+    flex: 1;
+}
+
+.menuItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--bacon-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 10px;
+    font-weight: var(--font-semibold);
+}
+
+.menuItem:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--bacon-gold);
+    color: var(--bacon-text-primary);
+    transform: translateY(-2px);
+}
+
+.menuIcon {
+    margin-bottom: 2px;
+}
+
+.menuPrimary {
+    background: rgba(233, 196, 106, 0.1);
+}
+
+.menuPrimary:hover {
+    background: var(--bacon-gold);
+    color: var(--bacon-bg-primary);
+}
+
+.menuDanger:hover {
     background: rgba(239, 68, 68, 0.2);
     border-color: #EF4444;
     color: #EF4444;
-    transform: translateX(-50%) scale(1.1);
-}
-
-.favoriteBtn.favorited {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: #EF4444;
-    color: #EF4444;
-}
-
-.favoriteBtn.favorited:hover {
-    background: rgba(239, 68, 68, 0.3);
 }
 
 /* Spam Badge */
@@ -148,52 +235,9 @@
     accent-color: var(--bacon-gold);
 }
 
-/* Actions Overlay */
-.actionsOverlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3);
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-    animation: fadeIn var(--transition-fast) ease;
-}
+/* Removed old actions overlay */
 
-.actionBtn {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bacon-glass-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--bacon-glass-border);
-    border-radius: var(--radius-md);
-    color: var(--bacon-text-primary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.actionBtn:hover {
-    background: var(--bacon-bg-tertiary);
-    border-color: var(--bacon-gold);
-    color: var(--bacon-gold);
-    transform: scale(1.1);
-}
-
-.actionPrimary {
-    background: linear-gradient(135deg, var(--bacon-gold), var(--bacon-orange));
-    border-color: transparent;
-    color: var(--bacon-bg-primary);
-}
-
-.actionPrimary:hover {
-    box-shadow: var(--bacon-shadow-glow-gold);
-    color: var(--bacon-bg-primary);
-}
+/* Removed old action styles */
 
 /* Rarity Badge */
 .rarityBadge {

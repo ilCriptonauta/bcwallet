@@ -46,10 +46,10 @@ const NAV_ITEMS: NavItem[] = [
 
 // System folder icon mapping
 const SYSTEM_FOLDER_ICONS: Record<string, ReactNode> = {
-    'all': <FolderIcon size={16} />,
-    'favorites': <StarIcon size={16} />,
-    'high-rarity': <DiamondIcon size={16} />,
-    'spam': <TrashIcon size={16} />,
+    'all': <FolderIcon size={18} />,
+    'favorites': <StarIcon size={18} />,
+    'high-rarity': <DiamondIcon size={18} />,
+    'spam': <TrashIcon size={18} />,
 };
 
 // Custom folder icons (emojis for user personalization - acceptable per UX)
@@ -61,10 +61,9 @@ interface SidebarProps {
     folderCounts?: Record<string, number>;
 }
 
-export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: SidebarProps) {
+export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
     const { address } = useGetAccount();
     const pathname = usePathname();
-    const [activeFolder, setActiveFolder] = useState<string>('all');
     const [isCreating, setIsCreating] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
     const [selectedIcon, setSelectedIcon] = useState('📁');
@@ -85,6 +84,7 @@ export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: Si
         addToFolder,
         canCreateFolder,
         folderLimit,
+        folderCounts,
     } = useFolders({
         isPremium: false,
         address: address || 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem'
@@ -103,10 +103,7 @@ export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: Si
 
     // Handle folder selection
     const handleFolderClick = (folderId: string) => {
-        setActiveFolder(folderId);
         selectFolder(folderId);
-        // Emit event for NFTs page to filter
-        window.dispatchEvent(new CustomEvent('folderSelected', { detail: { folderId } }));
     };
 
     // Handle create folder
@@ -185,9 +182,6 @@ export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: Si
             if (type === 'nft' && nftId) {
                 addToFolder([nftId], folderId);
                 console.log(`Added NFT ${nftId} to folder ${folderId}`);
-
-                // Force a refresh of the views if needed
-                window.dispatchEvent(new CustomEvent('folderUpdated', { detail: { folderId } }));
             }
         } catch (error) {
             console.error('Error dropping item:', error);
@@ -310,15 +304,17 @@ export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: Si
                     {systemFolders.map((folder) => (
                         <li key={folder.id}>
                             <button
-                                className={`${styles.folderItem} ${activeFolder === folder.id ? styles.active : ''}`}
+                                className={`${styles.folderItem} ${selectedFolderId === folder.id ? styles.active : ''}`}
                                 onClick={() => handleFolderClick(folder.id)}
                             >
-                                <span className={styles.folderIcon}>{folder.icon}</span>
+                                <span className={styles.folderIcon}>
+                                    {SYSTEM_FOLDER_ICONS[folder.id as string] || folder.icon}
+                                </span>
                                 {!isCollapsed && (
                                     <>
                                         <span className={styles.folderName}>{folder.name}</span>
-                                        {getFolderCount(folder.id) !== undefined && (
-                                            <span className={styles.folderCount}>{getFolderCount(folder.id)}</span>
+                                        {folderCounts[folder.id] !== undefined && (
+                                            <span className={styles.folderCount}>{folderCounts[folder.id]}</span>
                                         )}
                                     </>
                                 )}
@@ -348,7 +344,7 @@ export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: Si
                                     </div>
                                 ) : (
                                     <button
-                                        className={`${styles.folderItem} ${activeFolder === folder.id ? styles.active : ''} ${dragOverFolderId === folder.id ? styles.dragOver : ''}`}
+                                        className={`${styles.folderItem} ${selectedFolderId === folder.id ? styles.active : ''} ${dragOverFolderId === folder.id ? styles.dragOver : ''}`}
                                         onClick={() => handleFolderClick(folder.id)}
                                         onDoubleClick={() => {
                                             setEditingFolderId(folder.id);
@@ -362,8 +358,8 @@ export function Sidebar({ isCollapsed = false, onToggle, folderCounts = {} }: Si
                                         {!isCollapsed && (
                                             <>
                                                 <span className={styles.folderName}>{folder.name}</span>
-                                                {getFolderCount(folder.id) !== undefined && (
-                                                    <span className={styles.folderCount}>{getFolderCount(folder.id)}</span>
+                                                {folderCounts[folder.id] !== undefined && (
+                                                    <span className={styles.folderCount}>{folderCounts[folder.id]}</span>
                                                 )}
                                             </>
                                         )}

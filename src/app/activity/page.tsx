@@ -9,7 +9,7 @@ import styles from './page.module.css';
 
 export default function ActivityPage() {
     const { address: walletAddress } = useGetAccount();
-    const address = walletAddress || 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem';
+    const address = walletAddress;
     const { data: transactions, isLoading } = useTransactions(address, 50);
     const [filter, setFilter] = useState<'all' | 'sent' | 'received'>('all');
 
@@ -18,7 +18,7 @@ export default function ActivityPage() {
             <div className={styles.container}>
                 <h1 className={styles.title}>Activity</h1>
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '48px', color: 'var(--text-secondary)' }}>
-                    Loading transactions...
+                    <div className={styles.loader}>Loading transactions...</div>
                 </div>
             </div>
         );
@@ -33,9 +33,12 @@ export default function ActivityPage() {
                     textAlign: 'center',
                     background: 'rgba(255,255,255,0.05)',
                     borderRadius: '12px',
-                    marginTop: '24px'
+                    marginTop: '24px',
+                    border: '1px solid var(--border-color)'
                 }}>
-                    <p>Connect your wallet to view activity</p>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔐</div>
+                    <h2 style={{ marginBottom: '8px' }}>Wallet Not Connected</h2>
+                    <p style={{ color: 'var(--text-secondary)' }}>Connect your wallet to view your transaction history</p>
                 </div>
             </div>
         );

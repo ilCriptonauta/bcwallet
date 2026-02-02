@@ -8,8 +8,13 @@
 import { useState, useEffect } from 'react';
 import { useGetAccount } from '@multiversx/sdk-dapp/out/react/account/useGetAccount';
 import { NFT } from '@/types';
-import { Token } from '@/services/mx-api';
+import { Token, resolveHerotag } from '@/services/mx-api';
 import { NETWORK_CONFIG } from '@/lib/constants';
+import { Transaction, Address } from '@multiversx/sdk-core';
+import { getAccountProvider } from '@multiversx/sdk-dapp/out/providers/helpers/accountProvider';
+import { refreshAccount } from '@multiversx/sdk-dapp/out/utils/account/refreshAccount';
+import { TransactionManager } from '@multiversx/sdk-dapp/out/managers/TransactionManager/TransactionManager';
+import { useGetNetworkConfig } from '@multiversx/sdk-dapp/out/react/network/useGetNetworkConfig';
 import styles from './SendModal.module.css';
 
 // ---- Bech32 utilities (no external deps) ----
@@ -64,10 +69,13 @@ interface SendModalProps {
 }
 
 export function SendModal({ isOpen, onClose, initialNFT, initialToken }: SendModalProps) {
-    const { address, balance } = useGetAccount();
+    const { address, balance, nonce } = useGetAccount();
+    const { network } = useGetNetworkConfig();
     const [recipient, setRecipient] = useState('');
     const [amount, setAmount] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isResolving, setIsResolving] = useState(false);
+    const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     // Reset state on open
@@ -77,8 +85,37 @@ export function SendModal({ isOpen, onClose, initialNFT, initialToken }: SendMod
             setAmount('');
             setError(null);
             setIsLoading(false);
+            setIsResolving(false);
+            setResolvedAddress(null);
         }
     }, [isOpen, initialNFT, initialToken]);
+
+    // Debounced herotag resolution
+    useEffect(() => {
+        const timer = setTimeout(async () => {
+            const trimmed = recipient.trim();
+            if (!trimmed || trimmed.startsWith('erd1') || trimmed.length < 3) {
+                setResolvedAddress(null);
+                return;
+            }
+
+            const isHerotag = trimmed.includes('.elrond') || trimmed.startsWith('@') || (!trimmed.startsWith('erd1') && !trimmed.includes(' '));
+
+            if (isHerotag) {
+                setIsResolving(true);
+                try {
+                    const resolved = await resolveHerotag(trimmed);
+                    setResolvedAddress(resolved);
+                } catch (err) {
+                    setResolvedAddress(null);
+                } finally {
+                    setIsResolving(false);
+                }
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [recipient]);
 
     if (!isOpen) return null;
 
@@ -96,12 +133,27 @@ export function SendModal({ isOpen, onClose, initialNFT, initialToken }: SendMod
             setError(null);
             setIsLoading(true);
 
-            // Validate recipient address
-            if (!isValidAddress(recipient)) {
-                throw new Error('Invalid recipient address. Must be a valid erd1... address.');
+            let finalRecipient = recipient.trim();
+            const isHerotag = !finalRecipient.startsWith('erd1') || finalRecipient.includes('.elrond') || finalRecipient.startsWith('@');
+
+            if (isHerotag) {
+                setIsResolving(true);
+                const resolved = await resolveHerotag(finalRecipient);
+                setIsResolving(false);
+
+                if (!resolved) {
+                    throw new Error(`Could not resolve herotag: ${finalRecipient}`);
+                }
+                finalRecipient = resolved;
+                setResolvedAddress(resolved);
             }
 
-            if (recipient === address) {
+            // Validate recipient address
+            if (!isValidAddress(finalRecipient)) {
+                throw new Error('Invalid recipient address. Must be a valid erd1... address or herotag.');
+            }
+
+            if (finalRecipient === address) {
                 throw new Error('Cannot send to yourself');
             }
 
@@ -109,9 +161,12 @@ export function SendModal({ isOpen, onClose, initialNFT, initialToken }: SendMod
                 throw new Error('Please enter a valid amount');
             }
 
-            let txData = '';
+            // --- BUILD TRANSACTION ---
+            await refreshAccount(); // Get latest nonce
+
+            let txPayload = '';
             let txValue = '0';
-            let txReceiver = recipient;
+            let txReceiver = finalRecipient;
             let txGasLimit = 60000;
 
             if (isNFT && initialNFT) {
@@ -120,9 +175,9 @@ export function SendModal({ isOpen, onClose, initialNFT, initialToken }: SendMod
                 let nonceHex = initialNFT.nonce.toString(16);
                 if (nonceHex.length % 2 !== 0) nonceHex = '0' + nonceHex;
                 const quantityHex = '01';
-                const destHex = addressToHex(recipient);
+                const destHex = addressToHex(finalRecipient);
 
-                txData = `ESDTNFTTransfer@${collectionHex}@${nonceHex}@${quantityHex}@${destHex}`;
+                txPayload = `ESDTNFTTransfer@${collectionHex}@${nonceHex}@${quantityHex}@${destHex}`;
                 txReceiver = address; // NFT transfers are sent to self
                 txGasLimit = 1500000;
             } else if (isEGLD) {
@@ -136,46 +191,39 @@ export function SendModal({ isOpen, onClose, initialNFT, initialToken }: SendMod
                 let amountHex = amountInSmallest.toString(16);
                 if (amountHex.length % 2 !== 0) amountHex = '0' + amountHex;
 
-                txData = `ESDTTransfer@${tokenHex}@${amountHex}`;
+                txPayload = `ESDTTransfer@${tokenHex}@${amountHex}`;
                 txGasLimit = 500000;
             }
 
-            // Build Web Wallet URL for signing
-            const webWalletUrl = NETWORK_CONFIG.walletAddress;
-            const callbackUrl = encodeURIComponent(window.location.href);
-
-            const txParams = new URLSearchParams({
-                receiver: txReceiver,
-                value: txValue,
-                gasLimit: txGasLimit.toString(),
-                data: txData ? btoa(txData) : '',
-                callbackUrl: callbackUrl,
+            const transaction = new Transaction({
+                value: BigInt(txValue),
+                data: Buffer.from(txPayload),
+                receiver: Address.newFromBech32(txReceiver),
+                sender: Address.newFromBech32(address),
+                gasLimit: BigInt(txGasLimit),
+                chainID: network.chainId,
+                nonce: BigInt(nonce)
             });
 
-            const signUrl = `${webWalletUrl}/hook/transaction?${txParams.toString()}`;
+            // --- SIGN & SEND ---
+            const provider = getAccountProvider();
 
-            // Build transaction preview message
-            let previewMsg = '📋 Transaction Preview\n\n';
-            previewMsg += `To: ${recipient.slice(0, 10)}...${recipient.slice(-8)}\n`;
+            // This will open the wallet (Extension, xPortal, etc.)
+            const signedTransactions = await provider.signTransactions([transaction]);
 
-            if (isNFT && initialNFT) {
-                previewMsg += `Asset: ${initialNFT.name} (NFT)\n`;
-                previewMsg += `Collection: ${initialNFT.collection}\n`;
-            } else if (isToken && initialToken) {
-                previewMsg += `Amount: ${amount} ${initialToken.ticker}\n`;
-            } else {
-                previewMsg += `Amount: ${amount} EGLD\n`;
-            }
+            const txManager = TransactionManager.getInstance();
+            const sentTransactions = await txManager.send(signedTransactions);
 
-            previewMsg += `\nGas Limit: ${txGasLimit.toLocaleString()}\n`;
-            previewMsg += '\n⚠️ You will be redirected to MultiversX Web Wallet to sign.';
+            // Track for status toasts
+            await txManager.track(sentTransactions, {
+                transactionsDisplayInfo: {
+                    processingMessage: 'Processing transaction...',
+                    successMessage: 'Transaction successful! 🥓',
+                    errorMessage: 'Transaction failed'
+                }
+            });
 
-            // Confirm and redirect
-            if (confirm(previewMsg)) {
-                window.location.href = signUrl;
-            } else {
-                setIsLoading(false);
-            }
+            onClose();
 
         } catch (err: any) {
             console.error('Send error:', err);
@@ -265,14 +313,24 @@ export function SendModal({ isOpen, onClose, initialNFT, initialToken }: SendMod
 
                     {/* Recipient Input */}
                     <div className={styles.inputGroup}>
-                        <label className={styles.sectionLabel}>Recipient Address</label>
+                        <label className={styles.sectionLabel}>Recipient Address / Herotag</label>
                         <input
                             type="text"
                             className={styles.input}
-                            placeholder="erd1..."
+                            placeholder="erd1... or @herotag"
                             value={recipient}
-                            onChange={(e) => setRecipient(e.target.value)}
+                            onChange={(e) => {
+                                setRecipient(e.target.value);
+                                setResolvedAddress(null);
+                                setError(null);
+                            }}
                         />
+                        {isResolving && <div className={styles.resolvingInfo}>🔍 Resolving herotag...</div>}
+                        {resolvedAddress && !isResolving && (
+                            <div className={styles.resolvedInfo}>
+                                ✅ Resolved to: <code>{resolvedAddress.slice(0, 8)}...{resolvedAddress.slice(-8)}</code>
+                            </div>
+                        )}
                     </div>
 
                     {/* Error Message */}

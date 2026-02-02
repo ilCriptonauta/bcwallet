@@ -33,7 +33,6 @@ export default function NFTsPage() {
     const [tagModalNftId, setTagModalNftId] = useState<string | null>(null);
     const [sendModalNft, setSendModalNft] = useState<NFT | null>(null);
     const [listModalNft, setListModalNft] = useState<NFT | null>(null);
-    const [activeFolder, setActiveFolder] = useState<string>('all');
 
     // Debounced search
     const debouncedSearch = useDebounce(searchQuery, 300);
@@ -76,17 +75,7 @@ export default function NFTsPage() {
         autoDetectSpam,
     } = useFolders({ isPremium: false, address: address || 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem' });
 
-    // Listen for folder selection from sidebar
-    useEffect(() => {
-        const handleFolderSelected = (event: CustomEvent<{ folderId: string }>) => {
-            setActiveFolder(event.detail.folderId);
-        };
-
-        window.addEventListener('folderSelected', handleFolderSelected as EventListener);
-        return () => {
-            window.removeEventListener('folderSelected', handleFolderSelected as EventListener);
-        };
-    }, []);
+    // No longer need event listener as we use shared context for folder selection
 
     // Auto-detect spam on load
     useEffect(() => {
@@ -101,8 +90,8 @@ export default function NFTsPage() {
     // Filter NFTs based on active folder
     const filteredNfts = useMemo(() => {
         if (!allNfts) return [];
-        return getNFTsInFolder(activeFolder, allNfts);
-    }, [allNfts, activeFolder, getNFTsInFolder]);
+        return getNFTsInFolder(selectedFolderId, allNfts);
+    }, [allNfts, selectedFolderId, getNFTsInFolder]);
 
     // Fetch collection counts
     const { data: collectionCounts } = useNFTCountByCollection(address);
@@ -117,12 +106,12 @@ export default function NFTsPage() {
 
     // Get folder name for display
     const getFolderName = useCallback(() => {
-        const sysFolder = systemFolders.find(f => f.id === activeFolder);
+        const sysFolder = systemFolders.find(f => f.id === selectedFolderId);
         if (sysFolder) return sysFolder.name;
-        const customFolder = customFolders.find(f => f.id === activeFolder);
+        const customFolder = customFolders.find(f => f.id === selectedFolderId);
         if (customFolder) return customFolder.name;
         return 'All NFTs';
-    }, [activeFolder, systemFolders, customFolders]);
+    }, [selectedFolderId, systemFolders, customFolders]);
 
     // Handlers
     const handleViewNFT = (nft: NFT) => {
@@ -175,11 +164,21 @@ export default function NFTsPage() {
 
     // Calculate display count
     const displayCount = useMemo(() => {
-        if (activeFolder === 'all') {
-            return totalCount > 0 ? totalCount : filteredNfts.length;
+        // If we are in a specific folder (Favorites, Spam, Custom), show that folder's count
+        if (selectedFolderId !== 'all') {
+            return filteredNfts.length;
         }
-        return filteredNfts.length;
-    }, [activeFolder, totalCount, filteredNfts.length]);
+        // If a collection is selected, use its specific count from the counts API for better accuracy
+        if (selectedCollection && selectedCollection !== 'all' && collectionCounts) {
+            return collectionCounts[selectedCollection] || (allNfts?.length || 0);
+        }
+        // If we are searching, show the count of currently loaded results matching the search
+        if (searchQuery) {
+            return (allNfts?.length || 0);
+        }
+        // Otherwise show the total count from blockchain
+        return totalCount;
+    }, [selectedFolderId, totalCount, filteredNfts.length, selectedCollection, collectionCounts, searchQuery, allNfts]);
 
     return (
         <div className={styles.container}>
@@ -327,7 +326,7 @@ export default function NFTsPage() {
             <NFTGrid
                 nfts={filteredNfts}
                 isLoading={isLoading}
-                hasMore={hasMore && activeFolder === 'all'}
+                hasMore={hasMore && selectedFolderId === 'all'}
                 onLoadMore={loadMore}
                 onSelectNFT={handleViewNFT}
                 onDownloadNFT={handleDownloadNFT}
@@ -350,11 +349,11 @@ export default function NFTsPage() {
                 getTagsForNFT={getTagsForNFT}
                 columns={gridColumns}
                 emptyMessage={
-                    activeFolder === 'favorites'
+                    selectedFolderId === 'favorites'
                         ? 'No favorite NFTs yet. Click the heart on any NFT to add it!'
-                        : activeFolder === 'high-rarity'
+                        : selectedFolderId === 'high-rarity'
                             ? 'No high rarity NFTs (rank ≤ 100) found'
-                            : activeFolder === 'spam'
+                            : selectedFolderId === 'spam'
                                 ? 'No spam NFTs. That\'s good!'
                                 : searchQuery
                                     ? `No NFTs found for "${searchQuery}"`

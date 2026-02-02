@@ -366,27 +366,40 @@ export function detectSpamNFTs(nfts: NFT[], threshold = 0.5): NFT[] {
 
 // ---- Utility Functions ----
 
+import BigNumber from 'bignumber.js';
+
 /**
  * Format EGLD balance from wei to human readable
  */
 export function formatEGLD(balanceWei: string, decimals = 4): string {
-    const value = parseFloat(balanceWei) / 1e18;
-    return value.toFixed(decimals);
+    if (!balanceWei || balanceWei === '0') return '0';
+    try {
+        const value = new BigNumber(balanceWei).dividedBy(new BigNumber(10).pow(18));
+        return value.toFixed(decimals);
+    } catch {
+        return '0';
+    }
 }
 
 /**
  * Format any token balance with its decimals
  */
 export function formatTokenBalance(balance: string, decimals: number): string {
-    const value = parseFloat(balance) / Math.pow(10, decimals);
+    if (!balance || balance === '0') return '0';
+    try {
+        const bigBalance = new BigNumber(balance);
+        const value = bigBalance.dividedBy(new BigNumber(10).pow(decimals));
 
-    if (value >= 1000000) {
-        return `${(value / 1000000).toFixed(2)}M`;
+        if (value.isGreaterThanOrEqualTo(1000000)) {
+            return `${value.dividedBy(1000000).toFixed(2)}M`;
+        }
+        if (value.isGreaterThanOrEqualTo(1000)) {
+            return `${value.dividedBy(1000).toFixed(2)}K`;
+        }
+        return value.toFixed(decimals > 4 ? 4 : decimals);
+    } catch {
+        return '0';
     }
-    if (value >= 1000) {
-        return `${(value / 1000).toFixed(2)}K`;
-    }
-    return value.toFixed(decimals > 4 ? 4 : decimals);
 }
 
 /**

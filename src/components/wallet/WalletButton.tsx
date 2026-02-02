@@ -11,6 +11,7 @@ import { useGetAccount } from '@multiversx/sdk-dapp/out/react/account/useGetAcco
 import { getAccountProvider } from '@multiversx/sdk-dapp/out/providers/helpers/accountProvider';
 import { UnlockPanelManager } from '@multiversx/sdk-dapp/out/managers/UnlockPanelManager';
 import { WalletIcon, BaconIcon, ExternalLinkIcon, LogOutIcon } from '@/components/ui/Icons';
+import * as api from '@/services/mx-api';
 import styles from './WalletButton.module.css';
 import { NETWORK_CONFIG } from '@/lib/constants';
 
@@ -27,8 +28,7 @@ export function WalletButton() {
 
     // Format balance for display
     const formatBalance = (bal: string) => {
-        if (!bal) return '0';
-        return (parseFloat(bal) / 1e18).toFixed(4);
+        return api.formatEGLD(bal);
     };
 
     const handleLogout = async () => {
