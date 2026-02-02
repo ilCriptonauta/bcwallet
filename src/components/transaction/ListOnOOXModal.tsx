@@ -7,6 +7,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useGetAccount } from '@multiversx/sdk-dapp/out/react/account/useGetAccount';
+import { sendTransactions } from '@multiversx/sdk-dapp/services/transactions/sendTransactions';
+import { Address } from '@multiversx/sdk-core';
 import { NFT } from '@/types';
 import { NETWORK_CONFIG } from '@/lib/constants';
 import styles from './ListOnOOXModal.module.css';
@@ -119,95 +121,82 @@ export function ListOnOOXModal({ isOpen, onClose, nft }: ListOnOOXModalProps) {
             }
 
             // Calculate deadline timestamp
-            // For fixed price: default to 1 year (practically infinite for UI purposes)
-            // For auction: use selected duration
             const durationInSeconds = listingType === 'fixed'
                 ? (365 * 24 * 60 * 60)
                 : (durationDays * 24 * 60 * 60);
-
             const deadline = Math.floor(Date.now() / 1000) + durationInSeconds;
 
-            // Convert price to wei (EGLD has 18 decimals)
+            // Convert price to wei
             const priceInWei = BigInt(Math.floor(parseFloat(priceValue) * 1e18));
 
-            // For fixed price: min_bid = max_bid
-            // For auction: max_bid = 0 or very high
+            // Auction parameters
             const minBidWei = priceInWei;
             const maxBidWei = listingType === 'fixed' ? priceInWei : BigInt(0);
 
-            // Prepare NFT transfer data
-            // auctionToken is a payable endpoint - we need to send the NFT
-            // Format: ESDTNFTTransfer@TokenID(hex)@Nonce(hex)@Quantity(hex)@ContractAddress(hex)@FunctionName(hex)@Args...
+            // 1. Prepare Arguments for "auctionToken" function
+            // min_bid (BigUint), max_bid (BigUint), deadline (u64), accepted_payment_token (Identifier)
 
+            // Helper for even-length hex
+            const toHex = (val: bigint | number) => {
+                let hex = val.toString(16);
+                if (hex.length % 2 !== 0) hex = '0' + hex;
+                return hex;
+            };
+
+            const minBidHex = toHex(minBidWei);
+            const maxBidHexSafe = maxBidWei === BigInt(0) ? '' : toHex(maxBidWei);
+
+            // Deadline u64 -> hex
+            const deadlineHex = toHex(deadline);
+
+            // Token Identifier "EGLD"
+            const tokenHex = Buffer.from('EGLD').toString('hex');
+
+            // 2. Prepare ESDTNFTTransfer Arguments
+            // Collection, Nonce, Quantity, Receiver (OOX Contract), Function (auctionToken), Args...
             const collectionHex = Buffer.from(nft.collection).toString('hex');
-            let nonceHex = nft.nonce.toString(16);
-            if (nonceHex.length % 2 !== 0) nonceHex = '0' + nonceHex;
-            const quantityHex = '01'; // 1 NFT
-            const contractHex = addressToHex(OOX_CONTRACT_ADDRESS);
+            const nonceHex = toHex(nft.nonce);
+            const quantityHex = '01'; // 1
+            const receiverHex = new Address(OOX_CONTRACT_ADDRESS).toHex();
             const functionHex = Buffer.from('auctionToken').toString('hex');
 
-            // Arguments for auctionToken:
-            // 1. min_bid: BigUint
-            // 2. max_bid: BigUint
-            // 3. deadline: u64
-            // 4. accepted_payment_token: EgldOrEsdtTokenIdentifier (EGLD = "EGLD")
-
-            // Encode min_bid (BigUint)
-            let minBidHex = minBidWei.toString(16);
-            if (minBidHex.length % 2 !== 0) minBidHex = '0' + minBidHex;
-
-            // Encode max_bid (BigUint) - for fixed price same as min
-            let maxBidHex = maxBidWei.toString(16);
-            if (maxBidHex.length % 2 !== 0) maxBidHex = '0' + maxBidHex;
-            // For auction with no max, use '00' (not empty string)
-            if (maxBidWei === BigInt(0)) maxBidHex = '00';
-
-            // Encode deadline (u64) - 8 bytes
-            let deadlineHex = deadline.toString(16);
-            deadlineHex = deadlineHex.padStart(16, '0'); // u64 is 8 bytes = 16 hex chars
-
-            // Encode EGLD token identifier
-            const egldHex = Buffer.from('EGLD').toString('hex');
-
-            // Build the full data string
-            // ESDTNFTTransfer@collection@nonce@quantity@dest@function@arg1@arg2@arg3@arg4
-            const txData = [
+            // Construct Data Field
+            // ESDTNFTTransfer @ <collection> @ <nonce> @ <qty> @ <receiver> @ <func> @ <min_bid> @ <max_bid> @ <deadline> @ <token>
+            const dataParts = [
                 'ESDTNFTTransfer',
                 collectionHex,
                 nonceHex,
                 quantityHex,
-                contractHex,
+                receiverHex,
                 functionHex,
                 minBidHex,
-                maxBidHex,
+                maxBidHexSafe,
                 deadlineHex,
-                egldHex,
-            ].join('@');
+                tokenHex
+            ];
 
-            // Build Web Wallet URL for signing
-            const webWalletUrl = NETWORK_CONFIG.walletAddress;
-            const callbackUrl = encodeURIComponent(window.location.href);
+            const txData = dataParts.join('@');
 
-            const txParams = new URLSearchParams({
-                receiver: address, // ESDTNFTTransfer is sent to self
+            // 3. Send Transaction
+            // Using sendTransactions from sdk-dapp to handle all providers
+            const tx = {
                 value: '0',
-                gasLimit: '15000000', // Higher gas for SC call
-                data: btoa(txData),
-                callbackUrl: callbackUrl,
+                data: txData,
+                receiver: address, // Send to Self for ESDTNFTTransfer
+                gasLimit: 15000000,
+            };
+
+            await sendTransactions({
+                transactions: [tx],
+                transactionsDisplayInfo: {
+                    processingMessage: 'Listing NFT on OOX...',
+                    errorMessage: 'An error has occurred during listing',
+                    successMessage: 'NFT Listing Successful'
+                },
+                redirectAfterSign: false
             });
 
-            const signUrl = `${webWalletUrl}/hook/transaction?${txParams.toString()}`;
-
-            // Confirm and redirect
-            const confirmMsg = listingType === 'fixed'
-                ? `List "${nft.name}" for ${price} EGLD on OOX Marketplace?`
-                : `Start auction for "${nft.name}" with minimum bid ${minBid} EGLD?`;
-
-            if (confirm(confirmMsg + '\n\nYou will be redirected to the MultiversX Web Wallet to sign this transaction.')) {
-                window.location.href = signUrl;
-            } else {
-                setIsLoading(false);
-            }
+            onClose();
 
         } catch (err: any) {
             console.error('Listing error:', err);
