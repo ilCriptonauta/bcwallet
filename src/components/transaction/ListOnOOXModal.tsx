@@ -118,8 +118,14 @@ export function ListOnOOXModal({ isOpen, onClose, nft }: ListOnOOXModalProps) {
                 throw new Error('Please enter a valid price');
             }
 
-            // Calculate deadline timestamp (current time + duration in seconds)
-            const deadline = Math.floor(Date.now() / 1000) + (durationDays * 24 * 60 * 60);
+            // Calculate deadline timestamp
+            // For fixed price: default to 1 year (practically infinite for UI purposes)
+            // For auction: use selected duration
+            const durationInSeconds = listingType === 'fixed'
+                ? (365 * 24 * 60 * 60)
+                : (durationDays * 24 * 60 * 60);
+
+            const deadline = Math.floor(Date.now() / 1000) + durationInSeconds;
 
             // Convert price to wei (EGLD has 18 decimals)
             const priceInWei = BigInt(Math.floor(parseFloat(priceValue) * 1e18));
@@ -286,21 +292,23 @@ export function ListOnOOXModal({ isOpen, onClose, nft }: ListOnOOXModalProps) {
                     </div>
                 </div>
 
-                {/* Duration */}
-                <div className={styles.section}>
-                    <span className={styles.sectionLabel}>Duration</span>
-                    <div className={styles.durationSelect}>
-                        {DURATION_OPTIONS.map((option) => (
-                            <button
-                                key={option.days}
-                                className={`${styles.durationOption} ${durationDays === option.days ? styles.selected : ''}`}
-                                onClick={() => setDurationDays(option.days)}
-                            >
-                                {option.label}
-                            </button>
-                        ))}
+                {/* Duration - Only for Auctions */}
+                {listingType === 'auction' && (
+                    <div className={styles.section}>
+                        <span className={styles.sectionLabel}>Duration</span>
+                        <div className={styles.durationSelect}>
+                            {DURATION_OPTIONS.map((option) => (
+                                <button
+                                    key={option.days}
+                                    className={`${styles.durationOption} ${durationDays === option.days ? styles.selected : ''}`}
+                                    onClick={() => setDurationDays(option.days)}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Fee Summary */}
                 {feeCalculation.price > 0 && (
