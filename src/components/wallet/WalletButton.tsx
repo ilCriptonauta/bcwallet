@@ -2,27 +2,22 @@
 
 /* =====================================================
    🥓 BACON WALLET - Wallet Button Component
-   Navbar wallet connection button with real SDK integration
+   Using UnlockPanelManager for reliable wallet connection
    ===================================================== */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGetLoginInfo } from '@multiversx/sdk-dapp/out/react/loginInfo/useGetLoginInfo';
 import { useGetAccount } from '@multiversx/sdk-dapp/out/react/account/useGetAccount';
-import { getAccountProvider, setAccountProvider } from '@multiversx/sdk-dapp/out/providers/helpers/accountProvider';
-import { ProviderFactory } from '@multiversx/sdk-dapp/out/providers/ProviderFactory';
-import { ProviderTypeEnum, ProviderType } from '@multiversx/sdk-dapp/out/providers/types/providerFactory.types';
-import { WalletConnectV2Provider } from '@multiversx/sdk-wallet-connect-provider/out/walletConnectV2Provider';
-import { QRCodeSVG } from 'qrcode.react';
-import { WalletIcon, QrCodeIcon, ExternalLinkIcon, BaconIcon, ChevronDownIcon } from '@/components/ui/Icons';
+import { getAccountProvider } from '@multiversx/sdk-dapp/out/providers/helpers/accountProvider';
+import { UnlockPanelManager } from '@multiversx/sdk-dapp/out/managers/UnlockPanelManager';
+import { WalletIcon, BaconIcon, ExternalLinkIcon, LogOutIcon } from '@/components/ui/Icons';
 import styles from './WalletButton.module.css';
-import { CONFIG } from '../../config/config';
+import { NETWORK_CONFIG } from '@/lib/constants';
 
 export function WalletButton() {
     const { isLoggedIn } = useGetLoginInfo();
     const { address, balance } = useGetAccount();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [wcUri, setWcUri] = useState<string>('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     // Format address for display
     const formatAddress = (addr: string) => {
@@ -40,82 +35,46 @@ export function WalletButton() {
         try {
             const provider = getAccountProvider();
             await provider.logout();
-            setIsModalOpen(false);
+            setIsDropdownOpen(false);
+            // Force page reload to clear state
+            window.location.reload();
         } catch (error) {
             console.error('Logout failed:', error);
         }
     };
 
-    const handleXPortalLogin = async () => {
-        setIsLoading(true);
-        setWcUri('');
-
-        try {
-            const callbacks = {
-                onClientLogin: () => {
-                    setIsModalOpen(false);
-                    setIsLoading(false);
-                },
-                onClientLogout: () => {
-                    console.log('Logged out from xPortal');
-                },
-                onClientEvent: (event: any) => {
-                    console.log('xPortal event', event);
-                }
-            };
-
-            const provider = new WalletConnectV2Provider(
-                callbacks,
-                CONFIG.network.id,
-                CONFIG.walletConnect.relayUrl,
-                CONFIG.walletConnect.projectId
-            );
-
-            await provider.init();
-
-            const { uri, approval } = await provider.connect();
-
-            if (uri) {
-                setWcUri(uri);
-                setIsLoading(false);
+    const handleConnect = () => {
+        // Use UnlockPanelManager - the official SDK way
+        const unlockPanelManager = UnlockPanelManager.init({
+            loginHandler: () => {
+                // Called after successful login
+                console.log('Login successful');
+                // Refresh to update state
+                window.location.reload();
+            },
+            onClose: async () => {
+                console.log('UnlockPanel closed');
             }
+        });
 
-            await approval();
-            await provider.login();
+        unlockPanelManager.openUnlockPanel();
+    };
 
-            // Monkey-patch for sdk-dapp compatibility
-            (provider as any).getType = () => ProviderTypeEnum.walletConnect;
-            (provider as any).getProvider = () => provider;
-            (provider as any).isInitialized = () => true;
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest(`.${styles.wrapper}`)) {
+                setIsDropdownOpen(false);
+            }
+        };
 
-            setAccountProvider(provider as any);
-            setIsModalOpen(false);
-
-        } catch (error) {
-            console.error('XPortal login failed:', error);
-            setIsLoading(false);
-            setWcUri('');
+        if (isDropdownOpen) {
+            document.addEventListener('click', handleClickOutside);
         }
-    };
 
-    const handleLogin = async (type: ProviderType) => {
-        setIsLoading(true);
-        try {
-            const provider = await ProviderFactory.create({ type });
-            await provider.login();
-            setIsModalOpen(false);
-        } catch (error) {
-            console.error('Login failed:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const closeModal = () => {
-        setIsModalOpen(false);
-        setWcUri('');
-        setIsLoading(false);
-    };
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [isDropdownOpen]);
 
     // Connected state - show address and dropdown
     if (isLoggedIn && address) {
@@ -123,7 +82,7 @@ export function WalletButton() {
             <div className={styles.wrapper}>
                 <button
                     className={styles.connectedBtn}
-                    onClick={() => setIsModalOpen(!isModalOpen)}
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 >
                     <span className={styles.avatar}><BaconIcon size={18} /></span>
                     <span className={styles.address}>{formatAddress(address)}</span>
@@ -135,38 +94,30 @@ export function WalletButton() {
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
-                        style={{ transform: isModalOpen ? 'rotate(180deg)' : 'none' }}
+                        style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none' }}
                     >
                         <path d="M6 9l6 6 6-6" />
                     </svg>
                 </button>
 
-                {isModalOpen && (
+                {isDropdownOpen && (
                     <div className={styles.dropdown}>
                         <div className={styles.dropdownHeader}>
                             <span className={styles.dropdownBalance}>
-                                {formatBalance(balance)} EGLD
+                                {formatBalance(balance)} {NETWORK_CONFIG.egldLabel}
                             </span>
                         </div>
                         <a
-                            href={`https://explorer.multiversx.com/accounts/${address}`}
+                            href={`${NETWORK_CONFIG.explorerUrl}/accounts/${address}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={styles.dropdownItem}
                         >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                                <polyline points="15,3 21,3 21,9" />
-                                <line x1="10" y1="14" x2="21" y2="3" />
-                            </svg>
+                            <ExternalLinkIcon size={16} />
                             View on Explorer
                         </a>
                         <button className={styles.dropdownItem} onClick={handleLogout}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                <polyline points="16 17 21 12 16 7" />
-                                <line x1="21" y1="12" x2="9" y2="12" />
-                            </svg>
+                            <LogOutIcon size={16} />
                             Disconnect
                         </button>
                     </div>
@@ -180,94 +131,11 @@ export function WalletButton() {
         <div className={styles.wrapper}>
             <button
                 className={styles.connectBtn}
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleConnect}
             >
                 <span className={styles.connectIcon}><WalletIcon size={18} /></span>
                 <span>Connect</span>
             </button>
-
-            {isModalOpen && (
-                <div className={styles.modalOverlay} onClick={closeModal}>
-                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2 className={styles.modalTitle}>Connect Wallet</h2>
-                            <button className={styles.closeBtn} onClick={closeModal}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M18 6L6 18M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className={styles.modalContent}>
-                            {isLoading && !wcUri ? (
-                                <div className={styles.loading}>
-                                    <div className={styles.spinner} />
-                                    <p>Connecting...</p>
-                                </div>
-                            ) : wcUri ? (
-                                <div className={styles.qrContainer}>
-                                    <QRCodeSVG value={wcUri} size={200} />
-                                    <p className={styles.qrText}>Scan with xPortal App</p>
-                                </div>
-                            ) : (
-                                <div className={styles.providerList}>
-                                    <button
-                                        className={styles.providerBtn}
-                                        onClick={handleXPortalLogin}
-                                    >
-                                        <span className={styles.providerIcon}><QrCodeIcon size={22} /></span>
-                                        <div className={styles.providerInfo}>
-                                            <span className={styles.providerName}>xPortal App</span>
-                                            <span className={styles.providerDesc}>Scan QR Code</span>
-                                        </div>
-                                        <svg className={styles.providerArrow} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M9 18l6-6-6-6" />
-                                        </svg>
-                                    </button>
-
-                                    <button
-                                        className={styles.providerBtn}
-                                        onClick={() => handleLogin(ProviderTypeEnum.extension)}
-                                    >
-                                        <span className={styles.providerIcon}>
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
-                                            </svg>
-                                        </span>
-                                        <div className={styles.providerInfo}>
-                                            <span className={styles.providerName}>DeFi Wallet</span>
-                                            <span className={styles.providerDesc}>Browser Extension</span>
-                                        </div>
-                                        <svg className={styles.providerArrow} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M9 18l6-6-6-6" />
-                                        </svg>
-                                    </button>
-
-                                    <button
-                                        className={styles.providerBtn}
-                                        onClick={() => handleLogin(ProviderTypeEnum.crossWindow)}
-                                    >
-                                        <span className={styles.providerIcon}>
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <circle cx="12" cy="12" r="10" />
-                                                <line x1="2" y1="12" x2="22" y2="12" />
-                                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                                            </svg>
-                                        </span>
-                                        <div className={styles.providerInfo}>
-                                            <span className={styles.providerName}>Web Wallet</span>
-                                            <span className={styles.providerDesc}>MultiversX Web Wallet</span>
-                                        </div>
-                                        <svg className={styles.providerArrow} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M9 18l6-6-6-6" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

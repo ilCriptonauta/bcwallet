@@ -29,6 +29,13 @@ export function MvxProvider({ children }: MvxProviderProps) {
                         nativeAuth: {
                             expirySeconds: 86400, // 24 hours
                             tokenExpirationToastWarningSeconds: 300 // 5 min warning
+                        },
+                        // WalletConnect configuration for xPortal
+                        providers: {
+                            walletConnect: {
+                                walletConnectV2ProjectId: CONFIG.walletConnect.projectId,
+                                walletConnectV2RelayAddress: CONFIG.walletConnect.relayUrl
+                            }
                         }
                     }
                 });
