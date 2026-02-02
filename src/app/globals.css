@@ -143,6 +143,9 @@
   --sidebar-collapsed-width: 80px;
   --header-height: 72px;
   --max-content-width: 1400px;
+
+  /* === Gradients === */
+  --bacon-gradient-gold: linear-gradient(135deg, var(--bacon-gold), var(--bacon-orange));
 }
 
 /* ---- Reset & Base Styles ---- */

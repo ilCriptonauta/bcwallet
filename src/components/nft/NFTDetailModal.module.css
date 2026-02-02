@@ -91,8 +91,9 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    filter: blur(10px);
-    transform: scale(1.1);
+    filter: blur(4px);
+    /* Reduced blur for better fallback visibility */
+    transform: scale(1.02);
 }
 
 .loadingOverlay {
@@ -101,12 +102,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .loadingIcon {
-    font-size: 3rem;
-    animation: sizzle 1s ease-in-out infinite;
+    font-size: 2.5rem;
+    opacity: 0.8;
+    animation: sizzle 1.5s ease-in-out infinite;
 }
 
 .media {
@@ -130,35 +132,51 @@
 .actionBtn {
     flex: 1;
     display: flex;
+    flex-direction: column;
+    /* Match dashboard style buttons */
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-3);
-    background: var(--bacon-glass-bg);
+    padding: var(--space-4);
+    background: var(--bacon-bg-secondary);
     border: 1px solid var(--bacon-glass-border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
+    /* Larger radius like dashboard */
     font-family: var(--font-primary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-medium);
-    color: var(--bacon-text-primary);
+    font-size: var(--text-xs);
+    /* Smaller font for secondary info */
+    font-weight: var(--font-semibold);
+    color: var(--bacon-text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-base);
+}
+
+.actionBtn svg {
+    color: var(--bacon-gold);
+    /* Icons are gold by default */
 }
 
 .actionBtn:hover {
-    background: var(--bacon-glass-bg-hover);
+    background: var(--bacon-bg-tertiary);
     border-color: var(--bacon-gold);
+    color: var(--bacon-text-primary);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .primaryBtn {
     background: linear-gradient(135deg, var(--bacon-gold), var(--bacon-orange));
     border-color: transparent;
-    color: var(--bacon-bg-primary);
+    color: var(--bacon-bg-primary) !important;
+}
+
+.primaryBtn svg {
+    color: var(--bacon-bg-primary) !important;
 }
 
 .primaryBtn:hover {
     box-shadow: var(--bacon-shadow-glow-gold);
+    transform: translateY(-2px);
 }
 
 /* Details Section (Right) */
@@ -245,6 +263,7 @@
 .tab.active {
     background: var(--bacon-bg-tertiary);
     color: var(--bacon-gold);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Tab Content */
@@ -346,24 +365,29 @@
 }
 
 .explorerLink {
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
-    background: var(--bacon-bg-primary);
+    background: var(--bacon-bg-secondary);
     border: 1px solid var(--bacon-glass-border);
     border-radius: var(--radius-md);
     font-size: var(--text-sm);
-    font-weight: var(--font-medium);
+    font-weight: var(--font-semibold);
     color: var(--bacon-gold);
     text-decoration: none;
-    margin-top: var(--space-2);
-    transition: all var(--transition-fast);
+    margin-top: var(--space-4);
+    transition: all var(--transition-base);
+    width: 100%;
 }
 
 .explorerLink:hover {
     background: var(--bacon-bg-tertiary);
     border-color: var(--bacon-gold);
+    color: var(--bacon-gold-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Attributes Tab */

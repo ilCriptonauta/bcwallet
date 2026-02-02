@@ -25,6 +25,7 @@
 .content {
     padding: var(--space-6);
     max-width: var(--max-content-width);
+    margin: 0 auto;
 }
 
 /* Mobile Responsive */

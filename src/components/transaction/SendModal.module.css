@@ -80,19 +80,20 @@
 }
 
 .input {
-    background: var(--bacon-bg-tertiary);
-    border: 1px solid var(--bacon-border-color);
+    background: var(--bacon-bg-primary);
+    border: 1px solid var(--bacon-glass-border);
     border-radius: var(--radius-lg);
     padding: var(--space-3) var(--space-4);
     color: var(--bacon-text-primary);
-    font-size: var(--text-md);
+    font-size: var(--text-sm);
+    font-family: var(--font-primary);
     outline: none;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-base);
 }
 
 .input:focus {
     border-color: var(--bacon-gold);
-    box-shadow: 0 0 0 2px rgba(233, 196, 106, 0.2);
+    box-shadow: 0 0 0 3px rgba(233, 196, 106, 0.15);
 }
 
 .assetSelector {
@@ -223,10 +224,10 @@
     border: none;
     border-radius: var(--radius-lg);
     padding: var(--space-4);
-    font-size: var(--text-md);
+    font-size: var(--text-base);
     font-weight: var(--font-bold);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-spring);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -235,14 +236,13 @@
 
 .sendBtn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(233, 196, 106, 0.3);
+    box-shadow: var(--bacon-shadow-glow-gold);
 }
 
 .sendBtn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+    filter: grayscale(0.5);
 }
 
 .errorText {

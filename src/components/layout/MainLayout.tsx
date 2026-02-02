@@ -18,24 +18,34 @@ export function MainLayout({ children }: MainLayoutProps) {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const { address } = useGetAccount();
 
-    // In development, we can simulate login with the provided mock account
-    // In production, this will only be true if the user actually connects
     const MOCK_ADDRESS = 'erd1knr6ha4xat3juryp47x3duj4lykjhlxqhdu67vtj4ey9apy6aa5sg0hlem';
     const isDevelopment = process.env.NODE_ENV === 'development';
+
+    // In dev, we use mock address unless real address is connected
     const effectiveAddress = address || (isDevelopment ? MOCK_ADDRESS : null);
-    const isLoggedIn = Boolean(effectiveAddress);
+
+    // Sidebar visibility: show if we're "logged in" (real or mock)
+    const showSidebar = Boolean(effectiveAddress);
+
+    // For centring purposes, we check if the sidebar is actually being shown
+    // If not, we use full-width mode.
+    const isFullWidth = !showSidebar;
 
     return (
         <div className={styles.layout}>
             <Header />
-            {isLoggedIn && (
+            {showSidebar && (
                 <Sidebar
                     isCollapsed={isSidebarCollapsed}
                     onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                 />
             )}
             <main
-                className={`${styles.main} ${isSidebarCollapsed ? styles.sidebarCollapsed : ''} ${!isLoggedIn ? styles.fullWidth : ''}`}
+                className={`
+                    ${styles.main} 
+                    ${showSidebar && isSidebarCollapsed ? styles.sidebarCollapsed : ''} 
+                    ${isFullWidth ? styles.fullWidth : ''}
+                `}
             >
                 <div className={styles.content}>
                     {children}
