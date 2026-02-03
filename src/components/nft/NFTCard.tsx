@@ -176,26 +176,6 @@ export function NFTCard({
                     </div>
                 )}
 
-                {/* Bottom Right Actions (Heart & Gear) */}
-                <div className={`${styles.bottomActions} ${(isHovered || isFavorite || isMenuOpen) ? styles.visible : ''}`}>
-                    {onToggleFavorite && (
-                        <button
-                            className={`${styles.smallActionBtn} ${isFavorite ? styles.favorited : ''}`}
-                            onClick={(e) => handleAction(e, () => onToggleFavorite(nft))}
-                            title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                        >
-                            <HeartIcon size={16} fill={isFavorite ? 'currentColor' : 'none'} />
-                        </button>
-                    )}
-                    <button
-                        className={`${styles.smallActionBtn} ${isMenuOpen ? styles.active : ''}`}
-                        onClick={(e) => handleAction(e, () => onToggleMenu?.(!isMenuOpen))}
-                        title="Actions"
-                    >
-                        {isMenuOpen ? <XIcon size={16} /> : <SettingsIcon size={16} />}
-                    </button>
-                </div>
-
                 {/* Actions Menu Overlay */}
                 {isMenuOpen && (
                     <div className={styles.menuOverlay} onClick={(e) => e.stopPropagation()}>
@@ -257,9 +237,32 @@ export function NFTCard({
                         ))}
                     </div>
                 )}
-                <h3 className={styles.name} title={nft.name}>
-                    {nft.name}
-                </h3>
+                <div className={styles.nameRow}>
+                    <h3 className={styles.name} title={nft.name}>
+                        {nft.name}
+                    </h3>
+
+                    {/* Quick Actions (Heart & Gear) - Now moved below image */}
+                    <div className={`${styles.bottomActions} ${(isHovered || isFavorite || isMenuOpen) ? styles.visible : ''}`}>
+                        {onToggleFavorite && (
+                            <button
+                                className={`${styles.smallActionBtn} ${isFavorite ? styles.favorited : ''}`}
+                                onClick={(e) => handleAction(e, () => onToggleFavorite(nft))}
+                                title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                            >
+                                <HeartIcon size={14} fill={isFavorite ? 'currentColor' : 'none'} />
+                            </button>
+                        )}
+                        <button
+                            className={`${styles.smallActionBtn} ${isMenuOpen ? styles.active : ''}`}
+                            onClick={(e) => handleAction(e, () => onToggleMenu?.(!isMenuOpen))}
+                            title="Actions"
+                        >
+                            {isMenuOpen ? <XIcon size={14} /> : <SettingsIcon size={14} />}
+                        </button>
+                    </div>
+                </div>
+
                 <p className={styles.collection} title={nft.collection}>
                     {nft.collection.split('-')[0]}
                 </p>

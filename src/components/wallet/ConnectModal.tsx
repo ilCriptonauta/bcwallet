@@ -7,6 +7,7 @@
 
 import { useEffect, useCallback } from 'react';
 import styles from './ConnectModal.module.css';
+import { BaconIcon } from '@/components/ui/Icons';
 
 interface ConnectModalProps {
     isOpen: boolean;
@@ -104,7 +105,9 @@ export function ConnectModal({ isOpen, onClose, isConnected }: ConnectModalProps
                 {isConnected ? (
                     /* Connected State */
                     <div className={styles.connectedContent}>
-                        <div className={styles.avatar}>🥓</div>
+                        <div className={styles.avatar}>
+                            <BaconIcon size={48} />
+                        </div>
                         <h2 id="modal-title" className={styles.title}>Welcome, Sizzler!</h2>
 
                         <div className={styles.addressCard}>
@@ -156,7 +159,7 @@ export function ConnectModal({ isOpen, onClose, isConnected }: ConnectModalProps
                     /* Connect State */
                     <div className={styles.connectContent}>
                         <div className={styles.logoWrapper}>
-                            <span className={styles.logo}>🥓</span>
+                            <BaconIcon size={64} />
                         </div>
                         <h2 id="modal-title" className={styles.title}>Connect Wallet</h2>
                         <p className={styles.subtitle}>Choose your preferred wallet to get started</p>

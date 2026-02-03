@@ -17,7 +17,9 @@
 }
 
 .heroIcon {
-  font-size: 5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: var(--space-4);
   animation: sizzle 2s ease-in-out infinite;
 }

@@ -13,6 +13,7 @@ import { useAccount, useNFTs, useNFTCountByCollection, useTransactions } from '@
 import { useFolders } from '@/hooks/useFolders';
 import * as api from '@/services/mx-api';
 import { SendModal } from '@/components/transaction/SendModal';
+import { BaconIcon, SendIcon, TagIcon, FolderPlusIcon, FlameIcon } from '@/components/ui/Icons';
 import styles from './page.module.css';
 
 // Helpers
@@ -46,7 +47,9 @@ export default function HomePage() {
     return (
       <div className={styles.welcomeContainer}>
         <div className={styles.heroSection}>
-          <div className={styles.heroIcon}>🥓</div>
+          <div className={styles.heroIcon}>
+            <BaconIcon size={96} />
+          </div>
           <h1 className={styles.heroTitle}>
             Welcome to <span className={styles.highlight}>Bacon</span>
           </h1>
@@ -93,7 +96,7 @@ export default function HomePage() {
       {/* Greeting */}
       <div className={styles.greeting}>
         <h1 className={styles.greetingTitle}>
-          Good Morning, <span className={styles.highlight}>{username}</span>! 🥓
+          Good Morning, <span className={styles.highlight}>{username}</span>! <BaconIcon size={32} style={{ verticalAlign: 'middle', display: 'inline-block', marginLeft: '8px' }} />
         </h1>
         <p className={styles.greetingSubtitle}>
           Your portfolio is looking crispy today
@@ -139,19 +142,19 @@ export default function HomePage() {
             className={styles.actionBtn}
             onClick={() => setIsSendOpen(true)}
           >
-            <span className={styles.actionIcon}>📤</span>
+            <span className={styles.actionIcon}><SendIcon size={24} /></span>
             <span>Send EGLD</span>
           </button>
           <button className={styles.actionBtn}>
-            <span className={styles.actionIcon}>🏷️</span>
+            <span className={styles.actionIcon}><TagIcon size={24} /></span>
             <span>List on OOX</span>
           </button>
           <button className={styles.actionBtn}>
-            <span className={styles.actionIcon}>📁</span>
+            <span className={styles.actionIcon}><FolderPlusIcon size={24} /></span>
             <span>New Folder</span>
           </button>
           <button className={styles.actionBtn}>
-            <span className={styles.actionIcon}>🔥</span>
+            <span className={styles.actionIcon}><FlameIcon size={24} /></span>
             <span>Burn Spam</span>
           </button>
         </div>

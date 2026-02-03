@@ -33,35 +33,31 @@
     filter: grayscale(0%);
 }
 
-/* Bottom Actions (Heart & Gear) */
+/* Bottom Actions (Heart & Gear) - Now in flow */
 .bottomActions {
-    position: absolute;
-    bottom: var(--space-2);
-    right: var(--space-2);
     display: flex;
     gap: var(--space-1);
     z-index: 20;
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateX(10px);
     transition: all var(--transition-fast);
 }
 
 .bottomActions.visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
 }
 
 .smallActionBtn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
+    background: var(--bacon-bg-tertiary);
     border: 1px solid var(--bacon-glass-border);
     border-radius: var(--radius-md);
-    color: var(--bacon-text-primary);
+    color: var(--bacon-text-secondary);
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -272,6 +268,14 @@
     border-radius: 50%;
 }
 
+.nameRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
+}
+
 .name {
     font-size: var(--text-sm);
     font-weight: var(--font-semibold);
@@ -279,7 +283,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: var(--space-1);
+    margin-bottom: 0;
+    flex: 1;
 }
 
 .collection {

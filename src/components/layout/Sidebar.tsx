@@ -27,6 +27,7 @@ import {
     CrownIcon,
     FlameIcon,
     ChevronLeftIcon,
+    BaconIcon,
 } from '@/components/ui/Icons';
 import styles from './Sidebar.module.css';
 
@@ -418,7 +419,7 @@ export function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
             {!isCollapsed && (
                 <div className={`${styles.premiumBanner} ${isPremiumUser ? styles.isPremium : ''}`}>
                     <div className={styles.premiumIcon}>
-                        {isPremiumUser ? '👑' : '🥓'}
+                        {isPremiumUser ? '👑' : <BaconIcon size={24} />}
                     </div>
                     <div className={styles.premiumContent}>
                         <span className={styles.premiumTitle}>

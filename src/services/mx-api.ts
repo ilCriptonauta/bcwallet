@@ -432,9 +432,13 @@ export function formatTokenBalance(balance: string, decimals: number): string {
 
 /**
  * Shorten address for display
+ * If it's a herotag, removes the .elrond suffix
  */
 export function shortenAddress(address: string, chars = 6): string {
     if (!address) return '';
+    if (address.endsWith('.elrond')) {
+        return address.replace('.elrond', '');
+    }
     return `${address.slice(0, chars)}...${address.slice(-4)}`;
 }
 

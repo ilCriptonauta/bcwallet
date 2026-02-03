@@ -7,6 +7,7 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { NFT } from '@/types';
+import { BaconIcon } from '@/components/ui/Icons';
 import styles from './NFTDetailModal.module.css';
 
 interface NFTDetailModalProps {
@@ -166,7 +167,9 @@ export function NFTDetailModal({
                                         className={styles.thumbnailPreview}
                                     />
                                     <div className={styles.loadingOverlay}>
-                                        <span className={styles.loadingIcon}>🥓</span>
+                                        <span className={styles.loadingIcon}>
+                                            <BaconIcon size={32} />
+                                        </span>
                                     </div>
                                 </div>
                             )}

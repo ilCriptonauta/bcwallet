@@ -13,6 +13,7 @@ interface IconProps {
     className?: string;
     strokeWidth?: number;
     fill?: string;
+    style?: React.CSSProperties;
 }
 
 // Navigation Icons
@@ -49,6 +50,14 @@ export const ActivityIcon = ({ size = 20, className = '', strokeWidth = 2 }: Ico
 // Folder Icons
 export const FolderIcon = ({ size = 20, className = '', strokeWidth = 2 }: IconProps) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+    </svg>
+);
+
+export const FolderPlusIcon = ({ size = 20, className = '', strokeWidth = 2 }: IconProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M12 10v6" />
+        <path d="M9 13h6" />
         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
     </svg>
 );
@@ -236,25 +245,16 @@ export const CrownIcon = ({ size = 20, className = '', strokeWidth = 2 }: IconPr
     </svg>
 );
 
-// Bacon Logo Icon (SVG version)
-export const BaconIcon = ({ size = 20, className = '' }: IconProps) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-        <path
-            d="M4 6c2 0 3-2 5-2s3 2 5 2 3-2 5-2v4c-2 0-3 2-5 2s-3-2-5-2-3 2-5 2V6z"
-            fill="currentColor"
-            opacity="0.9"
-        />
-        <path
-            d="M4 12c2 0 3-2 5-2s3 2 5 2 3-2 5-2v4c-2 0-3 2-5 2s-3-2-5-2-3 2-5 2v-4z"
-            fill="currentColor"
-            opacity="0.7"
-        />
-        <path
-            d="M4 18c2 0 3-2 5-2s3 2 5 2 3-2 5-2v2c-2 0-3 2-5 2s-3-2-5-2-3 2-5 2v-2z"
-            fill="currentColor"
-            opacity="0.5"
-        />
-    </svg>
+// Bacon Logo Icon (Image version)
+export const BaconIcon = ({ size = 20, className = '', style }: IconProps) => (
+    <img
+        src="/bacon-logo.png"
+        alt="Bacon Logo"
+        width={size}
+        height={size}
+        className={className}
+        style={{ objectFit: 'contain', ...style }}
+    />
 );
 
 // Flame icon for premium/fire features
