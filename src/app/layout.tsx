@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Bacon Wallet",
-    description: "Let's Cook NFTs on MultiversX.",
+    title: "Bacon Wallet - Let's Cook NFTs",
+    description: "The ultimate hub to manage and create your digital Collectibles on MultiversX.",
   },
 };
 
