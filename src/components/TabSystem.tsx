@@ -1496,14 +1496,14 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               }
               setIsCreateModalOpen(true);
             }}
-            className={`group relative p-6 rounded-[2.5rem] bg-gray-50 dark:bg-[#0a0a0a]/20 border-2 border-dashed flex flex-col items-center justify-center space-y-4 transition-all h-full min-h-[280px] ${firebaseFolders.length >= maxFolders ? 'border-gray-300 dark:border-white/5 opacity-60 cursor-not-allowed' : 'border-gray-200 dark:border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5'}`}
+            className={`group relative p-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] bg-gray-50 dark:bg-[#0a0a0a]/20 border-2 border-dashed flex flex-col items-center justify-center space-y-3 md:space-y-4 transition-all h-full min-h-[220px] md:min-h-[280px] ${firebaseFolders.length >= maxFolders ? 'border-gray-300 dark:border-white/5 opacity-60 cursor-not-allowed' : 'border-gray-200 dark:border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5'}`}
           >
-            <div className={`w-16 h-16 rounded-full bg-white dark:bg-white/5 flex items-center justify-center shadow-lg transition-all ${firebaseFolders.length >= maxFolders ? '' : 'group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white'}`}>
-              {firebaseFolders.length >= maxFolders ? <Lock className="w-8 h-8 text-gray-400" /> : <Plus className="w-8 h-8" />}
+            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full bg-white dark:bg-white/5 flex items-center justify-center shadow-lg transition-all ${firebaseFolders.length >= maxFolders ? '' : 'group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white'}`}>
+              {firebaseFolders.length >= maxFolders ? <Lock className="w-6 h-6 md:w-8 md:h-8 text-gray-400" /> : <Plus className="w-6 h-6 md:w-8 md:h-8" />}
             </div>
-            <div className="text-center">
-              <p className="text-sm font-black dark:text-white">{firebaseFolders.length >= maxFolders ? 'Folder Limit Reached' : 'Create New Folder'}</p>
-              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{firebaseFolders.length >= maxFolders ? `Limit: ${maxFolders} folders` : 'Organize your collection'}</p>
+            <div className="text-center px-2">
+              <p className="text-xs md:text-sm font-black dark:text-white">{firebaseFolders.length >= maxFolders ? 'Folder Limit Reached' : 'Create New Folder'}</p>
+              <p className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-tight mt-1">{firebaseFolders.length >= maxFolders ? `Limit: ${maxFolders} folders` : 'Organize your collection'}</p>
             </div>
           </button>
 
@@ -1511,21 +1511,21 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             <div
               key={folder.id}
               onClick={() => handleFolderClick(folder)}
-              className="group relative cursor-pointer p-6 rounded-[2.5rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98]"
+              className="group relative cursor-pointer p-3 pb-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all flex flex-col hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1 md:hover:-translate-y-2 active:scale-[0.98]"
             >
-              <div className="flex items-center mb-6">
-                <div className="flex items-center space-x-4 min-w-0">
-                  <div className="w-12 h-12 flex-shrink-0 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                    {folder.id === 'favorites' ? <Heart className="w-5 h-5" /> : <Folder className="w-5 h-5" />}
+              <div className="flex flex-col flex-1 mb-3 md:mb-6">
+                <div className="flex items-center space-x-3 md:space-x-4 min-w-0">
+                  <div className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 rounded-xl md:rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                    {folder.id === 'favorites' ? <Heart className="w-4 h-4 md:w-5 md:h-5" /> : <Folder className="w-4 h-4 md:w-5 md:h-5" />}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-sm font-black dark:text-white text-gray-900 truncate pr-2">{folder.name}</h3>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{folder.itemCount} Items</p>
+                    <h3 className="text-xs md:text-sm font-black dark:text-white text-gray-900 truncate pr-2">{folder.name}</h3>
+                    <p className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest">{folder.itemCount} Items</p>
                   </div>
                 </div>
               </div>
 
-              <div className="aspect-square bg-gray-50 dark:bg-zinc-800/20 overflow-hidden relative p-4">
+              <div className="aspect-square bg-gray-50/50 dark:bg-zinc-800/20 rounded-2xl md:rounded-[1.5rem] overflow-hidden relative mt-auto">
                 {folder.previewImages.length > 0 ? (
                   folder.previewImages.slice(0, 3).reverse().map((img, idx, arr) => {
                     const isTop = idx === arr.length - 1;
@@ -1535,7 +1535,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
 
                     return (
-                      <div key={idx} className={`absolute inset-4 rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
+                      <div key={idx} className={`absolute inset-2 md:inset-4 rounded-xl md:rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
                         <NftMedia
                           src={img.startsWith('http') ? img : `https://picsum.photos/seed/${img}/200/200`}
                           alt="Preview"
@@ -1545,18 +1545,18 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     );
                   })
                 ) : (
-                  <div className="absolute inset-8 rounded-2xl bg-gray-100/50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 flex items-center justify-center">
-                    <Folder className="w-8 h-8 text-gray-300 dark:text-white/20" />
+                  <div className="absolute inset-4 md:inset-6 rounded-xl md:rounded-2xl bg-gray-100/50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 flex items-center justify-center">
+                    <Folder className="w-6 h-6 md:w-8 md:h-8 text-gray-300 dark:text-white/20" />
                   </div>
                 )}
                 {folder.itemCount > 0 && (
-                  <div className="absolute top-4 right-4 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
+                  <div className="absolute top-2 right-2 md:top-4 md:right-4 z-30 bg-orange-500 text-white text-[9px] md:text-[10px] font-black px-2 py-0.5 md:px-2.5 md:py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
                     {folder.itemCount} Items
                   </div>
                 )}
 
                 {folder.id !== 'favorites' && (
-                  <div className="absolute bottom-4 right-4 z-30">
+                  <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 z-30">
                     <button
                       onClick={(e) => toggleFolderMenu(e, folder.id)}
                       className={`p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${openFolderMenuId === folder.id ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
