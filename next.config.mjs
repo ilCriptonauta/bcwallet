@@ -3,8 +3,9 @@ const nextConfig = {
   // Configurazione specifica per metadati social
   experimental: {
     optimizePackageImports: ['@multiversx/sdk-dapp', '@multiversx/sdk-dapp-ui'],
-    serverExternalPackages: ['@multiversx/sdk-core', '@multiversx/sdk-bls-wasm'],
   },
+  serverExternalPackages: ['@multiversx/sdk-core', '@multiversx/sdk-bls-wasm'],
+  turbopack: {},
   images: {
     remotePatterns: [
       {
