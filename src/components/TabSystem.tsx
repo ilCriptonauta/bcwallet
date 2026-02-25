@@ -1513,19 +1513,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               onClick={() => handleFolderClick(folder)}
               className="group relative cursor-pointer p-3 pb-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all flex flex-col hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1 md:hover:-translate-y-2 active:scale-[0.98]"
             >
-              <div className="flex flex-col flex-1 mb-3 md:mb-6">
-                <div className="flex items-center space-x-3 md:space-x-4 min-w-0">
-                  <div className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 rounded-xl md:rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                    {folder.id === 'favorites' ? <Heart className="w-4 h-4 md:w-5 md:h-5" /> : <Folder className="w-4 h-4 md:w-5 md:h-5" />}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-xs md:text-sm font-black dark:text-white text-gray-900 truncate pr-2">{folder.name}</h3>
-                    <p className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest">{folder.itemCount} Items</p>
-                  </div>
-                </div>
-              </div>
 
-              <div className="aspect-square bg-gray-50/50 dark:bg-zinc-800/20 rounded-2xl md:rounded-[1.5rem] overflow-hidden relative mt-auto">
+
+              <div className="aspect-square bg-gray-50/50 dark:bg-zinc-800/20 rounded-2xl md:rounded-[1.5rem] overflow-hidden relative mb-3 md:mb-4">
                 {folder.previewImages.length > 0 ? (
                   folder.previewImages.slice(0, 3).reverse().map((img, idx, arr) => {
                     const isTop = idx === arr.length - 1;
@@ -1594,6 +1584,17 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     )}
                   </div>
                 )}
+              </div>
+
+              <div className="flex flex-col mt-auto w-full px-1">
+                <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+                  <div className="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                    {folder.id === 'favorites' ? <Heart className="w-3 h-3 md:w-3.5 md:h-3.5" /> : <Folder className="w-3 h-3 md:w-3.5 md:h-3.5" />}
+                  </div>
+                  <h3 className="text-[13px] md:text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
+                    {folder.name}
+                  </h3>
+                </div>
               </div>
             </div>
           ))}
