@@ -1138,9 +1138,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
                         {item.name}
                       </h3>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">
-                        {item.items.length} Items
-                      </p>
                     </div>
                   </div>
                 );
