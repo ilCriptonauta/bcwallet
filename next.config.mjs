@@ -3,7 +3,7 @@ const nextConfig = {
   // Configurazione specifica per metadati social
   experimental: {
     optimizePackageImports: ['@multiversx/sdk-dapp', '@multiversx/sdk-dapp-ui'],
-    turbo: {
+    turbopack: {
       resolveAlias: {
         fs: './src/mocks/fs.js',
         path: './src/mocks/fs.js',
