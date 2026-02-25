@@ -5,3 +5,4 @@ export * from './signAndSendTransactions';
 export * from './useAccountNfts';
 export * from './useCollectionNfts';
 export * from './useOnxBalance';
+export * from './useNftsValue';

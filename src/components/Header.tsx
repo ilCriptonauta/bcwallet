@@ -2,9 +2,9 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Sun, Moon, LogIn, LogOut, User, ChevronDown, Wrench, Wallet2, Coins, Crown } from 'lucide-react';
+import { Sun, Moon, LogIn, LogOut, User, ChevronDown, Wrench, Wallet2, Coins, Crown, TrendingUp } from 'lucide-react';
 import { useGetAccountInfo } from '@/lib';
-import { useOnxBalance } from '@/helpers';
+import { useOnxBalance, useAccountNfts, useNftsValue } from '@/helpers';
 import BigNumber from 'bignumber.js';
 
 interface HeaderProps {
@@ -33,10 +33,15 @@ const Header: React.FC<HeaderProps> = ({
 
   const { balance: onxBalance } = useOnxBalance();
   const account = useGetAccountInfo()?.account;
+  const address = account?.address;
   const balances = account?.balance
     ? BigNumber(account.balance).dividedBy(1e18).toFixed(3)
     : '0.000';
   const username = account?.username || 'User';
+
+  // NFT portfolio value
+  const { items: nfts } = useAccountNfts({ address, enabled: isLoggedIn });
+  const { totalEgld: nftsValue, isLoading: nftsValueLoading } = useNftsValue(nfts);
 
   useEffect(() => {
     const closeMenu = (e: MouseEvent) => {
@@ -140,6 +145,17 @@ const Header: React.FC<HeaderProps> = ({
                       </div>
                       <span className="text-sm font-black text-slate-900 dark:text-white">
                         {BigNumber(onxBalance).toFormat(0)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-transparent dark:border-white/5 transition-colors group-active:bg-slate-100 dark:group-active:bg-white/10">
+                      <div className="flex items-center space-x-2">
+                        <TrendingUp className="w-4 h-4 text-green-500" />
+                        <span className="text-xs font-bold">NFTs Value</span>
+                      </div>
+                      <span className="text-sm font-black text-slate-900 dark:text-white">
+                        {nftsValueLoading
+                          ? <span className="inline-block w-16 h-4 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
+                          : <>{nftsValue.toFixed(3)} <span className="text-[10px] text-slate-400 font-bold">EGLD</span></>}
                       </span>
                     </div>
                   </div>
