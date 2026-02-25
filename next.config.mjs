@@ -50,9 +50,7 @@ const nextConfig = {
   },
   transpilePackages: [
     '@multiversx/sdk-dapp',
-    '@multiversx/sdk-dapp-ui',
-    '@multiversx/sdk-core',
-    '@multiversx/sdk-bls-wasm'
+    '@multiversx/sdk-dapp-ui'
   ],
   webpack: (config, { isServer }) => {
     config.cache = {
