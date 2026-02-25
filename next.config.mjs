@@ -3,13 +3,7 @@ const nextConfig = {
   // Configurazione specifica per metadati social
   experimental: {
     optimizePackageImports: ['@multiversx/sdk-dapp', '@multiversx/sdk-dapp-ui'],
-  },
-  turbopack: {
-    resolveAlias: {
-      fs: './src/mocks/fs.js',
-      path: './src/mocks/fs.js',
-      os: './src/mocks/fs.js',
-    },
+    serverExternalPackages: ['@multiversx/sdk-core', '@multiversx/sdk-bls-wasm'],
   },
   images: {
     remotePatterns: [
@@ -72,6 +66,11 @@ const nextConfig = {
         path: false,
         os: false,
         buffer: false,
+        net: false,
+        tls: false,
+        stream: false,
+        url: false,
+        crypto: false,
       };
     }
 
