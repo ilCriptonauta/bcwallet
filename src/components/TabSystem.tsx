@@ -522,7 +522,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const dynamicUserFolders: UserFolder[] = [
     {
       id: "favorites",
-      name: 'My Favorites',
+      name: 'Favorites',
       description: 'Your favorite assets in one place.',
       itemCount: firebaseFavorites.length,
       previewImages: firebaseFavorites.length > 0
