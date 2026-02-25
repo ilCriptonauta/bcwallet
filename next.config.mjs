@@ -4,6 +4,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@multiversx/sdk-dapp', '@multiversx/sdk-dapp-ui'],
   },
+  turbopack: {},
   images: {
     remotePatterns: [
       {
