@@ -2,7 +2,14 @@
 const nextConfig = {
   // Configurazione specifica per metadati social
   experimental: {
-    optimizePackageImports: ['@multiversx/sdk-dapp'],
+    optimizePackageImports: ['@multiversx/sdk-dapp', '@multiversx/sdk-dapp-ui'],
+    turbo: {
+      resolveAlias: {
+        fs: './src/mocks/fs.js',
+        path: './src/mocks/fs.js',
+        os: './src/mocks/fs.js',
+      },
+    },
   },
   images: {
     remotePatterns: [
@@ -31,6 +38,11 @@ const nextConfig = {
         hostname: 'fevkctpkfn5okuuh.public.blob.vercel-storage.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        pathname: '/**',
+      }
     ],
     // Ottimizzazioni per le immagini pesanti da IPFS
     formats: ['image/webp', 'image/avif'],
@@ -41,14 +53,28 @@ const nextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  transpilePackages: ['@multiversx/sdk-dapp'],
-  turbopack: {},
-  webpack: (config) => {
+  transpilePackages: [
+    '@multiversx/sdk-dapp',
+    '@multiversx/sdk-dapp-ui',
+    '@multiversx/sdk-core',
+    '@multiversx/sdk-bls-wasm'
+  ],
+  webpack: (config, { isServer }) => {
     config.cache = {
       type: 'memory',
     };
     config.resolve.alias['@'] = process.cwd();
-    config.resolve.fallback = { fs: false };
+
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        os: false,
+        buffer: false,
+      };
+    }
+
     config.externals.push(
       'pino-pretty',
       'lokijs',
