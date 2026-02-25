@@ -4,8 +4,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@multiversx/sdk-dapp', '@multiversx/sdk-dapp-ui'],
   },
-  serverExternalPackages: ['@multiversx/sdk-core', '@multiversx/sdk-bls-wasm'],
-  turbopack: {},
   images: {
     remotePatterns: [
       {
@@ -50,7 +48,9 @@ const nextConfig = {
   },
   transpilePackages: [
     '@multiversx/sdk-dapp',
-    '@multiversx/sdk-dapp-ui'
+    '@multiversx/sdk-dapp-ui',
+    '@multiversx/sdk-core',
+    '@multiversx/sdk-bls-wasm'
   ],
   webpack: (config, { isServer }) => {
     config.cache = {
