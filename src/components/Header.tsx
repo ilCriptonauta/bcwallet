@@ -212,7 +212,7 @@ const Header: React.FC<HeaderProps> = ({
 
                 {/* ── DESKTOP DROPDOWN (md+) ── */}
                 {isMenuOpen && (
-                  <div className="hidden md:block absolute right-0 mt-3 w-72 bg-white dark:bg-[#0a0a0a] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 p-2 overflow-hidden animate-in zoom-in-95 duration-200 z-[110]">
+                  <div className="max-md:hidden absolute right-0 mt-3 w-72 bg-white dark:bg-[#0a0a0a] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 p-2 overflow-hidden animate-in zoom-in-95 duration-200 z-[110]">
                     <MenuContent />
                   </div>
                 )}
