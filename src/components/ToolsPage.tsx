@@ -646,9 +646,9 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
       )}
 
       {modalType && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-0 md:p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={handleCloseModal}></div>
-          <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 md:p-10 border dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] md:shadow-2xl border-t dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[92vh] overflow-y-auto custom-scrollbar">
             <button onClick={handleCloseModal} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-slate-400 hover:text-brand-orange transition-colors z-20 active:scale-90"><X /></button>
             <h2 className="text-3xl font-black mb-8 flex items-center gap-3 sticky top-0 bg-white dark:bg-zinc-900 z-10 py-2">
               {modalType === 'collection' ? (
@@ -1111,12 +1111,12 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
 
       {/* ─── Set Role Modal ─── */}
       {showSetRoleModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-0 md:p-4">
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-md"
             onClick={() => setShowSetRoleModal(false)}
           />
-          <div className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 border dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[85vh] overflow-y-auto custom-scrollbar">
+          <div className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] md:shadow-2xl border-t dark:border-white/10 md:border p-8 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[85vh] overflow-y-auto custom-scrollbar">
             <button
               onClick={() => setShowSetRoleModal(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-brand-orange transition-colors z-20"
