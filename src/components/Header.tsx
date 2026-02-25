@@ -62,8 +62,10 @@ const Header: React.FC<HeaderProps> = ({
     return () => { document.body.style.overflow = ''; };
   }, [isMenuOpen]);
 
-  // Shared menu content rendered in both drawer and dropdown
-  const MenuContent = () => (
+  // Shared menu content — called as a render function (not a React component)
+  // to avoid React unmounting/remounting it on every parent re-render, which
+  // can cause lost event handlers especially on mobile/iOS.
+  const renderMenuContent = () => (
     <>
       {/* Profile header */}
       <div className="px-4 py-4 border-b border-slate-100 dark:border-white/5 mb-2">
@@ -117,6 +119,23 @@ const Header: React.FC<HeaderProps> = ({
 
       <div className="h-px bg-slate-100 dark:bg-white/5 my-1" />
 
+      {/* Tools navigation */}
+      <button
+        onClick={() => { onNavigate(currentPage === 'home' ? 'tools' : 'home'); setIsMenuOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] ${currentPage === 'tools'
+          ? 'text-brand-orange bg-brand-orange/5 dark:bg-brand-orange/10'
+          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'
+          }`}
+      >
+        <Wrench className={`w-4 h-4 ${currentPage === 'tools' ? 'text-brand-orange' : 'text-slate-500 dark:text-slate-400'}`} />
+        <span>{currentPage === 'tools' ? 'Back to Wallet' : "Let's Cook"}</span>
+        {currentPage === 'tools' && (
+          <span className="ml-auto text-[10px] font-black uppercase tracking-widest text-brand-orange bg-brand-orange/10 px-2 py-1 rounded-md">Active</span>
+        )}
+      </button>
+
+      <div className="h-px bg-slate-100 dark:bg-white/5 my-1" />
+
       {/* Theme toggle */}
       <button
         onClick={toggleTheme}
@@ -166,19 +185,6 @@ const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center space-x-3 md:space-x-4">
-            {isLoggedIn && (
-              <button
-                onClick={() => onNavigate(currentPage === 'home' ? 'tools' : 'home')}
-                className={`p-2.5 rounded-xl border transition-all active:scale-95 ${currentPage === 'tools'
-                  ? 'bg-brand-orange/10 border-brand-orange/20 text-brand-orange'
-                  : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                title="Let's Cook"
-              >
-                <Wrench className="w-5 h-5" />
-              </button>
-            )}
-
             {!isLoggedIn && (
               <button
                 onClick={toggleTheme}
@@ -213,7 +219,7 @@ const Header: React.FC<HeaderProps> = ({
                 {/* ── DESKTOP DROPDOWN (md+) ── */}
                 {isMenuOpen && (
                   <div className="max-md:hidden absolute right-0 mt-3 w-72 bg-white dark:bg-[#0a0a0a] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 p-2 overflow-hidden animate-in zoom-in-95 duration-200 z-[110]">
-                    <MenuContent />
+                    {renderMenuContent()}
                   </div>
                 )}
               </div>
@@ -253,7 +259,7 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto py-2">
-              <MenuContent />
+              {renderMenuContent()}
             </div>
           </div>
         </>
