@@ -1,6 +1,7 @@
 
 'use client';
 
+import { createPortal } from 'react-dom';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import BigNumber from 'bignumber.js';
 import {
@@ -72,6 +73,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const hasProAccess = firebaseIsPro || isFullVersion;
   const maxFolders = hasProAccess ? 100 : 3;
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [nftToSend, setNftToSend] = useState<NormalizedNft | null>(null);
@@ -581,6 +584,36 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     };
   }, []);
 
+  const renderContextMenu = (i: number, nft: NormalizedNft) => {
+    if (openMenuId !== i) return null;
+    const contentJSX = (
+      <>
+        {/* Mobile Backdrop */}
+        <div className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm md:hidden animate-in fade-in duration-200" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); }} />
+        <div ref={menuRef} onClick={(e) => e.stopPropagation()} className="fixed md:absolute bottom-0 md:bottom-12 left-0 right-0 md:left-auto md:-right-2 z-[70] w-full md:w-44 bg-white dark:bg-[#252525] rounded-t-[2rem] md:rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-2xl border-t md:border border-gray-100 dark:border-white/10 p-5 md:p-1.5 animate-in slide-in-from-bottom-full md:slide-in-from-bottom-2 md:zoom-in-95 duration-300">
+          <div className="w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full mx-auto mb-6 md:hidden" />
+          <button onClick={(e) => openSellModal(e, nft)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all">
+            <div className="flex items-center gap-4 md:gap-2"><DollarSign className="w-5 h-5 md:w-4 md:h-4 text-green-500" /><span>Sell Asset</span></div>
+          </button>
+          <button onClick={(e) => openSendModal(e, nft)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all">
+            <div className="flex items-center gap-4 md:gap-2"><Send className="w-5 h-5 md:w-4 md:h-4 text-blue-500" /><span>Send</span></div>
+          </button>
+          <button onClick={(e) => openMoveModal(e, nft)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all">
+            <div className="flex items-center gap-4 md:gap-2"><Folder className="w-5 h-5 md:w-4 md:h-4 text-orange-500" /><span>Move to Folder</span></div>
+          </button>
+          <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-2 md:my-1" />
+          <button onClick={(e) => openBurnModal(e, nft)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 active:scale-95 transition-all">
+            <div className="flex items-center gap-4 md:gap-2"><Flame className="w-5 h-5 md:w-4 md:h-4" /><span>Burn</span></div>
+          </button>
+        </div>
+      </>
+    );
+    if (mounted && window.innerWidth < 768) {
+      return createPortal(contentJSX, document.body);
+    }
+    return contentJSX;
+  };
+
   const isNftsTabActive = viewMode === 'Collectibles' && activeTab === 'NFTs';
   const nftsQuery = useAccountNfts({
     address: walletAddress,
@@ -850,7 +883,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             onMouseLeave={clearLongPress}
             onTouchStart={() => startLongPress(nft)}
             onTouchEnd={clearLongPress}
-            className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+            className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
           >
             <div className="aspect-square bg-gray-50 dark:bg-zinc-800/50 overflow-hidden relative">
               {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -862,34 +895,18 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2">
                 <button
                   onClick={(e) => toggleFavorite(e, nft)}
-                  className={`p-2 backdrop-blur-md rounded-full transition-all active:scale-90 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white hover:text-orange-500'}`}
+                  className={`p-3 md:p-3 md:p-2 backdrop-blur-md rounded-full transition-all active:scale-90 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white hover:text-orange-500'}`}
                 >
                   <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
                 </button>
                 <button
                   onClick={(e) => toggleMenu(e, i)}
-                  className="p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-orange-500 transition-all active:scale-90"
+                  className="p-3 md:p-3 md:p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-orange-500 transition-all active:scale-90"
                 >
                   <Settings className={`w-4 h-4 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
                 </button>
               </div>
-              {openMenuId === i && (
-                <div ref={menuRef} onClick={(e) => e.stopPropagation()} className="absolute bottom-12 right-3 z-40 w-40 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 p-1.5 animate-in zoom-in-95 duration-200">
-                  <button onClick={(e) => openSellModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                    <div className="flex items-center gap-2"><DollarSign className="w-3.5 h-3.5 text-green-500" /><span>Sell</span></div>
-                  </button>
-                  <button onClick={(e) => openSendModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                    <div className="flex items-center gap-2"><Send className="w-3.5 h-3.5 text-blue-500" /><span>Send</span></div>
-                  </button>
-                  <button onClick={(e) => openMoveModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                    <div className="flex items-center gap-2"><Folder className="w-3.5 h-3.5 text-orange-500" /><span>Move to</span></div>
-                  </button>
-                  <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-1" />
-                  <button onClick={(e) => openBurnModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                    <div className="flex items-center gap-2"><Flame className="w-3.5 h-3.5" /><span>Burn</span></div>
-                  </button>
-                </div>
-              )}
+              {renderContextMenu(i, nft)}
               <NftMedia
                 src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/400/400`}
                 alt={nft.name}
@@ -996,7 +1013,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onMouseLeave={clearLongPress}
                   onTouchStart={() => startLongPress(nft)}
                   onTouchEnd={clearLongPress}
-                  className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                  className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                 >
                   <div className="aspect-square bg-gray-50 dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1008,34 +1025,18 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2">
                       <button
                         onClick={(e) => toggleFavorite(e, nft)}
-                        className={`p-2 backdrop-blur-md rounded-full transition-all active:scale-90 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white hover:text-orange-500'}`}
+                        className={`p-3 md:p-3 md:p-2 backdrop-blur-md rounded-full transition-all active:scale-90 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white hover:text-orange-500'}`}
                       >
                         <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
                       </button>
                       <button
                         onClick={(e) => toggleMenu(e, i)}
-                        className="p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-orange-500 transition-all active:scale-90"
+                        className="p-3 md:p-3 md:p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-orange-500 transition-all active:scale-90"
                       >
                         <Settings className={`w-4 h-4 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
                       </button>
                     </div>
-                    {openMenuId === i && (
-                      <div ref={menuRef} onClick={(e) => e.stopPropagation()} className="absolute bottom-12 right-3 z-40 w-40 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 p-1.5 animate-in zoom-in-95 duration-200">
-                        <button onClick={(e) => openSellModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                          <div className="flex items-center gap-2"><DollarSign className="w-3.5 h-3.5 text-green-500" /><span>Sell</span></div>
-                        </button>
-                        <button onClick={(e) => openSendModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                          <div className="flex items-center gap-2"><Send className="w-3.5 h-3.5 text-blue-500" /><span>Send</span></div>
-                        </button>
-                        <button onClick={(e) => openMoveModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                          <div className="flex items-center gap-2"><Folder className="w-3.5 h-3.5 text-orange-500" /><span>Move to</span></div>
-                        </button>
-                        <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-1" />
-                        <button className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                          <div className="flex items-center gap-2"><Flame className="w-3.5 h-3.5" /><span>Burn</span></div>
-                        </button>
-                      </div>
-                    )}
+                    {renderContextMenu(i, nft)}
                     <NftMedia
                       src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/400/400`}
                       alt={nft.name}
@@ -1103,20 +1104,35 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     onClick={() => handleCollectionClick(item.id)}
                     className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2"
                   >
-                    <div className="aspect-square bg-gray-50 dark:bg-zinc-800/30 p-3 grid grid-cols-2 gap-2 relative">
-                      {item.items.slice(0, 4).map((nft, idx) => (
-                        <div key={idx} className="rounded-xl overflow-hidden bg-gray-200 dark:bg-white/5">
-                          <NftMedia
-                            src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/200/200`}
-                            alt="preview"
-                            mimeType={nft.mimeType}
-                            className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                          />
+                    <div className="aspect-square bg-gray-50 dark:bg-zinc-800/30 overflow-hidden relative p-4">
+                      {item.items.slice(0, 3).reverse().map((nft, idx, arr) => {
+                        const isTop = idx === arr.length - 1;
+                        const rotation = isTop ? 'rotate-0' : idx === 0 ? '-rotate-6' : 'rotate-6';
+                        const scale = isTop ? 'scale-100' : idx === 0 ? 'scale-90' : 'scale-95';
+                        const zIndex = isTop ? 'z-20' : idx === 0 ? 'z-0' : 'z-10';
+                        const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
+
+                        return (
+                          <div key={idx} className={`absolute inset-4 rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
+                            <NftMedia
+                              src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/200/200`}
+                              alt="preview"
+                              mimeType={nft.mimeType}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                            {isTop && (
+                              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Folder className="w-10 h-10 text-white drop-shadow-lg" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      {item.items.length > 1 && (
+                        <div className="absolute top-4 right-4 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
+                          {item.items.length} Assets
                         </div>
-                      ))}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Folder className="w-10 h-10 text-white drop-shadow-lg" />
-                      </div>
+                      )}
                     </div>
                     <div className="p-5">
                       <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
@@ -1142,7 +1158,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onMouseLeave={clearLongPress}
                   onTouchStart={() => startLongPress(nft)}
                   onTouchEnd={clearLongPress}
-                  className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                  className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                 >
                   <div className="aspect-square bg-gray-50 dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1157,48 +1173,30 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       loading="lazy"
                     />
-                  </div>
-                  <div className="p-5 flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
-                        {nft.name}
-                      </h3>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">
-                        {nft.collection}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-0.5 relative">
+
+                    <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2">
                       <button
                         onClick={(e) => toggleFavorite(e, nft)}
-                        className={`p-2 rounded-full transition-all active:scale-90 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500 hover:text-orange-500'}`}
+                        className={`p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                       >
-                        <Heart className={`w-3.5 h-3.5 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
+                        <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
                       </button>
                       <button
                         onClick={(e) => toggleMenu(e, i)}
-                        className={`p-2 rounded-full transition-all active:scale-90 ${openMenuId === i ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500 hover:text-orange-500'}`}
+                        className={`p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${openMenuId === i ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                       >
-                        <Settings className={`w-3.5 h-3.5 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
+                        <Settings className={`w-4 h-4 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
                       </button>
-
-                      {openMenuId === i && (
-                        <div ref={menuRef} onClick={(e) => e.stopPropagation()} className="absolute bottom-11 right-0 z-40 w-40 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 p-1.5 animate-in zoom-in-95 duration-200">
-                          <button onClick={(e) => openSellModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-2"><DollarSign className="w-3.5 h-3.5 text-green-500" /><span>Sell</span></div>
-                          </button>
-                          <button onClick={(e) => openSendModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-2"><Send className="w-3.5 h-3.5 text-blue-500" /><span>Send</span></div>
-                          </button>
-                          <button onClick={(e) => openMoveModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-2"><Folder className="w-3.5 h-3.5 text-orange-500" /><span>Move to</span></div>
-                          </button>
-                          <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-1" />
-                          <button onClick={(e) => openBurnModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                            <div className="flex items-center gap-2"><Flame className="w-3.5 h-3.5" /><span>Burn</span></div>
-                          </button>
-                        </div>
-                      )}
+                      {renderContextMenu(i, nft)}
                     </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
+                      {nft.name}
+                    </h3>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">
+                      {nft.collection}
+                    </p>
                   </div>
                 </div>
               );
@@ -1243,7 +1241,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onMouseLeave={clearLongPress}
                   onTouchStart={() => startLongPress(nft)}
                   onTouchEnd={clearLongPress}
-                  className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                  className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                 >
                   <div className="aspect-square bg-gray-50 dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1258,47 +1256,30 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       loading="lazy"
                     />
-                  </div>
-                  <div className="p-5 flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors">
-                        {title}
-                      </h3>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">
-                        {subtitle}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-0.5 relative">
+
+                    <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2">
                       <button
                         onClick={(e) => toggleFavorite(e, nft)}
-                        className={`p-2 rounded-full transition-all active:scale-90 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500 hover:text-orange-500'}`}
+                        className={`p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                       >
-                        <Heart className={`w-3.5 h-3.5 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
+                        <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
                       </button>
                       <button
                         onClick={(e) => toggleMenu(e, i)}
-                        className={`p-2 rounded-full transition-all active:scale-90 ${openMenuId === i ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500 hover:text-orange-500'}`}
+                        className={`p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${openMenuId === i ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                       >
-                        <Settings className={`w-3.5 h-3.5 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
+                        <Settings className={`w-4 h-4 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
                       </button>
-                      {openMenuId === i && (
-                        <div ref={menuRef} onClick={(e) => e.stopPropagation()} className="absolute bottom-11 right-0 z-40 w-40 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 p-1.5 animate-in zoom-in-95 duration-200">
-                          <button onClick={(e) => openSellModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-2"><DollarSign className="w-3.5 h-3.5 text-green-500" /><span>Sell</span></div>
-                          </button>
-                          <button onClick={(e) => openSendModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-2"><Send className="w-3.5 h-3.5 text-blue-500" /><span>Send</span></div>
-                          </button>
-                          <button onClick={(e) => openMoveModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-2"><Folder className="w-3.5 h-3.5 text-orange-500" /><span>Move to</span></div>
-                          </button>
-                          <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-1" />
-                          <button onClick={(e) => openBurnModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                            <div className="flex items-center gap-2"><Flame className="w-3.5 h-3.5" /><span>Burn</span></div>
-                          </button>
-                        </div>
-                      )}
+                      {renderContextMenu(i, nft)}
                     </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
+                      {title}
+                    </h3>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">
+                      {subtitle}
+                    </p>
                   </div>
                 </div>
               );
@@ -1331,30 +1312,17 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2">
                 <button
                   onClick={(e) => { e.stopPropagation(); /* Badges are just placeholders for now */ }}
-                  className="p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:text-orange-500 transition-all active:scale-90"
+                  className="p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg bg-black/40 text-white/70 hover:text-white"
                 >
                   <Heart className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={(e) => toggleMenu(e, i)}
-                  className="p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-orange-500 transition-all active:scale-90"
+                  onClick={(e) => { e.stopPropagation(); /* Placeholder Settings */ }}
+                  className="p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg bg-black/40 text-white/70 hover:text-white"
                 >
-                  <Settings className={`w-4 h-4 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
+                  <Settings className="w-4 h-4" />
                 </button>
               </div>
-              {openMenuId === i && (
-                <div ref={menuRef} onClick={(e) => e.stopPropagation()} className="absolute bottom-12 right-3 z-40 w-40 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 p-1.5 animate-in zoom-in-95 duration-200">
-                  <button onClick={(e) => { e.stopPropagation(); alert('Mock listing'); }} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                    <div className="flex items-center gap-2"><DollarSign className="w-3.5 h-3.5 text-green-500" /><span>Sell</span></div>
-                  </button>
-                  <button className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                    <div className="flex items-center gap-2"><Send className="w-3.5 h-3.5 text-blue-500" /><span>Send</span></div>
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); alert('Mock burn'); }} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                    <div className="flex items-center gap-2"><Flame className="w-3.5 h-3.5" /><span>Burn</span></div>
-                  </button>
-                </div>
-              )}
               <img
                 src={`https://picsum.photos/seed/${activeTab}-${i}/400/400`}
                 alt={`${activeTab} Placeholder`}
@@ -1406,7 +1374,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     onMouseLeave={clearLongPress}
                     onTouchStart={() => startLongPress(nft)}
                     onTouchEnd={clearLongPress}
-                    className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
+                    className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
                     <div className="aspect-square bg-gray-100 dark:bg-zinc-800/50 overflow-hidden relative">
                       {selectedNfts.some(n => n.identifier === nft.identifier) && (
                         <div className="absolute top-3 left-3 z-30 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#1a1a1a] animate-in zoom-in-50 duration-200">
@@ -1419,44 +1387,26 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                         mimeType={nft.mimeType}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
-                    </div>
-                    <div className="p-5 flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">{nft.name}</h3>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">{nft.collection}</p>
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-0.5 relative">
+
+                      <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2">
                         <button
                           onClick={(e) => toggleFavorite(e, nft)}
-                          className="p-2 bg-orange-500 text-white rounded-full transition-all active:scale-90"
+                          className="p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg bg-orange-500 text-white"
                         >
-                          <Heart className="w-3.5 h-3.5 fill-current" />
+                          <Heart className="w-4 h-4 fill-current" />
                         </button>
                         <button
                           onClick={(e) => toggleMenu(e, i)}
-                          className={`p-2 rounded-full transition-all active:scale-90 ${openMenuId === i ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500 hover:text-orange-500'}`}
+                          className={`p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${openMenuId === i ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                         >
-                          <Settings className={`w-3.5 h-3.5 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
+                          <Settings className={`w-4 h-4 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
                         </button>
-
-                        {openMenuId === i && (
-                          <div ref={menuRef} onClick={(e) => e.stopPropagation()} className="absolute bottom-11 right-0 z-40 w-40 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 p-1.5 animate-in zoom-in-95 duration-200">
-                            <button onClick={(e) => openSellModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                              <div className="flex items-center gap-2"><DollarSign className="w-3.5 h-3.5 text-green-500" /><span>Sell</span></div>
-                            </button>
-                            <button onClick={(e) => openSendModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                              <div className="flex items-center gap-2"><Send className="w-3.5 h-3.5 text-blue-500" /><span>Send</span></div>
-                            </button>
-                            <button onClick={(e) => openMoveModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                              <div className="flex items-center gap-2"><Folder className="w-3.5 h-3.5 text-orange-500" /><span>Move to</span></div>
-                            </button>
-                            <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-1" />
-                            <button className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                              <div className="flex items-center gap-2"><Flame className="w-3.5 h-3.5" /><span>Burn</span></div>
-                            </button>
-                          </div>
-                        )}
+                        {renderContextMenu(i, nft)}
                       </div>
+                    </div>
+                    <div className="p-5">
+                      <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">{nft.name}</h3>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">{nft.collection}</p>
                     </div>
                   </div>
                 ))}
@@ -1496,7 +1446,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onMouseLeave={clearLongPress}
                   onTouchStart={() => startLongPress(nft)}
                   onTouchEnd={clearLongPress}
-                  className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
+                  className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
                   <div className="aspect-square bg-gray-100 dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
                       <div className="absolute top-3 left-3 z-30 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#1a1a1a] animate-in zoom-in-50 duration-200">
@@ -1509,44 +1459,26 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       mimeType={nft.mimeType}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                  </div>
-                  <div className="p-5 flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">{nft.name}</h3>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">{nft.collection}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-0.5 relative">
+
+                    <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2">
                       <button
                         onClick={(e) => toggleFavorite(e, nft)}
-                        className={`p-2 rounded-full transition-all active:scale-90 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500 hover:text-orange-500'}`}
+                        className={`p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                       >
-                        <Heart className={`w-3.5 h-3.5 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
+                        <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
                       </button>
                       <button
                         onClick={(e) => toggleMenu(e, i)}
-                        className={`p-2 rounded-full transition-all active:scale-90 ${openMenuId === i ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500 hover:text-orange-500'}`}
+                        className={`p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${openMenuId === i ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                       >
-                        <Settings className={`w-3.5 h-3.5 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
+                        <Settings className={`w-4 h-4 transition-transform duration-500 ${openMenuId === i ? 'rotate-180' : 'group-hover:rotate-45'}`} />
                       </button>
-
-                      {openMenuId === i && (
-                        <div ref={menuRef} onClick={(e) => e.stopPropagation()} className="absolute bottom-11 right-0 z-40 w-40 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 p-1.5 animate-in zoom-in-95 duration-200">
-                          <button onClick={(e) => openSellModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-2"><DollarSign className="w-3.5 h-3.5 text-green-500" /><span>Sell</span></div>
-                          </button>
-                          <button onClick={(e) => openSendModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-2"><Send className="w-3.5 h-3.5 text-blue-500" /><span>Send</span></div>
-                          </button>
-                          <button onClick={(e) => openMoveModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                            <div className="flex items-center gap-2"><Folder className="w-3.5 h-3.5 text-orange-500" /><span>Move to</span></div>
-                          </button>
-                          <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-1" />
-                          <button onClick={(e) => openBurnModal(e, nft)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                            <div className="flex items-center gap-2"><Flame className="w-3.5 h-3.5" /><span>Burn</span></div>
-                          </button>
-                        </div>
-                      )}
+                      {renderContextMenu(i, nft)}
                     </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">{nft.name}</h3>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">{nft.collection}</p>
                   </div>
                 </div>
               ))
@@ -1582,54 +1514,88 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             <div
               key={folder.id}
               onClick={() => handleFolderClick(folder)}
-              className="group relative cursor-pointer p-6 rounded-[2.5rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2"
+              className="group relative cursor-pointer p-6 rounded-[2.5rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98]"
             >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
+              <div className="flex items-center mb-6">
+                <div className="flex items-center space-x-4 min-w-0">
+                  <div className="w-12 h-12 flex-shrink-0 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
                     {folder.id === 'favorites' ? <Heart className="w-5 h-5" /> : <Folder className="w-5 h-5" />}
                   </div>
-                  <div>
-                    <h3 className="text-sm font-black dark:text-white text-gray-900">{folder.name}</h3>
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-black dark:text-white text-gray-900 truncate pr-2">{folder.name}</h3>
                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{folder.itemCount} Items</p>
                   </div>
                 </div>
-                {folder.id !== 'favorites' && (
-                  <div className="relative">
-                    <button onClick={(e) => toggleFolderMenu(e, folder.id)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-colors relative z-20">
-                      <Settings className={`w-4 h-4 text-gray-400 transition-transform ${openFolderMenuId === folder.id ? 'rotate-90' : ''}`} />
-                    </button>
-                    {openFolderMenuId === folder.id && (
-                      <div ref={folderMenuRef} onClick={(e) => e.stopPropagation()} className="absolute top-10 right-0 z-[100] w-36 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 p-1.5 animate-in zoom-in-95 duration-200">
-                        <button onClick={(e) => handleShareFolder(e, folder)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                          <div className="flex items-center gap-2"><Share2 className="w-3.5 h-3.5 text-blue-500" /><span>Share</span></div>
-                        </button>
-                        <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-1" />
-                        <button onClick={(e) => handleDeleteFolder(e, folder.id)} className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                          <div className="flex items-center gap-2"><Trash2 className="w-3.5 h-3.5" /><span>Delete</span></div>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 relative">
+              <div className="aspect-square bg-gray-50 dark:bg-zinc-800/20 overflow-hidden relative p-4">
                 {folder.previewImages.length > 0 ? (
-                  folder.previewImages.map((img, idx) => (
-                    <div key={idx} className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5 border border-gray-50 dark:border-white/5">
-                      <NftMedia
-                        src={img.startsWith('http') ? img : `https://picsum.photos/seed/${img}/200/200`}
-                        alt="Preview"
-                        /* mimeType is not available for purely preview strings, handled loosely */
-                        className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                      />
-                    </div>
-                  ))
+                  folder.previewImages.slice(0, 3).reverse().map((img, idx, arr) => {
+                    const isTop = idx === arr.length - 1;
+                    const rotation = isTop ? 'rotate-0' : idx === 0 ? '-rotate-6' : 'rotate-6';
+                    const scale = isTop ? 'scale-100' : idx === 0 ? 'scale-90' : 'scale-95';
+                    const zIndex = isTop ? 'z-20' : idx === 0 ? 'z-0' : 'z-10';
+                    const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
+
+                    return (
+                      <div key={idx} className={`absolute inset-4 rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
+                        <NftMedia
+                          src={img.startsWith('http') ? img : `https://picsum.photos/seed/${img}/200/200`}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    );
+                  })
                 ) : (
-                  Array.from({ length: 4 }).map((_, idx) => (
-                    <div key={`empty-${idx}`} className="aspect-square rounded-xl bg-gray-100/50 dark:bg-white/5 border border-dashed border-gray-200 dark:border-white/10" />
-                  ))
+                  <div className="absolute inset-8 rounded-2xl bg-gray-100/50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 flex items-center justify-center">
+                    <Folder className="w-8 h-8 text-gray-300 dark:text-white/20" />
+                  </div>
+                )}
+                {folder.itemCount > 0 && (
+                  <div className="absolute top-4 right-4 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
+                    {folder.itemCount} Items
+                  </div>
+                )}
+
+                {folder.id !== 'favorites' && (
+                  <div className="absolute bottom-4 right-4 z-30">
+                    <button
+                      onClick={(e) => toggleFolderMenu(e, folder.id)}
+                      className={`p-3 md:p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${openFolderMenuId === folder.id ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
+                    >
+                      <Settings className={`w-4 h-4 transition-transform duration-500 ${openFolderMenuId === folder.id ? 'rotate-180' : 'group-hover:rotate-45'}`} />
+                    </button>
+
+                    {openFolderMenuId === folder.id && (
+                      mounted && window.innerWidth < 768 ? createPortal(
+                        <>
+                          <div className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm md:hidden animate-in fade-in duration-200" onClick={(e) => { e.stopPropagation(); setOpenFolderMenuId(null); }} />
+                          <div ref={folderMenuRef} onClick={(e) => e.stopPropagation()} className="fixed md:absolute bottom-0 md:top-10 left-0 right-0 md:left-auto md:right-0 z-[70] w-full md:w-40 bg-white dark:bg-[#252525] rounded-t-[2rem] md:rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-2xl border-t md:border border-gray-100 dark:border-white/10 p-5 md:p-1.5 animate-in slide-in-from-bottom-full md:zoom-in-95 duration-300">
+                            <div className="w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full mx-auto mb-6 md:hidden" />
+                            <button onClick={(e) => handleShareFolder(e, folder)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all">
+                              <div className="flex items-center gap-4 md:gap-2"><Share2 className="w-5 h-5 md:w-4 md:h-4 text-blue-500" /><span>Share</span></div>
+                            </button>
+                            <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-2 md:my-1" />
+                            <button onClick={(e) => handleDeleteFolder(e, folder.id)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 active:scale-95 transition-all">
+                              <div className="flex items-center gap-4 md:gap-2"><Trash2 className="w-5 h-5 md:w-3.5 md:h-3.5" /><span>Delete</span></div>
+                            </button>
+                          </div>
+                        </>,
+                        document.body
+                      ) : (
+                        <div ref={folderMenuRef} onClick={(e) => e.stopPropagation()} className="absolute bottom-12 right-0 z-50 w-40 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 p-1.5 animate-in zoom-in-95 duration-200">
+                          <button onClick={(e) => handleShareFolder(e, folder)} className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all">
+                            <div className="flex items-center gap-2"><Share2 className="w-4 h-4 text-blue-500" /><span>Share</span></div>
+                          </button>
+                          <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-1" />
+                          <button onClick={(e) => handleDeleteFolder(e, folder.id)} className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 active:scale-95 transition-all">
+                            <div className="flex items-center gap-2"><Trash2 className="w-3.5 h-3.5" /><span>Delete</span></div>
+                          </button>
+                        </div>
+                      )
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -1674,7 +1640,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         {viewMode === 'Collectibles' ? (
           <div className="space-y-10">
             {/* Horizontal Tabs */}
-            <div className="flex items-center justify-center gap-8 border-b border-gray-100 dark:border-white/5 pb-2 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center justify-start md:justify-center gap-6 md:gap-8 border-b border-gray-100 dark:border-white/5 pb-2 px-1 md:px-0 overflow-x-auto scrollbar-hide no-scrollbar w-full">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -1700,17 +1666,20 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       {/* NFT Detail Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-500">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-3xl" onClick={() => setSelectedItem(null)}></div>
+        <div className="fixed inset-0 z-[300] flex items-end md:items-center justify-center p-0 md:p-10 animate-in fade-in duration-400">
+          <div className="absolute inset-0 bg-black/80 md:bg-black/90 backdrop-blur-md md:backdrop-blur-3xl" onClick={() => setSelectedItem(null)}></div>
 
-          <div className="relative w-full max-w-5xl bg-white dark:bg-[#121212] rounded-[3rem] shadow-[0_0_100px_rgba(249,115,22,0.15)] overflow-hidden border border-gray-100 dark:border-white/10 animate-in zoom-in-95 slide-in-from-bottom-10 duration-500 flex flex-col md:flex-row h-full max-h-[90vh]">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-[#121212] rounded-t-[2.5rem] md:rounded-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_0_100px_rgba(249,115,22,0.15)] overflow-hidden border-t md:border border-gray-100 dark:border-white/10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-10 duration-500 flex flex-col md:flex-row h-[92vh] md:h-[90vh] max-h-screen">
+
+            {/* Mobile Drag Indicator */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full md:hidden z-50 pointer-events-none"></div>
 
             {/* Close Button Mobile */}
             <button
               onClick={() => setSelectedItem(null)}
-              className="absolute top-6 right-6 z-50 p-3 bg-black/50 backdrop-blur-xl rounded-2xl text-white hover:bg-orange-500 transition-all md:hidden"
+              className="absolute top-4 right-4 z-50 p-2.5 bg-black/50 backdrop-blur-xl rounded-full text-white hover:bg-orange-500 transition-all md:hidden active:scale-95"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
 
             {/* Left Side: Large Image Preview */}
@@ -1823,10 +1792,31 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               {/* Action Footer - Fixed at bottom */}
               <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 flex flex-wrap sm:flex-nowrap items-center gap-3 z-50">
                 <button
-                  onClick={(e) => handleDownload(e, selectedItem.imageUrl, selectedItem.name || 'nft')}
-                  className="px-5 py-4 bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-200 rounded-2xl font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-orange-500/10 hover:text-orange-500 transition-all border border-gray-100 dark:border-white/10 group/dl"
+                  onClick={(e) => {
+                    setSelectedItem(null);
+                    setTimeout(() => openBurnModal(e, {
+                      identifier: selectedItem.identifier!,
+                      name: selectedItem.name!,
+                      collection: selectedItem.collection!,
+                      collectionName: selectedItem.collection!,
+                      imageUrl: selectedItem.imageUrl,
+                      originalImageUrl: selectedItem.originalImageUrl || null,
+                      type: selectedItem.type!,
+                      balance: selectedItem.balance
+                    }), 100);
+                  }}
+                  className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-red-500/20 group/burn"
+                  title="Burn Asset"
                 >
-                  <Download className="w-4 h-4 text-orange-500 group-hover/dl:scale-110 transition-transform" />
+                  <Flame className="w-5 h-5 group-hover/burn:scale-110 transition-transform" />
+                  <span>Burn</span>
+                </button>
+
+                <button
+                  onClick={(e) => handleDownload(e, selectedItem.imageUrl, selectedItem.name || 'nft')}
+                  className="flex-1 py-4 bg-slate-800 dark:bg-slate-700 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase md:normal-case tracking-wider md:tracking-normal flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-slate-800/20"
+                >
+                  <Download className="w-4 h-4 text-white" />
                   <span>Download</span>
                 </button>
 
@@ -1844,7 +1834,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl"
+                  className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-blue-500/20"
                 >
                   <Send className="w-4 h-4" />
                   <span>Send</span>
@@ -1868,26 +1858,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 >
                   <DollarSign className="w-4 h-4" />
                   <span>List</span>
-                </button>
-
-                <button
-                  onClick={(e) => {
-                    setSelectedItem(null);
-                    setTimeout(() => openBurnModal(e, {
-                      identifier: selectedItem.identifier!,
-                      name: selectedItem.name!,
-                      collection: selectedItem.collection!,
-                      collectionName: selectedItem.collection!,
-                      imageUrl: selectedItem.imageUrl,
-                      originalImageUrl: selectedItem.originalImageUrl || null,
-                      type: selectedItem.type!,
-                      balance: selectedItem.balance
-                    }), 100);
-                  }}
-                  className="p-4 bg-red-500/10 text-red-500 rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all border border-red-500/20 group/burn"
-                  title="Burn Asset"
-                >
-                  <Flame className="w-5 h-5 group-hover/burn:scale-110 transition-transform" />
                 </button>
               </div>
             </div>

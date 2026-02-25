@@ -71,7 +71,7 @@ const Header: React.FC<HeaderProps> = ({
           {isLoggedIn && (
             <button
               onClick={() => onNavigate(currentPage === 'home' ? 'tools' : 'home')}
-              className={`p-2.5 rounded-xl border transition-all ${currentPage === 'tools'
+              className={`p-2.5 rounded-xl border transition-all active:scale-95 ${currentPage === 'tools'
                 ? 'bg-brand-orange/10 border-brand-orange/20 text-brand-orange'
                 : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
@@ -81,13 +81,15 @@ const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
-          <button
-            onClick={toggleTheme}
-            className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
-            aria-label="Toggle Mode"
-          >
-            {isDarkMode ? <Sun className="w-5 h-5 text-brand-yellow" /> : <Moon className="w-5 h-5 text-slate-600" />}
-          </button>
+          {!isLoggedIn && (
+            <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-95"
+              aria-label="Toggle Mode"
+            >
+              {isDarkMode ? <Sun className="w-5 h-5 text-brand-yellow" /> : <Moon className="w-5 h-5 text-slate-600" />}
+            </button>
+          )}
 
           {!isLoggedIn ? (
             <button
@@ -101,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="flex items-center space-x-2 p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-brand-orange/50 transition-all"
+                className="flex items-center space-x-2 p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-brand-orange/50 transition-all active:scale-95"
               >
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-orange to-brand-yellow flex items-center justify-center">
                   <User className="w-4 h-4 text-black" />
@@ -110,7 +112,7 @@ const Header: React.FC<HeaderProps> = ({
               </button>
 
               {isMenuOpen && (
-                <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-[#0a0a0a] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 p-2 overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="absolute right-0 sm:right-0 -right-4 mt-3 w-[calc(100vw-2rem)] sm:w-64 max-w-sm bg-white dark:bg-[#0a0a0a] rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 p-2 overflow-hidden animate-in zoom-in-95 duration-200">
                   <div className="px-3 py-3 border-b border-slate-100 dark:border-white/5 mb-2 flex flex-col items-start">
                     <div className="text-sm font-black text-slate-900 dark:text-white truncate w-full">
                       {username}
@@ -124,14 +126,14 @@ const Header: React.FC<HeaderProps> = ({
                   </div>
                   <div className="px-3 py-1 text-[10px] font-black uppercase text-slate-400 tracking-widest">Assets</div>
                   <div className="space-y-1 mb-2 px-1">
-                    <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-transparent dark:border-white/5">
+                    <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-transparent dark:border-white/5 transition-colors group-active:bg-slate-100 dark:group-active:bg-white/10">
                       <div className="flex items-center space-x-2">
                         <Wallet2 className="w-4 h-4 text-brand-orange" />
                         <span className="text-xs font-bold">EGLD</span>
                       </div>
                       <span className="text-sm font-black text-slate-900 dark:text-white">{balances}</span>
                     </div>
-                    <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-transparent dark:border-white/5">
+                    <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-transparent dark:border-white/5 transition-colors group-active:bg-slate-100 dark:group-active:bg-white/10">
                       <div className="flex items-center space-x-2">
                         <Coins className="w-4 h-4 text-brand-yellow" />
                         <span className="text-xs font-bold">ONX</span>
@@ -143,8 +145,21 @@ const Header: React.FC<HeaderProps> = ({
                   </div>
                   <div className="h-px bg-slate-100 dark:bg-white/5 my-1" />
                   <button
+                    onClick={toggleTheme}
+                    className="w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 active:scale-[0.98] transition-all"
+                  >
+                    <div className="flex items-center space-x-3">
+                      {isDarkMode ? <Sun className="w-4 h-4 text-brand-yellow" /> : <Moon className="w-4 h-4 text-slate-500" />}
+                      <span>Theme</span>
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-2 py-1 rounded-md">
+                      {isDarkMode ? 'Dark' : 'Light'}
+                    </span>
+                  </button>
+                  <div className="h-px bg-slate-100 dark:bg-white/5 my-1" />
+                  <button
                     onClick={onLogout}
-                    className="w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                    className="w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 active:scale-[0.98] transition-all"
                   >
                     <LogOut className="w-4 h-4" /> <span>Logout</span>
                   </button>

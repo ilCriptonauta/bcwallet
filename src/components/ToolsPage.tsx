@@ -544,7 +544,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
           <div
             key={tool.id}
             onClick={() => setModalType(tool.id)}
-            className="group relative p-10 rounded-[2.5rem] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/5 cursor-pointer hover:shadow-2xl hover:shadow-brand-orange/10 transition-all hover:-translate-y-2 overflow-hidden"
+            className="group relative p-10 rounded-[2.5rem] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/5 cursor-pointer hover:shadow-2xl hover:shadow-brand-orange/10 transition-all hover:-translate-y-2 active:scale-[0.98] overflow-hidden"
           >
             <div className={`absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br ${tool.color} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity`} />
             <div className="relative z-10">
@@ -595,7 +595,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
                 return (
                   <div
                     key={col.id}
-                    className={`group flex items-center gap-5 px-6 py-5 rounded-2xl border transition-all ${isPending
+                    className={`group flex items-center gap-5 px-6 py-5 rounded-2xl border transition-all active:scale-[0.98] ${isPending
                       ? 'bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/10 opacity-80'
                       : 'bg-white dark:bg-zinc-900 border-slate-100 dark:border-white/5 hover:border-brand-orange/30 hover:shadow-lg hover:shadow-brand-orange/5'
                       }`}
@@ -649,7 +649,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={handleCloseModal}></div>
           <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 md:p-10 border dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <button onClick={handleCloseModal} className="absolute top-6 right-6 text-slate-400 hover:text-brand-orange transition-colors z-20"><X /></button>
+            <button onClick={handleCloseModal} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-slate-400 hover:text-brand-orange transition-colors z-20 active:scale-90"><X /></button>
             <h2 className="text-3xl font-black mb-8 flex items-center gap-3 sticky top-0 bg-white dark:bg-zinc-900 z-10 py-2">
               {modalType === 'collection' ? (
                 <><Layers className="text-brand-orange" /><span>New Collection</span></>

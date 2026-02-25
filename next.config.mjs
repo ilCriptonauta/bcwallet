@@ -42,6 +42,7 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   transpilePackages: ['@multiversx/sdk-dapp'],
+  turbopack: {},
   webpack: (config) => {
     config.cache = {
       type: 'memory',
@@ -57,7 +58,7 @@ const nextConfig = {
         'utf-8-validate': 'utf-8-validate',
       }
     );
-    
+
     return config;
   },
 };
