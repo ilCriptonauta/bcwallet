@@ -1669,7 +1669,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         <div className="fixed inset-0 z-[300] flex items-end md:items-center justify-center p-0 md:p-10 animate-in fade-in duration-400">
           <div className="absolute inset-0 bg-black/80 md:bg-black/90 backdrop-blur-md md:backdrop-blur-3xl" onClick={() => setSelectedItem(null)}></div>
 
-          <div className="relative w-full max-w-5xl bg-white dark:bg-[#121212] rounded-t-[2.5rem] md:rounded-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_0_100px_rgba(249,115,22,0.15)] overflow-hidden border-t md:border border-gray-100 dark:border-white/10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-10 duration-500 flex flex-col md:flex-row h-[92vh] md:h-[90vh] max-h-screen">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-[#121212] rounded-t-[2.5rem] md:rounded-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_0_100px_rgba(249,115,22,0.15)] overflow-hidden border-t md:border border-gray-100 dark:border-white/10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-10 duration-500 flex flex-col md:flex-row h-[92dvh] md:h-[90dvh] max-h-screen">
 
             {/* Mobile Drag Indicator */}
             <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full md:hidden z-50 pointer-events-none"></div>
@@ -1701,7 +1701,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
             {/* Right Side: Details & Actions */}
             <div className="w-full md:w-[55%] h-[60%] md:h-full flex flex-col bg-white dark:bg-[#121212] overflow-hidden">
-              <div className="flex-1 overflow-y-auto scrollbar-hide p-8 md:p-12 space-y-10 pb-32">
+              <div className="flex-1 overflow-y-auto scrollbar-hide p-8 md:p-12 space-y-10">
 
                 {/* Header Info */}
                 <div className="flex items-start justify-between">
@@ -1790,7 +1790,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
 
               {/* Action Footer - Fixed at bottom */}
-              <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 flex flex-wrap sm:flex-nowrap items-center gap-3 z-50">
+              <div className="shrink-0 p-6 pb-8 md:p-8 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3 z-50">
                 <button
                   onClick={(e) => {
                     setSelectedItem(null);
