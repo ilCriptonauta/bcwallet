@@ -13,13 +13,13 @@ const Splash: React.FC<SplashProps> = ({ onLogin }) => {
     <div className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[#0c0c0e] text-white">
       {/* Subtle Background Glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
-        <div className="w-[150vw] h-[150vh] sm:w-[800px] sm:h-[800px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-orange/15 via-brand-orange/0 to-transparent" />
+        <div className="w-[120vw] h-[120vw] sm:w-[600px] sm:h-[600px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-orange/5 via-brand-orange/0 to-transparent" />
       </div>
 
       <div className="z-10 flex flex-col items-center animate-in fade-in zoom-in-95 duration-1000 ease-out">
         {/* Large Logo */}
         <div className="relative mb-8 group flex items-center justify-center">
-          <div className="absolute -inset-32 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-orange/40 via-brand-yellow/10 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute -inset-20 sm:-inset-32 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-orange/30 via-brand-orange/0 to-transparent opacity-100 transition-opacity duration-700" />
           <img
             src="/bacon-icon.png"
             alt="Bacon Logo"
