@@ -1809,7 +1809,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   title="Burn Asset"
                 >
                   <Flame className="w-5 h-5 group-hover/burn:scale-110 transition-transform" />
-                  <span>Burn</span>
+                  <span className="hidden md:inline">Burn</span>
                 </button>
 
                 <button
@@ -1817,7 +1817,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   className="flex-1 py-4 bg-slate-800 dark:bg-slate-700 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase md:normal-case tracking-wider md:tracking-normal flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-slate-800/20"
                 >
                   <Download className="w-4 h-4 text-white" />
-                  <span>Download</span>
+                  <span className="hidden md:inline">Download</span>
                 </button>
 
                 <button
@@ -1837,7 +1837,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-blue-500/20"
                 >
                   <Send className="w-4 h-4" />
-                  <span>Send</span>
+                  <span className="hidden md:inline">Send</span>
                 </button>
 
                 <button
@@ -1857,7 +1857,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   className="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-orange-500/20"
                 >
                   <DollarSign className="w-4 h-4" />
-                  <span>List</span>
+                  <span className="hidden md:inline">List</span>
                 </button>
               </div>
             </div>
