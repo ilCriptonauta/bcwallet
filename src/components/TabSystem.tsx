@@ -2130,9 +2130,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </div>
 
             <div className="flex items-center gap-2">
-              <button onClick={() => setIsMoveModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-[1.5rem] font-black text-sm hover:scale-105 transition-all">
-                <Folder className="w-4 h-4" />
-                <span>Move to...</span>
+              <button onClick={() => setIsMoveModalOpen(true)} className="flex items-center justify-center px-8 py-3 bg-orange-500 text-white rounded-[1.5rem] font-black text-sm md:text-base hover:scale-105 transition-all shadow-xl shadow-orange-500/20">
+                <span>Move</span>
               </button>
             </div>
           </div>
