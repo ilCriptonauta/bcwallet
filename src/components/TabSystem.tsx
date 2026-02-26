@@ -1992,13 +1992,13 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       <Zap className="w-5 h-5 text-gray-900 fill-current" />
                     </div>
                     <div>
-                      <span className="block text-sm font-black dark:text-white">BUY NOW</span>
+                      <span className="block text-sm font-black dark:text-white">SELL</span>
                       <span className="block text-[10px] text-orange-500 font-bold uppercase tracking-widest">Fixed Price Listing</span>
                     </div>
                   </div>
                   <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                    <span className="text-[10px] text-green-500 font-black uppercase tracking-widest">Verified Marketplace</span>
+                    <span className="text-[10px] text-green-500 font-black uppercase tracking-widest">OOX</span>
                   </div>
                 </div>
 
