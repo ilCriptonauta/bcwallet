@@ -46,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={`${plusJakarta.variable} dark`}>
-      <body className="antialiased selection:bg-brand-orange/30 min-h-screen">
+      <body className="antialiased selection:bg-brand-orange/30 min-h-screen bg-slate-50 dark:bg-[#0c0c0e]">
         <InitAppWrapper>
           <Suspense>
             {children}

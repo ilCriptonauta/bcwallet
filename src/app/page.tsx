@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import Hero from '@/components/Hero';
 import PromoBanner from '@/components/PromoBanner';
 import Splash from '@/components/Splash';
 import TabSystem from '@/components/TabSystem';
@@ -85,7 +84,6 @@ export default function Home() {
       <main className="flex-grow pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         {currentPage === 'home' ? (
           <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <Hero />
             <TabSystem isFullVersion={isPro} />
             {!isPro && <PromoBanner onUpgrade={() => setIsPro(true)} />}
           </div>

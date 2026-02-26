@@ -17,8 +17,14 @@ const Splash: React.FC<SplashProps> = ({ onLogin }) => {
       </div>
 
       <div className="z-10 flex flex-col items-center animate-in fade-in zoom-in-95 duration-1000 ease-out">
+        {/* Powered By Badge */}
+        <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-brand-orange/10 border border-brand-orange/20 mb-16 animate-bounce">
+          <span className="w-2 h-2 rounded-full bg-brand-orange"></span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange">Powered by MultiversX</span>
+        </div>
+
         {/* Large Logo */}
-        <div className="relative mb-8 group flex items-center justify-center">
+        <div className="relative mb-16 group flex items-center justify-center">
           <div className="absolute -inset-20 sm:-inset-32 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-orange/30 via-brand-orange/0 to-transparent opacity-100 transition-opacity duration-700" />
           <img
             src="/bacon-icon.png"
@@ -30,12 +36,13 @@ const Splash: React.FC<SplashProps> = ({ onLogin }) => {
         {/* Name */}
         <div className="text-center mb-12">
           <h1 className="text-6xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-            Bacon
+            Bacon Wallet
           </h1>
-          <p className="text-brand-orange font-bold uppercase tracking-[0.4em] text-xs mt-2 opacity-80">
-            Let&apos;s Cook NFTs
+          <p className="text-brand-orange font-bold uppercase tracking-[0.4em] text-xs mt-2 opacity-80 max-w-sm mx-auto leading-relaxed">
+            manage and create <span className="text-white">NFTs</span>
           </p>
         </div>
+
 
         {/* Login Button */}
         <button
