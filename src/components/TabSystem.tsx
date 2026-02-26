@@ -1015,7 +1015,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onTouchEnd={clearLongPress}
                   className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                 >
-                  <div className="aspect-square bg-gray-50 dark:bg-zinc-800/50 overflow-hidden relative">
+                  <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
                       <div className="absolute top-3 left-3 z-30 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#1a1a1a] animate-in zoom-in-50 duration-200">
                         <Zap className="w-3 h-3 text-white fill-current" />
@@ -1104,7 +1104,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     onClick={() => handleCollectionClick(item.id)}
                     className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2"
                   >
-                    <div className="aspect-square bg-gray-50 dark:bg-zinc-800/30 overflow-hidden relative p-4">
+                    <div className="aspect-square bg-transparent dark:bg-zinc-800/30 overflow-hidden relative p-4">
                       {item.items.slice(0, 3).reverse().map((nft, idx, arr) => {
                         const isTop = idx === arr.length - 1;
                         const rotation = isTop ? 'rotate-0' : idx === 0 ? '-rotate-6' : 'rotate-6';
@@ -1157,7 +1157,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onTouchEnd={clearLongPress}
                   className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                 >
-                  <div className="aspect-square bg-gray-50 dark:bg-zinc-800/50 overflow-hidden relative">
+                  <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
                       <div className="absolute top-3 left-3 z-30 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#1a1a1a] animate-in zoom-in-50 duration-200">
                         <Zap className="w-3 h-3 text-white fill-current" />
@@ -1240,7 +1240,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onTouchEnd={clearLongPress}
                   className={`group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                 >
-                  <div className="aspect-square bg-gray-50 dark:bg-zinc-800/50 overflow-hidden relative">
+                  <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
                       <div className="absolute top-3 left-3 z-30 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#1a1a1a] animate-in zoom-in-50 duration-200">
                         <Zap className="w-3 h-3 text-white fill-current" />
@@ -1604,8 +1604,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 space-y-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c0e]">
+      <div className="max-w-7xl mx-auto px-4 pb-8 md:pb-12 space-y-12">
         {/* Navigation & Header */}
         <div className="flex flex-col items-center justify-center gap-6">
           <div className="flex flex-col items-center space-y-4">
