@@ -18,6 +18,12 @@ type TabId = 'NFTs' | 'Chubby' | 'OnionXCards';
 
 const OOX_CONTRACT_ADDRESS = "erd1qqqqqqqqqqqqqpgqwp73w2a9eyzs64eltupuz3y3hv798vlv899qrjnflg";
 
+const OOX_PAYMENT_TOKENS = [
+  { identifier: 'EGLD', ticker: 'EGLD', decimals: 18 },
+  { identifier: 'USDC-c76f1f', ticker: 'USDC', decimals: 6 },
+  { identifier: 'ONX-3e51c8', ticker: 'ONX', decimals: 18 },
+];
+
 interface SelectedItem {
   id: number;
   tab: TabId | 'FolderItem';
@@ -85,6 +91,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [burnQuantity, setBurnQuantity] = useState('1');
   const [sellPrice, setSellPrice] = useState('');
   const [selectedPaymentToken, setSelectedPaymentToken] = useState('EGLD');
+  const [userTokens, setUserTokens] = useState<{ identifier: string; balance: string }[]>([]);
   const [recipient, setRecipient] = useState('');
   const [sendQuantity, setSendQuantity] = useState('1');
   const [folderTitle, setFolderTitle] = useState('');
@@ -347,6 +354,16 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     setSelectedPaymentToken('EGLD');
     setIsSellModalOpen(true);
     setOpenMenuId(null);
+
+    // Fetch user's fungible tokens to validate payment token ownership
+    if (walletAddress) {
+      fetch(`https://api.multiversx.com/accounts/${walletAddress}/tokens?size=100`)
+        .then(res => res.json())
+        .then((tokens: { identifier: string; balance: string }[]) => {
+          setUserTokens(tokens);
+        })
+        .catch(() => setUserTokens([]));
+    }
   };
 
   const handleSellNft = async () => {
@@ -358,7 +375,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         .join('');
 
       const priceBN = new BigNumber(sellPrice);
-      const decimals = selectedPaymentToken === 'USDC-c7723f' ? 6 : 18;
+      const tokenConfig = OOX_PAYMENT_TOKENS.find(t => t.identifier === selectedPaymentToken);
+      const decimals = tokenConfig?.decimals ?? 18;
       const priceRaw = priceBN.times(new BigNumber(10).pow(decimals)).toFixed(0);
       let priceHex = BigInt(priceRaw).toString(16);
       if (priceHex.length % 2 !== 0) priceHex = '0' + priceHex;
@@ -2020,9 +2038,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                           onChange={(e) => setSelectedPaymentToken(e.target.value)}
                           className="bg-gray-200 dark:bg-zinc-800 border-none rounded-xl text-xs font-black py-2 px-3 focus:ring-0 cursor-pointer dark:text-white hover:bg-orange-500 hover:text-gray-900 transition-colors"
                         >
-                          <option value="EGLD">EGLD</option>
-                          <option value="USDC-c7723f">USDC</option>
-                          <option value="ONX-3e51c8">ONX</option>
+                          {OOX_PAYMENT_TOKENS.map((t) => (
+                            <option key={t.identifier} value={t.identifier}>{t.ticker}</option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -2032,14 +2050,29 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
             </div>
 
-            <button
-              onClick={handleSellNft}
-              disabled={!sellPrice}
-              className="w-full py-5 bg-gradient-to-r from-orange-500 to-yellow-500 text-gray-900 font-black rounded-3xl shadow-2xl shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
-            >
-              <span>List Now</span>
-              <DollarSign className="w-5 h-5" />
-            </button>
+            {(() => {
+              const isEgld = selectedPaymentToken === 'EGLD';
+              const hasToken = isEgld || userTokens.some(t => t.identifier === selectedPaymentToken && BigInt(t.balance) > 0n);
+              const canList = !!sellPrice && hasToken;
+              return (
+                <>
+                  {!hasToken && !isEgld && (
+                    <div className="flex items-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-2xl mb-3">
+                      <Lock className="w-4 h-4 text-red-500 flex-shrink-0" />
+                      <p className="text-xs text-red-500 font-bold">The selected token is not present in your wallet.</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={handleSellNft}
+                    disabled={!canList}
+                    className="w-full py-5 bg-gradient-to-r from-orange-500 to-yellow-500 text-gray-900 font-black rounded-3xl shadow-2xl shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+                  >
+                    <span>List Now</span>
+                    <DollarSign className="w-5 h-5" />
+                  </button>
+                </>
+              );
+            })()}
             <p className="text-[10px] text-gray-500 font-bold text-center mt-6 uppercase tracking-widest">Powered by <a href="https://oox.art" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">oox.art</a></p>
           </div>
         </div>
