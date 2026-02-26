@@ -99,6 +99,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [nftToMove, setNftToMove] = useState<NormalizedNft | null>(null);
+  const [collectionFloorPrice, setCollectionFloorPrice] = useState<string | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const isLongPressActive = useRef(false);
 
@@ -611,7 +612,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         <div ref={menuRef} onClick={(e) => e.stopPropagation()} className="fixed md:absolute bottom-0 md:bottom-12 left-0 right-0 md:left-auto md:-right-2 z-[70] w-full md:w-44 bg-white dark:bg-[#252525] rounded-t-[2rem] md:rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-2xl border-t md:border border-gray-100 dark:border-white/10 p-5 md:p-1.5 animate-in slide-in-from-bottom-full md:slide-in-from-bottom-2 md:zoom-in-95 duration-300">
           <div className="w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full mx-auto mb-6 md:hidden" />
           <button onClick={(e) => openSellModal(e, nft)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all">
-            <div className="flex items-center gap-4 md:gap-2"><DollarSign className="w-5 h-5 md:w-4 md:h-4 text-green-500" /><span>Sell Asset</span></div>
+            <div className="flex items-center gap-4 md:gap-2"><DollarSign className="w-5 h-5 md:w-4 md:h-4 text-green-500" /><span>List on OOX</span></div>
           </button>
           <button onClick={(e) => openSendModal(e, nft)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all">
             <div className="flex items-center gap-4 md:gap-2"><Send className="w-5 h-5 md:w-4 md:h-4 text-blue-500" /><span>Send</span></div>
@@ -829,6 +830,18 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
   const handleCollectionClick = (collectionId: string) => {
     setActiveCollectionId(collectionId);
+    setCollectionFloorPrice(null);
+    fetch(`https://api.oox.art/collections/${collectionId}/auction/stats`)
+      .then(res => res.json())
+      .then((data: { minPrice?: string; activeAuctions?: number }) => {
+        if (data.minPrice && data.activeAuctions && data.activeAuctions > 0) {
+          const floor = new BigNumber(data.minPrice).dividedBy(new BigNumber(10).pow(18));
+          setCollectionFloorPrice(floor.toFixed(floor.lt(1) ? 4 : 2));
+        } else {
+          setCollectionFloorPrice(null);
+        }
+      })
+      .catch(() => setCollectionFloorPrice(null));
   };
 
   const handleNftClick = (index: number, nft: NormalizedNft) => {
@@ -1019,6 +1032,15 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   {collectionItems.length} assets
                 </p>
               </div>
+              {collectionFloorPrice && (
+                <div className="ml-auto px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center gap-2">
+                  <Zap className="w-3.5 h-3.5 text-orange-500" />
+                  <div>
+                    <p className="text-[9px] text-orange-500 font-black uppercase tracking-widest leading-none">Floor</p>
+                    <p className="text-sm font-black text-orange-500 leading-tight">{collectionFloorPrice} EGLD</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
