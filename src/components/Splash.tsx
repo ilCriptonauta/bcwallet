@@ -47,9 +47,9 @@ const Splash: React.FC<SplashProps> = ({ onLogin }) => {
         {/* Login Button */}
         <button
           onClick={onLogin}
-          className="group relative flex items-center space-x-3 bg-white text-black px-12 py-5 rounded-2xl font-black text-lg hover:bg-brand-orange hover:text-black transition-all active:scale-95 shadow-xl shadow-brand-orange/10"
+          className="group relative flex items-center space-x-2 bg-white text-black px-6 py-3 rounded-xl font-bold text-sm hover:bg-brand-orange hover:text-black transition-all active:scale-95 shadow-md shadow-brand-orange/10"
         >
-          <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          <LogIn className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           <span>Login with Wallet</span>
         </button>
       </div>
