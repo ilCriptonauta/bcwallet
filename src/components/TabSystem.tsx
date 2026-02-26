@@ -1806,7 +1806,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-red-500/20 group/burn"
                   title="Burn Asset"
                 >
-                  <Flame className="w-5 h-5 group-hover/burn:scale-110 transition-transform" />
+                  <Flame className="w-4 h-4 group-hover/burn:scale-110 transition-transform" />
                   <span className="hidden md:inline">Burn</span>
                 </button>
 
