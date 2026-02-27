@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import BigNumber from 'bignumber.js';
 import {
-  X, Folder, Plus, LayoutDashboard,
+  X, Folder, Plus, LayoutDashboard, Search,
   DollarSign, Send, Flame, Download, Heart, Settings,
   Zap, ArrowLeft, Lock, Trash2, Share2, Square, LayoutGrid,
   TrendingUp, TrendingDown, Clock
@@ -138,6 +138,7 @@ const NftActivityHistory = ({ identifier }: { identifier: string }) => {
 
 const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('Collectibles');
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<TabId>('Overview');
   const [activeFolder, setActiveFolder] = useState<UserFolder | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
@@ -902,7 +903,12 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
 
   const renderCollectibles = () => {
-    const allItems = nftsQuery.items;
+    const searchLower = searchQuery.toLowerCase();
+    const allItems = nftsQuery.items.filter(item =>
+      !searchQuery ||
+      (item.name && item.name.toLowerCase().includes(searchLower)) ||
+      (item.collection && item.collection.toLowerCase().includes(searchLower))
+    );
 
     // Grouping logic used by Overview and Collections
     const collectionsMap = new Map<string, NormalizedNft[]>();
@@ -969,7 +975,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 onMouseLeave={clearLongPress}
                 onTouchStart={() => startLongPress(nft)}
                 onTouchEnd={clearLongPress}
-                className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
               >
                 <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                   {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1053,7 +1059,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onMouseLeave={clearLongPress}
                   onTouchStart={() => startLongPress(nft)}
                   onTouchEnd={clearLongPress}
-                  className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                  className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                 >
                   <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1132,7 +1138,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <div
                 key={folder.id}
                 onClick={() => handleCollectionClick(folder.id)}
-                className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 transform-gpu will-change-transform"
+                className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 transform-gpu will-change-transform"
               >
                 <div className="aspect-square bg-transparent dark:bg-zinc-800/30 overflow-hidden relative p-2 md:p-4">
                   {folder.items.slice(0, 3).reverse().map((nft, idx, arr) => {
@@ -1200,7 +1206,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     onMouseLeave={clearLongPress}
                     onTouchStart={() => startLongPress(nft)}
                     onTouchEnd={clearLongPress}
-                    className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                    className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                   >
                     <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                       {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1304,7 +1310,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   key={item.id}
                   ref={attachRef}
                   onClick={() => handleCollectionClick(item.id)}
-                  className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 transform-gpu will-change-transform"
+                  className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 transform-gpu will-change-transform"
                 >
                   <div className="aspect-square bg-transparent dark:bg-zinc-800/30 overflow-hidden relative p-2 md:p-4">
                     {item.items.slice(0, 3).reverse().map((nft, idx, arr) => {
@@ -1357,7 +1363,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 onMouseLeave={clearLongPress}
                 onTouchStart={() => startLongPress(nft)}
                 onTouchEnd={clearLongPress}
-                className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
               >
                 <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                   {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1425,6 +1431,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   };
 
   const renderManagementView = () => {
+    const searchLower = searchQuery.toLowerCase();
+
     if (activeFolder) {
       if (activeFolder.id === "favorites") {
         return (
@@ -1443,21 +1451,21 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 </div>
               </div>
             </div>
-            {firebaseFavorites.length === 0 ? (
+            {firebaseFavorites.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchLower)) || (item.collection && item.collection.toLowerCase().includes(searchLower))).length === 0 ? (
               <div className="text-center py-20 bg-gray-50 dark:bg-white/5 rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-white/10">
                 <Heart className="w-12 h-12 text-gray-300 dark:text-white/20 mx-auto mb-4" />
                 <p className="text-sm font-bold text-gray-500">No favorites yet. Start hearting your NFTs!</p>
               </div>
             ) : (
               <div className={`grid ${isLargeGrid ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-6`}>
-                {firebaseFavorites.map((nft, i) => (
+                {firebaseFavorites.filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchLower)) || (item.collection && item.collection.toLowerCase().includes(searchLower))).map((nft, i) => (
                   <div key={nft.identifier} onClick={() => handleNftClick(i, nft)}
                     onMouseDown={() => startLongPress(nft)}
                     onMouseUp={clearLongPress}
                     onMouseLeave={clearLongPress}
                     onTouchStart={() => startLongPress(nft)}
                     onTouchEnd={clearLongPress}
-                    className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
+                    className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
                     <div className="aspect-square bg-gray-100 dark:bg-zinc-800/50 overflow-hidden relative">
                       {selectedNfts.some(n => n.identifier === nft.identifier) && (
                         <div className="absolute bottom-3 right-3 z-30 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#1a1a1a] animate-in zoom-in-50 duration-200">
@@ -1526,20 +1534,20 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </div>
           </div>
           <div className={`grid ${isLargeGrid ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-6`}>
-            {(firebaseFolderContents[activeFolder.id] || []).length === 0 ? (
+            {(firebaseFolderContents[activeFolder.id] || []).filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchLower)) || (item.collection && item.collection.toLowerCase().includes(searchLower))).length === 0 ? (
               <div className="col-span-full text-center py-20 bg-gray-50 dark:bg-white/5 rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-white/10">
                 <Folder className="w-12 h-12 text-gray-300 dark:text-white/20 mx-auto mb-4" />
-                <p className="text-sm font-bold text-gray-500">Folder is empty. Move items here!</p>
+                <p className="text-sm font-bold text-gray-500">{searchQuery ? 'No items match your search.' : 'Folder is empty. Move items here!'}</p>
               </div>
             ) : (
-              (firebaseFolderContents[activeFolder.id] || []).map((nft, i) => (
+              (firebaseFolderContents[activeFolder.id] || []).filter(item => !searchQuery || (item.name && item.name.toLowerCase().includes(searchLower)) || (item.collection && item.collection.toLowerCase().includes(searchLower))).map((nft, i) => (
                 <div key={nft.identifier} onClick={() => handleNftClick(i, nft)}
                   onMouseDown={() => startLongPress(nft)}
                   onMouseUp={clearLongPress}
                   onMouseLeave={clearLongPress}
                   onTouchStart={() => startLongPress(nft)}
                   onTouchEnd={clearLongPress}
-                  className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
+                  className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
                   <div className="aspect-square bg-gray-100 dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
                       <div className="absolute bottom-3 right-3 z-30 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#1a1a1a] animate-in zoom-in-50 duration-200">
@@ -1612,11 +1620,11 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </div>
           </button>
 
-          {dynamicUserFolders.map((folder) => (
+          {dynamicUserFolders.filter(folder => !searchQuery || folder.name.toLowerCase().includes(searchLower)).map((folder) => (
             <div
               key={folder.id}
               onClick={() => handleFolderClick(folder)}
-              className="group relative cursor-pointer p-3 pb-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all flex flex-col hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1 md:hover:-translate-y-2 active:scale-[0.98]"
+              className="group relative cursor-pointer p-3 pb-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all flex flex-col hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98]"
             >
 
 
@@ -1710,14 +1718,14 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c0e]">
-      <div className="max-w-7xl mx-auto px-4 pb-8 md:pb-12 space-y-12">
-        {/* Navigation & Header */}
-        <div className="flex flex-col items-center justify-center gap-6">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="inline-flex items-center justify-center h-7 px-4 bg-orange-500/10 border border-orange-500/20 rounded-full">
-                <span className="text-[10px] text-orange-500 font-black uppercase tracking-[0.2em] pl-[0.2em] mb-[1px] leading-none">Asset Hub</span>
-              </div>
+
+      {/* Sticky Header Section */}
+      <div className="sticky top-0 z-40 bg-gray-50/90 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 pt-6 pb-4 w-full px-4">
+        <div className="max-w-7xl mx-auto flex flex-col items-center justify-center gap-5 md:gap-6">
+
+          <div className="flex items-center gap-4">
+            <div className="inline-flex items-center justify-center h-7 px-4 bg-orange-500/10 border border-orange-500/20 rounded-full">
+              <span className="text-[10px] text-orange-500 font-black uppercase tracking-[0.2em] pl-[0.2em] mb-[1px] leading-none">Asset Hub</span>
             </div>
           </div>
 
@@ -1738,27 +1746,44 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </button>
           </div>
 
-          <div className="flex items-center gap-1 p-1 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 shadow-sm mt-1">
-            <button
-              onClick={() => setIsLargeGrid(false)}
-              className={`p-2 rounded-full transition-all ${!isLargeGrid ? 'bg-orange-500 text-white shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setIsLargeGrid(true)}
-              className={`p-2 rounded-full transition-all ${isLargeGrid ? 'bg-orange-500 text-white shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              <Square className="w-4 h-4" />
-            </button>
+          <div className="flex items-center justify-center gap-2 w-full max-w-md">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search items..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-10 py-2 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all dark:text-white shadow-sm"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-1 p-1 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 shadow-sm shrink-0">
+              <button
+                onClick={() => setIsLargeGrid(false)}
+                className={`p-2 rounded-full transition-all ${!isLargeGrid ? 'bg-orange-500 text-white shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setIsLargeGrid(true)}
+                className={`p-2 rounded-full transition-all ${isLargeGrid ? 'bg-orange-500 text-white shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+              >
+                <Square className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Dynamic Content */}
-        {viewMode === 'Collectibles' ? (
-          <div className="space-y-10">
-            {/* Horizontal Tabs */}
-            <div className="flex items-center justify-start md:justify-center gap-6 md:gap-8 border-b border-gray-100 dark:border-white/5 pb-2 px-1 md:px-0 overflow-x-auto scrollbar-hide no-scrollbar w-full">
+          {/* Horizontal Tabs */}
+          {viewMode === 'Collectibles' && (
+            <div className="flex items-center justify-start md:justify-center gap-6 md:gap-8 overflow-x-auto scrollbar-hide no-scrollbar w-full px-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -1766,7 +1791,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     setActiveTab(tab.id);
                     setActiveCollectionId(null);
                   }}
-                  className="relative pb-4 group"
+                  className="relative pb-2 group"
                 >
                   <span className={`text-sm font-black transition-colors ${activeTab === tab.id ? 'text-gray-900 dark:text-white' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200'}`}>
                     {tab.label}
@@ -1777,7 +1802,15 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 </button>
               ))}
             </div>
+          )}
 
+        </div>
+      </div>
+
+      {/* Main Dynamic Content Area */}
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 space-y-12">
+        {viewMode === 'Collectibles' ? (
+          <div className="space-y-10">
             {renderCollectibles()}
           </div>
         ) : (
@@ -1865,7 +1898,10 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     <X className="w-6 h-6" />
                   </button>
                 </div>
+              </div>
 
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto scrollbar-hide p-6 md:p-10 pt-4 md:pt-6 space-y-8 md:space-y-10">
                 {/* Main Stats Card */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex flex-col justify-between group hover:border-orange-500/30 transition-all relative overflow-hidden">
@@ -1884,15 +1920,12 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 {selectedItem.description && (
                   <div className="space-y-3">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Description</h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/10 italic max-h-[80px] overflow-y-auto scrollbar-hide">
+                    <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/10 italic">
                       {selectedItem.description}
                     </p>
                   </div>
                 )}
-              </div>
 
-              {/* Scrollable Attributes */}
-              <div className="flex-1 overflow-y-auto scrollbar-hide p-6 md:p-10 pt-4 md:pt-6 space-y-8 md:space-y-10">
                 {/* Attributes Grid */}
                 {selectedItem.attributes && selectedItem.attributes.length > 0 && (
                   <div className="space-y-4">

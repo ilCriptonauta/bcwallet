@@ -7,14 +7,14 @@ import {
   Layers, Diamond, Plus, ArrowRight, X, Hash,
   AlignLeft, ShieldCheck, Zap, Type, Tags, PlusCircle,
   Trash2, Boxes, Database, Upload,
-  ArrowLeft
+  ArrowLeft, Check, Clock
 } from 'lucide-react';
 
 interface ToolsPageProps {
   isFullVersion: boolean;
 }
 
-type ModalType = 'collection' | 'asset';
+type ModalType = 'collection' | 'asset' | 'collection_details';
 
 const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
   const [modalType, setModalType] = useState<ModalType | null>(null);
@@ -63,6 +63,8 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
   const { network } = useGetNetworkConfig();
   const [userCollections, setUserCollections] = useState<Array<{ id: string, name: string, type: string }>>([]);
   const [isFetchingCollections, setIsFetchingCollections] = useState(false);
+  const [selectedCollectionDetails, setSelectedCollectionDetails] = useState<any | null>(null);
+  const [isFetchingCollectionDetails, setIsFetchingCollectionDetails] = useState(false);
 
   useEffect(() => {
     if (!address) return;
@@ -90,6 +92,54 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
     fetchCollections();
   }, [address]);
 
+  // Magic Recovery local storage implementation
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('nft_mint_draft');
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed.assetForm) setAssetForm(parsed.assetForm);
+        if (parsed.mintStep) setMintStep(parsed.mintStep);
+        if (parsed.ipfsState) setIpfsState(parsed.ipfsState);
+        if (parsed.imagePreview) setImagePreview(parsed.imagePreview);
+      } catch (err) {
+        console.error("Failed to restore mint draft:", err);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (assetForm.name || assetForm.mediaUrl || imagePreview) {
+      try {
+        localStorage.setItem('nft_mint_draft', JSON.stringify({
+          assetForm,
+          mintStep,
+          ipfsState,
+          imagePreview: imagePreview && imagePreview.length < 3000000 ? imagePreview : null // Skip big base64 to avoid quota limits
+        }));
+      } catch (e) {
+        try {
+          localStorage.setItem('nft_mint_draft', JSON.stringify({ assetForm, mintStep, ipfsState, imagePreview: null }));
+        } catch (e2) {
+          console.error("Draft save error:", e2);
+        }
+      }
+    }
+  }, [assetForm, mintStep, ipfsState, imagePreview]);
+
+  const clearAssetDraft = () => {
+    setAssetForm({
+      name: '', description: '', type: 'NFT', supply: '1', royalties: 5,
+      tags: '', mediaUrl: '', collection: '', properties: [{ key: '', value: '' }, { key: '', value: '' }]
+    });
+    setAssetErrors({});
+    setImageFile(null);
+    setIpfsState('idle');
+    setImagePreview(null);
+    setMintStep(1);
+    localStorage.removeItem('nft_mint_draft');
+  };
+
   const tools: Array<{
     id: ModalType;
     title: string;
@@ -116,22 +166,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
   const handleCloseModal = () => {
     setModalType(null);
     setCollectionForm({ name: '', ticker: '', description: '', type: 'NFT' });
-    setAssetForm({
-      name: '',
-      description: '',
-      type: 'NFT',
-      supply: '1',
-      royalties: 5,
-      tags: '',
-      mediaUrl: '',
-      collection: '',
-      properties: [{ key: '', value: '' }, { key: '', value: '' }]
-    });
-    setAssetErrors({});
-    setImageFile(null);
-    setIpfsState('idle');
-    setImagePreview(null);
-    setMintStep(1);
+    setSelectedCollectionDetails(null);
   };
 
   const uploadToIPFS = async (file: File): Promise<string | null> => {
@@ -398,6 +433,24 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
     return h.length % 2 === 0 ? h : '0' + h;
   };
 
+  const handleCollectionClick = async (collectionId: string) => {
+    if (collectionId.endsWith('-pending')) return;
+    setIsFetchingCollectionDetails(true);
+    setModalType('collection_details');
+    try {
+      const res = await fetch(`https://api.multiversx.com/collections/${collectionId}`);
+      if (res.ok) {
+        const data = await res.json();
+        data.id = collectionId;
+        setSelectedCollectionDetails(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsFetchingCollectionDetails(false);
+    }
+  };
+
   const createSftNftMesdtTokens = async () => {
     if (!address) {
       alert('Please connect your wallet first.');
@@ -519,6 +572,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
         },
       });
 
+      clearAssetDraft();
       handleCloseModal();
     } catch (err) {
       console.error('Minting failed:', err);
@@ -594,8 +648,9 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
                 return (
                   <div
                     key={col.id}
-                    className={`group flex items-center gap-5 px-6 py-5 rounded-2xl border transition-all active:scale-[0.98] ${isPending
-                      ? 'bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/10 opacity-80'
+                    onClick={() => handleCollectionClick(col.id)}
+                    className={`group flex items-center gap-5 px-6 py-5 rounded-2xl border transition-all active:scale-[0.98] cursor-pointer ${isPending
+                      ? 'bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/10 opacity-80 cursor-default'
                       : 'bg-white dark:bg-zinc-900 border-slate-100 dark:border-white/5 hover:border-brand-orange/30 hover:shadow-lg hover:shadow-brand-orange/5'
                       }`}
                   >
@@ -644,10 +699,131 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
         </div>
       )}
 
-      {modalType && (
+      {/* SEPARATE MODAL FOR COLLECTION DETAILS */}
+      {modalType === 'collection_details' && (
+        <div className="fixed inset-0 z-[200] flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={handleCloseModal}></div>
+          <div className="relative w-full max-w-4xl bg-white dark:bg-[#121212] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] min-h-[50vh] animate-in slide-in-from-bottom-full duration-300 max-h-[92vh] flex flex-col pt-8 px-6 md:px-10 pb-10">
+
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full z-50 pointer-events-none md:hidden"></div>
+
+            <button onClick={handleCloseModal} className="absolute z-20 transition-all hover:scale-110 active:scale-95 top-6 right-6 p-2.5 bg-gray-100 dark:bg-white/5 rounded-full text-gray-500 hover:bg-brand-orange hover:text-white">
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="overflow-y-auto scrollbar-hide">
+              <div className="space-y-8 mt-2 pb-12">
+                {isFetchingCollectionDetails ? (
+                  <div className="h-64 flex flex-col items-center justify-center gap-4">
+                    <svg className="animate-spin w-10 h-10 text-brand-orange" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 animate-pulse">Loading Details...</p>
+                  </div>
+                ) : selectedCollectionDetails ? (
+                  <>
+                    <div className="flex items-start gap-5">
+                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-brand-orange/10 flex items-center justify-center border border-brand-orange/20 overflow-hidden shrink-0 mt-1 shadow-inner">
+                        {selectedCollectionDetails.assets?.pngUrl ? (
+                          <img src={selectedCollectionDetails.assets.pngUrl} className="w-full h-full object-cover" alt="Collection Icon" />
+                        ) : (
+                          <Layers className="w-8 h-8 md:w-10 md:h-10 text-brand-orange" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1">
+                          <span className="px-3 py-1 bg-brand-orange/10 border border-brand-orange/20 rounded-full text-[10px] font-black uppercase text-brand-orange tracking-widest">
+                            {selectedCollectionDetails.type === 'SemiFungibleESDT' ? 'SFT' : 'NFT'}
+                          </span>
+                        </div>
+                        <h2 className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white leading-tight truncate">{selectedCollectionDetails.name}</h2>
+                        <div className="flex items-center gap-2 mt-2">
+                          <p className="text-xs md:text-sm font-bold uppercase text-slate-400 truncate cursor-pointer hover:text-brand-orange transition-colors" onClick={() => { navigator.clipboard.writeText(selectedCollectionDetails.id); alert('ID Copied'); }}>
+                            ID: {selectedCollectionDetails.id}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="p-5 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex flex-col justify-between hover:border-emerald-500/30 transition-all">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1 text-nowrap">Holders</p>
+                        <p className="text-2xl md:text-3xl font-black text-emerald-500">{selectedCollectionDetails.holderCount ?? 0}</p>
+                      </div>
+                      <div className="p-5 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex flex-col justify-between hover:border-brand-yellow/30 transition-all">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1 text-nowrap">Items</p>
+                        <p className="text-2xl md:text-3xl font-black text-brand-yellow">{selectedCollectionDetails.nftCount ?? 0}</p>
+                      </div>
+                      <div className="col-span-2 p-5 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex flex-col justify-between hover:border-brand-orange/30 transition-all">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1 text-nowrap flex items-center gap-2"><Clock className="w-3 h-3" /> Created</p>
+                        <div className="space-y-1">
+                          {selectedCollectionDetails.timestamp && (
+                            <p className="text-sm md:text-base font-black dark:text-white">
+                              {new Date(selectedCollectionDetails.timestamp * 1000).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          )}
+                          {selectedCollectionDetails.timestamp && (
+                            <p className="text-xs font-bold text-slate-500">
+                              {(() => {
+                                const days = Math.floor((Date.now() - selectedCollectionDetails.timestamp * 1000) / (1000 * 60 * 60 * 24));
+                                if (days === 0) return 'Today';
+                                if (days === 1) return '1 day ago';
+                                return `${days} days ago`;
+                              })()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-1">Properties Configuration</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { key: 'canUpgrade', label: 'Can Upgrade' },
+                          { key: 'canChangeOwner', label: 'Can Change Owner' },
+                          { key: 'canTransfer', label: 'Can Transfer' },
+                          { key: 'canPause', label: 'Can Pause' },
+                          { key: 'canFreeze', label: 'Can Freeze' },
+                          { key: 'canWipe', label: 'Can Wipe' },
+                          { key: 'canTransferNftCreateRole', label: 'Can Transfer NFT Create Role' },
+                          { key: 'canAddSpecialRoles', label: 'Can Add Special Role' }
+                        ].map((prop) => {
+                          const val = selectedCollectionDetails[prop.key];
+                          if (typeof val === 'undefined') return null;
+                          return (
+                            <span key={prop.key} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all
+                              ${val ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500/80 border border-rose-500/20'}
+                            `}>
+                              {val ? <Check className="w-3 h-3 md:w-4 md:h-4 stroke-[3]" /> : <X className="w-3 h-3 md:w-4 md:h-4 stroke-[3]" />}
+                              {prop.label}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="text-slate-500 font-bold">Failed to load collection details.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(modalType === 'collection' || modalType === 'asset') && (
         <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-0 md:p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={handleCloseModal}></div>
           <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] md:shadow-2xl border-t dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[92vh] overflow-y-auto custom-scrollbar">
+            {modalType === 'asset' && (assetForm.name || assetForm.mediaUrl || imagePreview) && (
+              <button
+                onClick={clearAssetDraft}
+                className="absolute top-4 right-14 md:top-6 md:right-16 px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-all focus:outline-none z-20"
+              >
+                Clear Draft
+              </button>
+            )}
             <button onClick={handleCloseModal} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-slate-400 hover:text-brand-orange transition-colors z-20 active:scale-90"><X /></button>
             <h2 className="text-3xl font-black mb-8 flex items-center gap-3 sticky top-0 bg-white dark:bg-zinc-900 z-10 py-2">
               {modalType === 'collection' ? (

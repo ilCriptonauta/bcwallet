@@ -21,9 +21,18 @@ export default function Home() {
   const accountInfo = useGetAccountInfo();
   const address = accountInfo?.address;
   const { network } = useGetNetworkConfig();
-  const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [isPro, setIsPro] = useState(false);
   const router = useRouter();
+  const [isPro, setIsPro] = useState(false);
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const [currentPage, setCurrentPage] = useState<Page>((searchParams.get('tab') as Page) || 'home');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', currentPage);
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [currentPage]);
 
   useEffect(() => {
     let active = true;
