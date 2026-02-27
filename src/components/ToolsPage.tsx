@@ -530,13 +530,12 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
 
   return (
     <div className="py-10 max-w-5xl mx-auto">
-      <div className="text-center mb-16 space-y-4">
-        <h1 className="text-5xl md:text-7xl font-black tracking-tighter">
-          Let&apos;s <span className="text-brand-orange">Cook</span>
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">
-          Professional tools for blockchain creation{isFullVersion ? '.' : ' (demo mode).'}
-        </p>
+      <div className="flex flex-col items-center justify-center gap-6 mb-16">
+        <div className="flex items-center gap-4">
+          <div className="inline-flex items-center justify-center h-7 px-4 bg-orange-500/10 border border-orange-500/20 rounded-full">
+            <span className="text-[10px] text-orange-500 font-black uppercase tracking-[0.2em] pl-[0.2em] mb-[1px] leading-none">Tools</span>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

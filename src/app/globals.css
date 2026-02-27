@@ -26,3 +26,17 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.nft-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 300px;
+}
+
+/* Force image dimensions to prevent layout shifts */
+.nft-card img, 
+.nft-card video {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}

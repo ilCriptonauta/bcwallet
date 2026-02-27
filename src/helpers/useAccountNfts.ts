@@ -30,7 +30,7 @@ export type NormalizedNft = {
   collectionName: string;
   imageUrl: string | null;
   originalImageUrl: string | null;
-  type: 'NFT' | 'SFT';
+  type: 'NFT' | 'SFT' | 'MetaESDT';
   balance?: string;
   metadata?: Record<string, any>;
   mimeType?: string;
@@ -197,7 +197,7 @@ export const useAccountNfts = ({
         collectionName: nft.collectionName || nft.collection || 'Unknown Collection',
         imageUrl: pickBestImageUrl(nft),
         originalImageUrl: pickOriginalImageUrl(nft),
-        type: (nft.type === 'SemiFungibleESDT' || nft.type === 'MetaESDT') ? 'SFT' : 'NFT',
+        type: nft.type === 'SemiFungibleESDT' ? 'SFT' : nft.type === 'MetaESDT' ? 'MetaESDT' : 'NFT',
         balance: nft.balance,
         metadata: nft.metadata,
         mimeType: nft.media?.[0]?.fileType,
