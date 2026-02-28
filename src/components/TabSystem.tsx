@@ -655,12 +655,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   };
 
   const [gridColumns, setGridColumns] = useState(2);
-  const [rowHeight, setRowHeight] = useState<number>(0);
-  const [scrollY, setScrollY] = useState(0);
   const nftGridRef = useRef<HTMLDivElement>(null);
   const nftSentinelRef = useRef<HTMLDivElement>(null);
-  const measuredRowHeightRef = useRef<number>(0);
-  const rowHeightRafRef = useRef<number | null>(null);
 
 
 
@@ -701,13 +697,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (rowHeightRafRef.current) {
-        window.cancelAnimationFrame(rowHeightRafRef.current);
-      }
-    };
-  }, []);
+
 
   useEffect(() => {
     const computeColumns = () => {
@@ -724,23 +714,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     return () => window.removeEventListener('resize', computeColumns);
   }, [isLargeGrid]);
 
-  useEffect(() => {
-    let raf = 0;
-    const onScroll = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(() => {
-        raf = 0;
-        setScrollY(window.scrollY);
-      });
-    };
 
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, []);
 
   const renderContextMenu = (i: number, nft: NormalizedNft) => {
     if (openMenuId !== i) return null;
@@ -809,30 +783,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
 
 
-  const firstNftCardRef = useCallback((el: HTMLDivElement | null) => {
-    if (!el) {
-      return;
-    }
 
-    const next = Math.round(el.getBoundingClientRect().height);
-    if (!next) {
-      return;
-    }
-    if (measuredRowHeightRef.current === next) {
-      return;
-    }
-    measuredRowHeightRef.current = next;
-
-    if (rowHeightRafRef.current) {
-      return;
-    }
-
-    rowHeightRafRef.current = window.requestAnimationFrame(() => {
-      rowHeightRafRef.current = null;
-      const measured = measuredRowHeightRef.current;
-      setRowHeight((prev) => (prev === measured ? prev : measured));
-    });
-  }, []);
 
 
   const handleDownload = (e: React.MouseEvent, imageUrl: string, name: string) => {
@@ -1344,29 +1295,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     }
 
     // === Overview Tab (default) ===
-    const rowGapPx = 24; // gap-6
-
-    const totalDisplayItems = displayFolders.length + displaySingles.length;
-    const totalRows = Math.ceil(totalDisplayItems / gridColumns);
-    const rowStep = rowHeight > 0 ? rowHeight + rowGapPx : 0;
-
-    const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0;
-    const containerTop = nftGridRef.current ? nftGridRef.current.getBoundingClientRect().top + window.scrollY : 0;
-    const relativeScrollTop = Math.max(0, scrollY - containerTop);
-
-    const startRow = rowStep > 0 ? Math.max(0, Math.floor(relativeScrollTop / rowStep) - 10) : 0;
-    const endRow = rowStep > 0 ? Math.min(totalRows - 1, Math.floor((relativeScrollTop + viewportHeight) / rowStep) + 10) : Math.min(totalRows - 1, 16);
-
-    const startIndex = startRow * gridColumns;
-    const endIndex = Math.min(totalDisplayItems, (endRow + 1) * gridColumns);
-
+    // === Overview Tab (default) ===
     // Final list: Folders first, then singles
     const finalItems = [...displayFolders, ...displaySingles.map(nft => ({ type: 'nft' as const, data: nft }))];
-    const visibleItems = finalItems.slice(startIndex, endIndex);
-
-    const topSpacerHeight = rowHeight > 0 && startRow > 0 ? startRow * rowHeight + Math.max(0, startRow - 1) * rowGapPx : 0;
-    const bottomRows = Math.max(0, totalRows - endRow - 1);
-    const bottomSpacerHeight = rowHeight > 0 && bottomRows > 0 ? bottomRows * rowHeight + Math.max(0, bottomRows - 1) * rowGapPx : 0;
 
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -1377,17 +1308,13 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         )}
 
         <div ref={nftGridRef} className={`grid ${isLargeGrid ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-6`}>
-          {topSpacerHeight > 0 && <div style={{ gridColumn: '1 / -1', height: topSpacerHeight }} />}
 
-          {visibleItems.map((item, localIndex) => {
-            const i = startIndex + localIndex;
-            const attachRef = localIndex === 0 ? firstNftCardRef : undefined;
+          {finalItems.map((item, i) => {
 
             if (item.type === 'folder') {
               return (
                 <div
                   key={item.id}
-                  ref={attachRef}
                   onClick={() => handleCollectionClick(item.id)}
                   className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 transform-gpu will-change-transform"
                 >
@@ -1435,7 +1362,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             return (
               <div
                 key={nft.identifier}
-                ref={attachRef}
                 onClick={() => handleNftClick(i, nft)}
                 onMouseDown={() => startLongPress(nft)}
                 onMouseUp={clearLongPress}
@@ -1494,8 +1420,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
             );
           })}
-
-          {bottomSpacerHeight > 0 && <div style={{ gridColumn: '1 / -1', height: bottomSpacerHeight }} />}
         </div>
 
         <div ref={nftSentinelRef} className="h-1" />
