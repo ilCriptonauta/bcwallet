@@ -110,9 +110,9 @@ export const useCollectionNfts = ({
       const raw = (await res.json()) as MultiversxNftApiItem[];
       const normalized: NormalizedNft[] = raw.map((nft) => ({
         identifier: nft.identifier,
-        name: nft.name || nft.identifier,
+        name: nft.name ? nft.name.split('-')[0].trim() : (nft.identifier ? nft.identifier.split('-')[0].trim() : ''),
         collection: nft.collection || '',
-        collectionName: nft.collectionName || nft.collection || 'Unknown Collection',
+        collectionName: nft.collectionName ? nft.collectionName.split('-')[0].trim() : (nft.collection ? nft.collection.split('-')[0].trim() : 'Unknown Collection'),
         imageUrl: pickBestImageUrl(nft),
         originalImageUrl: pickOriginalImageUrl(nft),
         type: (nft.type === 'SemiFungibleESDT' || nft.type === 'MetaESDT') ? 'SFT' : 'NFT',

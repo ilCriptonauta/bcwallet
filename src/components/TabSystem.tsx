@@ -1040,7 +1040,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       {nft.name}
                     </h3>
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1 truncate">
-                      {nft.collection}
+                      {nft.collectionName}
                     </p>
                   </div>
                   <div className="relative shrink-0">
@@ -1125,7 +1125,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                         {nft.name}
                       </h3>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1 truncate">
-                        {nft.collection}
+                        {nft.collectionName}
                       </p>
                     </div>
                     <div className="relative shrink-0">
@@ -1272,7 +1272,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                           {nft.name}
                         </h3>
                         <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1 truncate">
-                          {nft.collection}
+                          {nft.collectionName}
                         </p>
                       </div>
                       <div className="relative shrink-0">
@@ -1404,7 +1404,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       {nft.name}
                     </h3>
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1 truncate">
-                      {nft.collection}
+                      {nft.collectionName}
                     </p>
                   </div>
                   <div className="relative shrink-0">
@@ -1510,7 +1510,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                             {renderContextMenu(i, nft)}
                           </div>
                         </div>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1 truncate">{nft.collection}</p>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1 truncate">{nft.collectionName}</p>
                       </div>
                     </div>
                   </div>
@@ -1581,7 +1581,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   <div className="p-4 md:p-5 flex items-start justify-between gap-2 overflow-visible relative">
                     <div className="overflow-hidden">
                       <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">{nft.name}</h3>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1 truncate">{nft.collection}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1 truncate">{nft.collectionName}</p>
                     </div>
                     <div className="relative shrink-0">
                       <button
