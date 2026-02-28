@@ -8,7 +8,7 @@ import {
   X, Folder, Plus, LayoutDashboard, Search,
   DollarSign, Send, Flame, Download, Heart, Settings,
   Zap, ArrowLeft, Lock, Trash2, Share2, Square, LayoutGrid,
-  TrendingUp, TrendingDown, Clock
+  TrendingUp, TrendingDown, Clock, Users
 } from 'lucide-react';
 import { useGetAccountInfo, Transaction, Address, useGetNetworkConfig } from '@/lib';
 import { useAccountNfts, signAndSendTransactions, type NormalizedNft } from '@/helpers';
@@ -158,11 +158,12 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     createFolder: fbCreateFolder,
     deleteFolder: fbDeleteFolder,
     addItemToFolder: fbAddItemToFolder,
+    removeItemFromFolder: fbRemoveItemFromFolder,
     toggleFavorite: fbToggleFavorite
   } = useFirebaseFolders(walletAddress);
 
   const hasProAccess = firebaseIsPro || isFullVersion;
-  const maxFolders = hasProAccess ? 100 : 3;
+  const maxFolders = hasProAccess ? 50 : 3;
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -183,8 +184,14 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [folderDesc, setFolderDesc] = useState('');
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [isRemoveConfirmationOpen, setIsRemoveConfirmationOpen] = useState(false);
   const [nftToMove, setNftToMove] = useState<NormalizedNft | null>(null);
   const [collectionFloorPrice, setCollectionFloorPrice] = useState<string | null>(null);
+  const [collectionDetails, setCollectionDetails] = useState<{
+    description?: string;
+    holderCount?: number;
+    nftCount?: number;
+  } | null>(null);
   const [itemFloorPrice, setItemFloorPrice] = useState<string | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const isLongPressActive = useRef(false);
@@ -215,7 +222,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     if (!folderTitle.trim()) return;
 
     if (firebaseFolders.length >= maxFolders) {
-      alert(`You've reached the limit of ${maxFolders} folders!${!hasProAccess ? ' Get a Bacon PASS license to unlock up to 100 folders.' : ''}`);
+      alert(`You've reached the limit of ${maxFolders} folders!${!hasProAccess ? ' Get a Bacon PASS license to unlock up to 50 folders.' : ''}`);
       return;
     }
 
@@ -566,10 +573,41 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
     await Promise.all(selectedNfts.map((nft) => fbAddItemToFolder(targetFolderId.toString(), nft)));
 
+    if (activeFolder && activeFolder.id !== targetFolderId.toString()) {
+      if (activeFolder.id === 'favorites') {
+        for (const nft of selectedNfts) {
+          if (firebaseFavorites.some(f => f.identifier === nft.identifier)) {
+            await fbToggleFavorite(nft);
+          }
+        }
+      } else {
+        await Promise.all(selectedNfts.map((nft) => fbRemoveItemFromFolder(activeFolder.id.toString(), nft.identifier)));
+      }
+    }
+
     setIsMoveModalOpen(false);
     setIsSelectionMode(false);
     setSelectedNfts([]);
     setOpenMenuId(null);
+  };
+
+  const handleRemoveMultipleNfts = async () => {
+    if (selectedNfts.length === 0 || !activeFolder) return;
+
+    if (activeFolder.id === 'favorites') {
+      for (const nft of selectedNfts) {
+        if (firebaseFavorites.some(f => f.identifier === nft.identifier)) {
+          await fbToggleFavorite(nft);
+        }
+      }
+    } else {
+      await Promise.all(selectedNfts.map((nft) => fbRemoveItemFromFolder(activeFolder.id.toString(), nft.identifier)));
+    }
+
+    setIsSelectionMode(false);
+    setSelectedNfts([]);
+    setOpenMenuId(null);
+    setIsRemoveConfirmationOpen(false);
   };
 
   const toggleSelection = (nft: NormalizedNft) => {
@@ -642,17 +680,11 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     ...firebaseFolders
   ];
 
-  const userFolderTabs = dynamicUserFolders
-    .filter(f => f.id !== 'favorites')
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(f => ({ id: String(f.id), label: f.name }));
-
   const tabs: { id: string; label: string }[] = [
     { id: 'Overview', label: 'Overview' },
     { id: 'Collections', label: 'Collections' },
     { id: 'SFTs', label: 'SFTs' },
-    { id: 'favorites', label: 'Favorites' },
-    ...userFolderTabs,
+    { id: 'favorites', label: 'Favorites' }
   ];
 
   const cancelSelection = () => {
@@ -852,7 +884,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const handleCollectionClick = (collectionId: string) => {
     setActiveCollectionId(collectionId);
     setCollectionFloorPrice(null);
+    setCollectionDetails(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
     fetch(`https://api.oox.art/collections/${collectionId}/auction/stats`)
       .then(res => res.json())
       .then((data: { minPrice?: string; activeAuctions?: number }) => {
@@ -864,6 +898,17 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         }
       })
       .catch(() => setCollectionFloorPrice(null));
+
+    fetch(`https://api.multiversx.com/collections/${collectionId}`)
+      .then(res => res.json())
+      .then((data: any) => {
+        setCollectionDetails({
+          description: data?.assets?.description,
+          holderCount: data?.holderCount,
+          nftCount: data?.nftCount
+        });
+      })
+      .catch(() => setCollectionDetails(null));
   };
 
   const handleNftClick = (index: number, nft: NormalizedNft) => {
@@ -964,6 +1009,40 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </a>
             )}
           </div>
+
+          {collectionDetails && (
+            <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 space-y-4">
+              {collectionDetails.description && (
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl">
+                  {collectionDetails.description}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-6">
+                {collectionDetails.nftCount && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                      <LayoutGrid className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Total Items</p>
+                      <p className="text-sm font-black dark:text-white">{collectionDetails.nftCount.toLocaleString()}</p>
+                    </div>
+                  </div>
+                )}
+                {collectionDetails.holderCount && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                      <Users className="w-4 h-4 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Holders</p>
+                      <p className="text-sm font-black dark:text-white">{collectionDetails.holderCount.toLocaleString()}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className={`grid ${isLargeGrid ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-6`}>
             {collectionItems.map((nft, i) => (
@@ -1604,7 +1683,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           <button
             onClick={() => {
               if (firebaseFolders.length >= maxFolders) {
-                alert(`You've reached the limit of ${maxFolders} folders!${!hasProAccess ? ' Get a Bacon PASS license to unlock up to 100 folders.' : ''}`);
+                alert(`You've reached the limit of ${maxFolders} folders!${!hasProAccess ? ' Get a Bacon PASS license to unlock up to 50 folders.' : ''}`);
                 return;
               }
               setIsCreateModalOpen(true);
@@ -1719,8 +1798,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c0e]">
 
-      {/* Sticky Header Section */}
-      <div className="sticky top-0 z-40 bg-gray-50/90 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 pt-6 pb-4 w-full px-4">
+      {/* Header Section */}
+      <div className="bg-gray-50/90 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 pt-6 pb-4 w-full px-4">
         <div className="max-w-7xl mx-auto flex flex-col items-center justify-center gap-5 md:gap-6">
 
           <div className="flex items-center gap-4">
@@ -1870,7 +1949,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                           {selectedItem.balance} Assets
                         </span>
                       )}
-                      {selectedItem.identifier?.includes('ONX') && (
+                      {selectedItem.collection === 'BCNPASS-40e72d' && (
                         <span className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-500 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
                           Bacon Premium
                         </span>
@@ -2313,8 +2392,54 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </div>
 
             <div className="flex items-center gap-2">
-              <button onClick={() => setIsMoveModalOpen(true)} className="flex items-center justify-center px-8 py-3 bg-orange-500 text-white rounded-[1.5rem] font-black text-sm md:text-base hover:scale-105 transition-all shadow-xl shadow-orange-500/20">
+              <button onClick={() => setIsMoveModalOpen(true)} className="flex items-center justify-center px-6 md:px-8 h-[44px] md:h-[48px] bg-orange-500 text-white rounded-[1.5rem] font-black text-sm md:text-base hover:scale-105 transition-all shadow-xl shadow-orange-500/20">
                 <span>Move</span>
+              </button>
+              {activeFolder && (
+                <button
+                  onClick={() => setIsRemoveConfirmationOpen(true)}
+                  className="flex items-center justify-center px-4 md:px-6 h-[44px] md:h-[48px] bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-[1.5rem] font-black text-sm md:text-base hover:scale-105 transition-all"
+                >
+                  <Trash2 className="w-5 h-5 md:mr-2" />
+                  <span className="hidden md:inline">Remove</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Confirmation Modal */}
+      {isRemoveConfirmationOpen && (
+        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsRemoveConfirmationOpen(false)}></div>
+          <div className="relative w-full max-w-sm bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-t border-gray-100 dark:border-white/10 md:border p-8 pb-10 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shrink-0">
+                <Trash2 className="w-6 h-6 text-red-500" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black dark:text-white">Remove Items</h3>
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">Required Action</p>
+              </div>
+            </div>
+
+            <p className="text-gray-600 dark:text-gray-300 text-sm font-medium leading-relaxed mb-8">
+              The selected {selectedNfts.length > 1 ? 'items' : 'item'} will be removed from the folder but will remain in your wallet. Are you sure you want to proceed?
+            </p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setIsRemoveConfirmationOpen(false)}
+                className="w-full flex items-center justify-center py-3 md:py-4 px-6 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 dark:text-white rounded-[1.5rem] font-black text-sm md:text-base transition-all active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRemoveMultipleNfts}
+                className="w-full flex items-center justify-center py-3 md:py-4 px-6 bg-red-500 hover:bg-red-600 text-white rounded-[1.5rem] font-black text-sm md:text-base hover:scale-[1.02] shadow-xl shadow-red-500/20 transition-all active:scale-95"
+              >
+                Confirm
               </button>
             </div>
           </div>

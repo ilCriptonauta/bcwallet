@@ -167,7 +167,7 @@ export const useAccountNfts = ({
     abortRef.current = controller;
 
     const from = fromRef.current;
-    const url = `https://api.multiversx.com/accounts/${address}/nfts?from=${from}&size=${pageSize}`;
+    const url = `https://api.multiversx.com/accounts/${address}/nfts?from=${from}&size=${pageSize}&type=NonFungibleESDT,SemiFungibleESDT`;
 
     try {
       // Rate-limit calls (MultiversX API allows ~2 req/sec).

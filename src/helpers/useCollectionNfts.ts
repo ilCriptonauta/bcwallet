@@ -82,7 +82,7 @@ export const useCollectionNfts = ({
 
     const from = fromRef.current;
 
-    let url = `https://api.multiversx.com/accounts/${address}/nfts?from=${from}&size=${pageSize}`;
+    let url = `https://api.multiversx.com/accounts/${address}/nfts?from=${from}&size=${pageSize}&type=NonFungibleESDT,SemiFungibleESDT`;
     if (collection) {
       url += `&collection=${collection}`;
     }

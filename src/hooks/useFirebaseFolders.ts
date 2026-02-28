@@ -147,5 +147,24 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
         }
     };
 
-    return { folders, folderContents, favorites, isPro, loading, createFolder, deleteFolder, addItemToFolder, toggleFavorite };
+    const removeItemFromFolder = async (folderId: string, nftIdentifier: string) => {
+        if (!walletAddress) return;
+        try {
+            const folderRef = doc(db, 'users', walletAddress, 'folders', folderId);
+            const snap = await getDoc(folderRef);
+            if (snap.exists()) {
+                const currentItems = snap.data().items || [];
+                const updatedItems = currentItems.filter((item: NormalizedNft) => item.identifier !== nftIdentifier);
+                await updateDoc(folderRef, { items: updatedItems });
+            }
+        } catch (err: unknown) {
+            console.error("Firebase removeItemFromFolder error:", err);
+            const errMessage = err instanceof Error ? err.message : String(err);
+            if (errMessage.includes("permissions") || errMessage.includes("Quota")) {
+                alert("Could not remove item. Firebase limits or permissions errors.");
+            }
+        }
+    };
+
+    return { folders, folderContents, favorites, isPro, loading, createFolder, deleteFolder, addItemToFolder, removeItemFromFolder, toggleFavorite };
 };

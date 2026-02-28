@@ -81,9 +81,9 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ onUpgrade }) => {
               <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500">
                 <ShieldCheck className="w-10 h-10" />
               </div>
-              <h2 className="text-3xl font-black dark:text-white text-gray-900">Unlock Unlimited Power</h2>
+              <h2 className="text-3xl font-black dark:text-white text-gray-900">Unlock the Next Level</h2>
               <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-                To unlock unlimited folders and premium features, you need to purchase a <strong>Bacon PASS</strong> license directly on OOX.
+                To unlock up to 50 folders and premium features, you need to purchase a <strong>Bacon PASS</strong> license directly on OOX.
               </p>
             </div>
 

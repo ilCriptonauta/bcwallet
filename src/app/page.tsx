@@ -41,7 +41,7 @@ export default function Home() {
       if (!isLoggedIn || !address || !network?.apiAddress) return;
 
       try {
-        const licenseCollections = ['CHBONX-3e0201']; // Add more licensed collections here in the future
+        const licenseCollections = ['BCNPASS-40e72d']; // Add more licensed collections here in the future
 
         for (const collection of licenseCollections) {
           const res = await axios.get(`${network.apiAddress}/accounts/${address}/nfts/count?collection=${collection}`);
