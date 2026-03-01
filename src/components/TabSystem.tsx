@@ -1173,7 +1173,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     const zIndex = isTop ? 'z-20' : idx === 0 ? 'z-0' : 'z-10';
                     const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
                     return (
-                      <div key={idx} className={`absolute inset-2 rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
+                      <div key={idx} className={`absolute inset-2 rounded-[1.5rem] overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
                         <NftMedia
                           src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/200/200`}
                           alt="preview"
@@ -1588,7 +1588,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
 
                     return (
-                      <div key={idx} className={`absolute inset-2 rounded-2xl md:rounded-3xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
+                      <div key={idx} className={`absolute inset-2 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
                         <NftMedia
                           src={img.startsWith('http') ? img : `https://picsum.photos/seed/${img}/200/200`}
                           alt="Preview"
@@ -1598,7 +1598,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     );
                   })
                 ) : (
-                  <div className="absolute inset-2 rounded-2xl md:rounded-3xl bg-gray-100/50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 flex items-center justify-center">
+                  <div className="absolute inset-2 rounded-[1.5rem] md:rounded-[2rem] bg-gray-100/50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 flex items-center justify-center">
                     <Folder className="w-6 h-6 md:w-8 md:h-8 text-gray-300 dark:text-white/20" />
                   </div>
                 )}
