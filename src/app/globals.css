@@ -41,10 +41,6 @@
   scrollbar-width: none;
 }
 
-.nft-card {
-  content-visibility: auto;
-  contain-intrinsic-size: 300px;
-}
 
 /* Force image dimensions to prevent layout shifts */
 .nft-card img,
