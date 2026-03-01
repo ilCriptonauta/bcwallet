@@ -1000,7 +1000,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 onMouseLeave={clearLongPress}
                 onTouchStart={() => startLongPress(nft)}
                 onTouchEnd={clearLongPress}
-                className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
               >
                 <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                   {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1084,7 +1084,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onMouseLeave={clearLongPress}
                   onTouchStart={() => startLongPress(nft)}
                   onTouchEnd={clearLongPress}
-                  className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                  className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                 >
                   <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1163,7 +1163,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <div
                 key={folder.id}
                 onClick={() => handleCollectionClick(folder.id)}
-                className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 transform-gpu will-change-transform"
+                className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10"
               >
                 <div className="aspect-square bg-transparent dark:bg-zinc-800/30 overflow-hidden relative p-2 md:p-4">
                   {folder.items.slice(0, 3).reverse().map((nft, idx, arr) => {
@@ -1231,7 +1231,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     onMouseLeave={clearLongPress}
                     onTouchStart={() => startLongPress(nft)}
                     onTouchEnd={clearLongPress}
-                    className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                    className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                   >
                     <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                       {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1315,7 +1315,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 onMouseLeave={clearLongPress}
                 onTouchStart={() => startLongPress(nft)}
                 onTouchEnd={clearLongPress}
-                className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
+                className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
               >
                 <div className="aspect-square bg-transparent dark:bg-zinc-800/50 overflow-hidden relative">
                   {selectedNfts.some(n => n.identifier === nft.identifier) && (
@@ -1415,7 +1415,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     onMouseLeave={clearLongPress}
                     onTouchStart={() => startLongPress(nft)}
                     onTouchEnd={clearLongPress}
-                    className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
+                    className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
                     <div className="aspect-square bg-gray-100 dark:bg-zinc-800/50 overflow-hidden relative">
                       {selectedNfts.some(n => n.identifier === nft.identifier) && (
                         <div className="absolute bottom-3 right-3 z-30 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#1a1a1a] animate-in zoom-in-50 duration-200">
@@ -1497,7 +1497,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onMouseLeave={clearLongPress}
                   onTouchStart={() => startLongPress(nft)}
                   onTouchEnd={clearLongPress}
-                  className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] transform-gpu will-change-transform ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
+                  className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
                   <div className="aspect-square bg-gray-100 dark:bg-zinc-800/50 overflow-hidden relative">
                     {selectedNfts.some(n => n.identifier === nft.identifier) && (
                       <div className="absolute bottom-3 right-3 z-30 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#1a1a1a] animate-in zoom-in-50 duration-200">
