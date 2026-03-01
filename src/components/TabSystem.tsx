@@ -1178,7 +1178,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     const zIndex = isTop ? 'z-20' : idx === 0 ? 'z-0' : 'z-10';
                     const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
                     return (
-                      <div key={idx} className={`absolute inset-4 rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
+                      <div key={idx} className={`absolute inset-2 rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
                         <NftMedia
                           src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/200/200`}
                           alt="preview"
@@ -1194,12 +1194,12 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     );
                   })}
                   {folder.items.length > 1 && (
-                    <div className="absolute top-4 right-4 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
+                    <div className="absolute top-3 right-3 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
                       {folder.items.length} Assets
                     </div>
                   )}
                 </div>
-                <div className="p-5">
+                <div className="px-4 pb-4 pt-2">
                   <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
                     {folder.name}
                   </h3>
@@ -1327,7 +1327,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
 
                       return (
-                        <div key={idx} className={`absolute inset-4 rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
+                        <div key={idx} className={`absolute inset-2 rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
                           <NftMedia
                             src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/200/200`}
                             alt="preview"
@@ -1343,12 +1343,12 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       );
                     })}
                     {item.items.length > 1 && (
-                      <div className="absolute top-4 right-4 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
+                      <div className="absolute top-3 right-3 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
                         {item.items.length} Assets
                       </div>
                     )}
                   </div>
-                  <div className="p-5">
+                  <div className="px-4 pb-4 pt-2">
                     <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
                       {item.name}
                     </h3>
