@@ -1574,11 +1574,11 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             <div
               key={folder.id}
               onClick={() => handleFolderClick(folder)}
-              className="group relative cursor-pointer p-3 pb-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all flex flex-col hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98]"
+              className="group relative cursor-pointer p-0 pb-3 md:p-0 md:pb-4 rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all flex flex-col hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98]"
             >
 
 
-              <div className="aspect-square bg-gray-50/50 dark:bg-zinc-800/20 rounded-2xl md:rounded-[1.5rem] overflow-hidden relative mb-3 md:mb-4">
+              <div className="aspect-square bg-gray-50/50 dark:bg-zinc-800/20 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden relative p-2 md:p-4 mb-3 md:mb-4">
                 {folder.previewImages.length > 0 ? (
                   folder.previewImages.slice(0, 3).reverse().map((img, idx, arr) => {
                     const isTop = idx === arr.length - 1;
@@ -1588,7 +1588,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
 
                     return (
-                      <div key={idx} className={`absolute inset-2 md:inset-4 rounded-xl md:rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
+                      <div key={idx} className={`absolute inset-2 rounded-2xl md:rounded-3xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
                         <NftMedia
                           src={img.startsWith('http') ? img : `https://picsum.photos/seed/${img}/200/200`}
                           alt="Preview"
@@ -1598,12 +1598,12 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     );
                   })
                 ) : (
-                  <div className="absolute inset-4 md:inset-6 rounded-xl md:rounded-2xl bg-gray-100/50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 flex items-center justify-center">
+                  <div className="absolute inset-2 rounded-2xl md:rounded-3xl bg-gray-100/50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 flex items-center justify-center">
                     <Folder className="w-6 h-6 md:w-8 md:h-8 text-gray-300 dark:text-white/20" />
                   </div>
                 )}
                 {folder.itemCount > 0 && (
-                  <div className="absolute top-2 right-2 md:top-4 md:right-4 z-30 bg-orange-500 text-white text-[9px] md:text-[10px] font-black px-2 py-0.5 md:px-2.5 md:py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
+                  <div className="absolute top-3 right-3 z-30 bg-orange-500 text-white text-[9px] md:text-[10px] font-black px-2 py-0.5 md:px-2.5 md:py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
                     {folder.itemCount} Items
                   </div>
                 )}
@@ -1649,7 +1649,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 )}
               </div>
 
-              <div className="flex flex-col mt-auto w-full px-1">
+              <div className="flex flex-col mt-auto w-full px-4 md:px-5">
                 <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
                   <div className="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
                     {folder.id === 'favorites' ? <Heart className="w-3 h-3 md:w-3.5 md:h-3.5" /> : <Folder className="w-3 h-3 md:w-3.5 md:h-3.5" />}
