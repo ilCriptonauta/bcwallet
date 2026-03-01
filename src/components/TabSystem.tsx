@@ -915,14 +915,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     }
 
     const displayFolders: { type: 'folder'; id: string; name: string; items: NormalizedNft[] }[] = [];
-    const displaySingles: NormalizedNft[] = [];
 
     for (const [id, list] of collectionsMap.entries()) {
-      if (list.length > 1) {
-        displayFolders.push({ type: 'folder', id, name: list[0].collectionName, items: list });
-      } else {
-        displaySingles.push(list[0]);
-      }
+      displayFolders.push({ type: 'folder', id, name: list[0].collectionName, items: list });
     }
 
     // If viewing a specific collection
@@ -1160,7 +1155,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           {displayFolders.length === 0 && walletAddress && (
             <div className="text-center py-20 bg-gray-50 dark:bg-white/5 rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-white/10">
               <Folder className="w-12 h-12 text-gray-300 dark:text-white/20 mx-auto mb-4" />
-              <p className="text-sm font-bold text-gray-500">No collections with multiple items</p>
+              <p className="text-sm font-bold text-gray-500">No collections found</p>
             </div>
           )}
           <div className={`grid ${isLargeGrid ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-6`}>
@@ -1295,9 +1290,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     }
 
     // === Overview Tab (default) ===
-    // === Overview Tab (default) ===
-    // Final list: Folders first, then singles
-    const finalItems = [...displayFolders, ...displaySingles.map(nft => ({ type: 'nft' as const, data: nft }))];
+    // Final list: all individual items, no more collection grouping
+    const finalItems = allItems.map(nft => ({ type: 'nft' as const, data: nft }));
 
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -1310,53 +1304,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         <div ref={nftGridRef} className={`grid ${isLargeGrid ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-6`}>
 
           {finalItems.map((item, i) => {
-
-            if (item.type === 'folder') {
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => handleCollectionClick(item.id)}
-                  className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10 transform-gpu will-change-transform"
-                >
-                  <div className="aspect-square bg-transparent dark:bg-zinc-800/30 overflow-hidden relative p-2 md:p-4">
-                    {item.items.slice(0, 3).reverse().map((nft, idx, arr) => {
-                      const isTop = idx === arr.length - 1;
-                      const rotation = isTop ? 'rotate-0' : idx === 0 ? '-rotate-6' : 'rotate-6';
-                      const scale = isTop ? 'scale-100' : idx === 0 ? 'scale-90' : 'scale-95';
-                      const zIndex = isTop ? 'z-20' : idx === 0 ? 'z-0' : 'z-10';
-                      const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
-
-                      return (
-                        <div key={idx} className={`absolute inset-2 rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
-                          <NftMedia
-                            src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/200/200`}
-                            alt="preview"
-                            mimeType={nft.mimeType}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                          {isTop && (
-                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Folder className="w-10 h-10 text-white drop-shadow-lg" />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {item.items.length > 1 && (
-                      <div className="absolute top-3 right-3 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
-                        {item.items.length} Assets
-                      </div>
-                    )}
-                  </div>
-                  <div className="px-4 pb-4 pt-2">
-                    <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
-                      {item.name}
-                    </h3>
-                  </div>
-                </div>
-              );
-            }
-
             const nft = item.data;
             const imageUrl = nft.imageUrl || `https://picsum.photos/seed/NFTs-${i}/400/400`;
             return (
