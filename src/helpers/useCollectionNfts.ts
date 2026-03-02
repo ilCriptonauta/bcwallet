@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NormalizedNft, MultiversxNftApiItem, UseAccountNftsOptions } from './useAccountNfts';
 import { pickBestImageUrl, pickOriginalImageUrl } from './useAccountNfts';
+import { useGetNetworkConfig } from '@/lib';
 
 const sleep = (ms: number, signal?: AbortSignal) => {
   if (ms <= 0) {
@@ -47,6 +48,8 @@ export const useCollectionNfts = ({
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
+  const { network } = useGetNetworkConfig();
+
   const fromRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const inFlightRef = useRef(false);
@@ -82,7 +85,7 @@ export const useCollectionNfts = ({
 
     const from = fromRef.current;
 
-    let url = `https://api.multiversx.com/accounts/${address}/nfts?from=${from}&size=${pageSize}&type=NonFungibleESDT,SemiFungibleESDT`;
+    let url = `${network.apiAddress}/accounts/${address}/nfts?from=${from}&size=${pageSize}&type=NonFungibleESDT,SemiFungibleESDT`;
     if (collection) {
       url += `&collection=${collection}`;
     }

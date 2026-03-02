@@ -57,12 +57,13 @@ interface TabSystemProps {
 const NftActivityHistory = ({ identifier }: { identifier: string }) => {
   const [activities, setActivities] = useState<{ type: 'list' | 'delist'; hash: string; timestamp: number }[]>([]);
   const [loading, setLoading] = useState(true);
+  const { network } = useGetNetworkConfig();
 
   useEffect(() => {
     let active = true;
     if (!identifier) return;
 
-    fetch(`https://api.multiversx.com/nfts/${identifier}/transactions?size=50`)
+    fetch(`${network.apiAddress}/nfts/${identifier}/transactions?size=50`)
       .then((res) => res.json())
       .then((data) => {
         if (!active || !Array.isArray(data)) return;
@@ -465,7 +466,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
     // Fetch user's fungible tokens to validate payment token ownership
     if (walletAddress) {
-      fetch(`https://api.multiversx.com/accounts/${walletAddress}/tokens?size=100`)
+      fetch(`${network.apiAddress}/accounts/${walletAddress}/tokens?size=100`)
         .then(res => res.json())
         .then((tokens: { identifier: string; balance: string }[]) => {
           setUserTokens(tokens);
@@ -850,7 +851,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       })
       .catch(() => setCollectionFloorPrice(null));
 
-    fetch(`https://api.multiversx.com/collections/${collectionId}`)
+    fetch(`${network.apiAddress}/collections/${collectionId}`)
       .then(res => res.json())
       .then((data: any) => {
         setCollectionDetails({

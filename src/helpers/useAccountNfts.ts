@@ -2,6 +2,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useGetNetworkConfig } from '@/lib';
 
 export type MultiversxMediaItem = {
   url?: string;
@@ -133,6 +134,8 @@ export const useAccountNfts = ({
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
+  const { network } = useGetNetworkConfig();
+
   const fromRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const inFlightRef = useRef(false);
@@ -167,7 +170,7 @@ export const useAccountNfts = ({
     abortRef.current = controller;
 
     const from = fromRef.current;
-    const url = `https://api.multiversx.com/accounts/${address}/nfts?from=${from}&size=${pageSize}&type=NonFungibleESDT,SemiFungibleESDT`;
+    const url = `${network.apiAddress}/accounts/${address}/nfts?from=${from}&size=${pageSize}&type=NonFungibleESDT,SemiFungibleESDT`;
 
     try {
       // Rate-limit calls (MultiversX API allows ~2 req/sec).

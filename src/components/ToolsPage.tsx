@@ -72,7 +72,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
     const fetchCollections = async () => {
       setIsFetchingCollections(true);
       try {
-        const response = await fetch(`https://api.multiversx.com/collections?creator=${address}&size=100`);
+        const response = await fetch(`${network.apiAddress}/collections?creator=${address}&size=100`);
         if (response.ok) {
           const data = await response.json();
           const formatted = data.map((c: { collection: string; name: string; type: string }) => ({
@@ -267,7 +267,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
     try {
       // Fetch all collections created by this address
       const res = await fetch(
-        `https://api.multiversx.com/collections?creator=${address}&size=100`
+        `${network.apiAddress}/collections?creator=${address}&size=100`
       );
       if (!res.ok) return;
       const data: Array<{ collection: string; name: string; type: string; roles?: Array<{ role: string }> }> = await res.json();
@@ -399,7 +399,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
       setTimeout(async () => {
         try {
           const res = await fetch(
-            `https://api.multiversx.com/collections?creator=${address}&size=100`
+            `${network.apiAddress}/collections?creator=${address}&size=100`
           );
           if (res.ok) {
             const data = await res.json();
@@ -438,7 +438,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
     setIsFetchingCollectionDetails(true);
     setModalType('collection_details');
     try {
-      const res = await fetch(`https://api.multiversx.com/collections/${collectionId}`);
+      const res = await fetch(`${network.apiAddress}/collections/${collectionId}`);
       if (res.ok) {
         const data = await res.json();
         data.id = collectionId;
