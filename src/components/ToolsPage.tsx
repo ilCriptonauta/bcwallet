@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useGetAccountInfo, Transaction, Address, useGetNetworkConfig } from '@/lib';
+import { SmartContractTransactionsFactory, TransactionsFactoryConfig, TokenTransfer, TokenManagementTransactionsFactory } from '@multiversx/sdk-core';
 import { signAndSendTransactions } from '@/helpers';
 import {
   Layers, Diamond, Plus, ArrowRight, X, Hash,
@@ -301,22 +302,39 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
       const addrHex = addressToHex(address);
       const createRoleHex = toHex('ESDTRoleNFTCreate');
 
-      // SFTs also need ESDTRoleNFTAddQuantity to mint more
       const data = colType === 'SFT'
         ? `setSpecialRole@${collHex}@${addrHex}@${createRoleHex}@${toHex('ESDTRoleNFTAddQuantity')}`
         : `setSpecialRole@${collHex}@${addrHex}@${createRoleHex}`;
 
-      const tx = new Transaction({
-        nonce: 0n,
-        value: 0n,
-        receiver: new Address(ESDT_SYSTEM_SC),
-        sender: new Address(address),
-        gasLimit: ISSUANCE_GAS_LIMIT,
-        chainID: network.chainId,
-        data: Buffer.from(data),
-        version: 1,
-        gasPrice: 1000000000n,
-      });
+      const factoryConfig = new TransactionsFactoryConfig({ chainID: network.chainId });
+      const factory = new TokenManagementTransactionsFactory({ config: factoryConfig });
+
+      const txPromise = colType === 'SFT'
+        ? factory.createTransactionForSettingSpecialRoleOnSemiFungibleToken(
+          new Address(address),
+          {
+            user: new Address(address),
+            tokenIdentifier: collectionId,
+            addRoleNFTCreate: true,
+            addRoleNFTAddQuantity: true,
+            addRoleNFTBurn: false,
+            addRoleESDTTransferRole: false,
+          }
+        )
+        : factory.createTransactionForSettingSpecialRoleOnNonFungibleToken(
+          new Address(address),
+          {
+            user: new Address(address),
+            tokenIdentifier: collectionId,
+            addRoleNFTCreate: true,
+            addRoleNFTBurn: false,
+            addRoleNFTUpdateAttributes: false,
+            addRoleNFTAddURI: false,
+            addRoleESDTTransferRole: false,
+          }
+        );
+
+      const tx = await txPromise;
 
       await signAndSendTransactions({
         transactions: [tx],
@@ -356,25 +374,40 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
 
     setIsCreatingCollection(true);
     try {
-      const funcName = collectionForm.type === 'NFT'
-        ? 'issueNonFungible'
-        : 'issueSemiFungible';
+      const factoryConfig = new TransactionsFactoryConfig({ chainID: network.chainId });
+      const factory = new TokenManagementTransactionsFactory({ config: factoryConfig });
 
-      const nameHex = toHex(name);
-      const tickerHex = toHex(ticker);
-      const data = `${funcName}@${nameHex}@${tickerHex}`;
+      const txPromise = collectionForm.type === 'NFT'
+        ? factory.createTransactionForIssuingNonFungible(
+          new Address(address),
+          {
+            tokenName: name,
+            tokenTicker: ticker,
+            canAddSpecialRoles: true,
+            canChangeOwner: true,
+            canFreeze: false,
+            canPause: false,
+            canTransferNFTCreateRole: true,
+            canUpgrade: true,
+            canWipe: false,
+          }
+        )
+        : factory.createTransactionForIssuingSemiFungible(
+          new Address(address),
+          {
+            tokenName: name,
+            tokenTicker: ticker,
+            canAddSpecialRoles: true,
+            canChangeOwner: true,
+            canFreeze: false,
+            canPause: false,
+            canTransferNFTCreateRole: true,
+            canUpgrade: true,
+            canWipe: false,
+          }
+        );
 
-      const tx = new Transaction({
-        nonce: 0n,
-        value: ISSUANCE_VALUE,
-        receiver: new Address(ESDT_SYSTEM_SC),
-        sender: new Address(address),
-        gasLimit: ISSUANCE_GAS_LIMIT,
-        chainID: network.chainId,
-        data: Buffer.from(data),
-        version: 1,
-        gasPrice: 1000000000n,
-      });
+      const tx = await txPromise;
 
       await signAndSendTransactions({
         transactions: [tx],
@@ -542,26 +575,23 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
       const uri2Hex = toHex(`ipfs://${metadataCid}`);
 
       // ── 3. Build data string ──
-      // ESDTNFTCreate@collection@qty@name@royalties@hash@attributes@uri1@uri2
-      const data = `ESDTNFTCreate@${collectionHex}@${quantityHex}@${nameHex}@${royaltiesHex}@${hashHex}@${attributesHex}@${uri1Hex}@${uri2Hex}`;
+      const factoryConfig = new TransactionsFactoryConfig({ chainID: network.chainId });
+      const factory = new TokenManagementTransactionsFactory({ config: factoryConfig });
 
-      // ── Dynamic gas limit ──
-      // Base: 3_000_000 + 1_500 per data byte + 50_000 per attribute byte (stored on trie)
-      const dataBytes = Buffer.from(data).length;
-      const attrBytes = Buffer.from(attrParts.join(';')).length;
-      const gasLimit = BigInt(3_000_000 + dataBytes * 1_500 + attrBytes * 50_000);
+      const txPromise = factory.createTransactionForCreatingNFT(
+        new Address(address),
+        {
+          tokenIdentifier: assetForm.collection,
+          initialQuantity: BigInt(quantity),
+          name: assetForm.name.trim(),
+          royalties: royaltiesValue,
+          hash: hashHex,
+          attributes: Buffer.from(attrParts.join(';')),
+          uris: [assetForm.mediaUrl.trim(), `ipfs://${metadataCid}`]
+        }
+      );
 
-      const tx = new Transaction({
-        nonce: 0n,
-        value: 0n,
-        receiver: new Address(address), // ESDTNFTCreate is sent to self
-        sender: new Address(address),
-        gasLimit,
-        chainID: network.chainId,
-        data: Buffer.from(data),
-        version: 1,
-        gasPrice: 1000000000n,
-      });
+      const tx = await txPromise;
 
       await signAndSendTransactions({
         transactions: [tx],

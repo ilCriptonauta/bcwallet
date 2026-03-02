@@ -1,4 +1,3 @@
-
 'use client';
 
 import { createPortal } from 'react-dom';
@@ -14,6 +13,14 @@ import { useGetAccountInfo, Transaction, Address, useGetNetworkConfig } from '@/
 import { useAccountNfts, signAndSendTransactions, type NormalizedNft } from '@/helpers';
 import { useFirebaseFolders } from '@/hooks/useFirebaseFolders';
 import { NftMedia } from './NftMedia';
+import {
+  TokenTransfer,
+  TransferTransactionsFactory,
+  TransactionsFactoryConfig,
+  SmartContractTransactionsFactory,
+  TokenManagementTransactionsFactory,
+  Token
+} from '@multiversx/sdk-core';
 type ViewMode = 'Collectibles' | 'Management';
 type TabId = 'Overview' | 'SFTs' | 'Collections' | string;
 
@@ -313,36 +320,30 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         recipientAddr = new Address(herotagData.address);
       }
 
-      // 2. Prepare NFT Transfer Data
+      // 2. Build Transaction
+      const factoryConfig = new TransactionsFactoryConfig({ chainID: network.chainId });
+      const factory = new TransferTransactionsFactory({ config: factoryConfig });
+
       const lastDashIndex = nftToSend.identifier.lastIndexOf('-');
       if (lastDashIndex === -1) throw new Error("Invalid NFT identifier format.");
 
       const collection = nftToSend.identifier.substring(0, lastDashIndex);
-      let nonceHex = nftToSend.identifier.substring(lastDashIndex + 1);
-      if (nonceHex.length % 2 !== 0) nonceHex = '0' + nonceHex;
+      const nonce = parseInt(nftToSend.identifier.substring(lastDashIndex + 1), 16);
 
-      const collectionHex = toHex(collection);
-      const receiverHex = Array.from(recipientAddr.getPublicKey())
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-
-      const qtyHex = BigInt(sendQuantity).toString(16);
-      const qtyHexPadded = qtyHex.length % 2 !== 0 ? '0' + qtyHex : qtyHex;
-
-      const txData = `ESDTNFTTransfer@${collectionHex}@${nonceHex}@${qtyHexPadded}@${receiverHex}`;
-
-      // 3. Build Transaction
-      const accountNonce = accountInfo?.account?.nonce ?? 0;
-      const tx = new Transaction({
-        nonce: BigInt(accountNonce),
-        value: 0n,
-        receiver: new Address(walletAddress),
-        sender: new Address(walletAddress),
-        gasLimit: 3000000n,
-        chainID: network.chainId,
-        data: new TextEncoder().encode(txData),
-        version: 1
+      const transfer = new TokenTransfer({
+        token: new Token({ identifier: collection, nonce: BigInt(nonce) }),
+        amount: BigInt(nftToSend.type === 'NFT' ? 1 : sendQuantity)
       });
+
+      const txPromise = factory.createTransactionForESDTTokenTransfer(
+        new Address(walletAddress),
+        {
+          receiver: recipientAddr,
+          tokenTransfers: [transfer],
+        }
+      );
+
+      const tx = await txPromise;
 
       await signAndSendTransactions({
         transactions: [Transaction.newFromPlainObject(tx.toPlainObject())],
@@ -392,35 +393,28 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
 
-      // 1. Prepare NFT Burn Data
+      const factoryConfig = new TransactionsFactoryConfig({ chainID: network.chainId });
+      const factory = new TokenManagementTransactionsFactory({ config: factoryConfig });
+
       const lastDashIndex = nftToBurn.identifier.lastIndexOf('-');
       if (lastDashIndex === -1) throw new Error("Invalid NFT identifier format.");
 
       const collection = nftToBurn.identifier.substring(0, lastDashIndex);
-      let nonceHex = nftToBurn.identifier.substring(lastDashIndex + 1);
-      if (nonceHex.length % 2 !== 0) nonceHex = '0' + nonceHex;
+      const nonce = parseInt(nftToBurn.identifier.substring(lastDashIndex + 1), 16);
 
-      const collectionHex = toHex(collection);
-      const qtyHex = BigInt(burnQuantity).toString(16);
-      const qtyHexPadded = qtyHex.length % 2 !== 0 ? '0' + qtyHex : qtyHex;
+      const txPromise = factory.createTransactionForBurningQuantity(
+        new Address(walletAddress),
+        {
+          tokenIdentifier: collection,
+          tokenNonce: BigInt(nonce),
+          quantity: BigInt(burnQuantity),
+        }
+      );
 
-      const txData = `ESDTNFTBurn@${collectionHex}@${nonceHex}@${qtyHexPadded}`;
-
-      // 2. Build Transaction
-      const accountNonce = accountInfo?.account?.nonce ?? 0;
-      const tx = new Transaction({
-        nonce: BigInt(accountNonce),
-        value: 0n,
-        receiver: new Address(walletAddress),
-        sender: new Address(walletAddress),
-        gasLimit: 10000000n,
-        chainID: network.chainId,
-        data: new TextEncoder().encode(txData),
-        version: 1
-      });
+      const tx = await txPromise;
 
       await signAndSendTransactions({
-        transactions: [Transaction.newFromPlainObject(tx.toPlainObject())],
+        transactions: [tx],
         transactionsDisplayInfo: {
           processingMessage: `Burning ${burnQuantity} edition(s) of ${nftToBurn.name}...`,
           errorMessage: 'Failed to burn Asset.',
@@ -487,6 +481,13 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       const tokenConfig = OOX_PAYMENT_TOKENS.find(t => t.identifier === selectedPaymentToken);
       const decimals = tokenConfig?.decimals ?? 18;
       const priceRaw = priceBN.times(new BigNumber(10).pow(decimals)).toFixed(0);
+      // Prepare NFT data
+      const lastDashIndex = nftToSell.identifier.lastIndexOf('-');
+      if (lastDashIndex === -1) throw new Error("Invalid NFT identifier format.");
+
+      const collection = nftToSell.identifier.substring(0, lastDashIndex);
+      const nonce = parseInt(nftToSell.identifier.substring(lastDashIndex + 1), 16);
+
       let priceHex = BigInt(priceRaw).toString(16);
       if (priceHex.length % 2 !== 0) priceHex = '0' + priceHex;
 
@@ -494,46 +495,34 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       let deadlineHex = deadline.toString(16);
       if (deadlineHex.length % 2 !== 0) deadlineHex = '0' + deadlineHex;
 
-      // Prepare NFT data
-      const lastDashIndex = nftToSell.identifier.lastIndexOf('-');
-      if (lastDashIndex === -1) throw new Error("Invalid NFT identifier format.");
-
-      const collection = nftToSell.identifier.substring(0, lastDashIndex);
-      let nonceHex = nftToSell.identifier.substring(lastDashIndex + 1);
-      if (nonceHex.length % 2 !== 0) nonceHex = '0' + nonceHex;
-
-      const collectionHex = toHex(collection);
-      const marketAddr = new Address(OOX_CONTRACT_ADDRESS);
-      const marketHex = Array.from(marketAddr.getPublicKey())
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-
-      const functionHex = toHex('auctionToken');
-      const qtyHex = "01";
-      const paymentTokenHex = toHex(selectedPaymentToken);
-
-      // OOX auctionToken(min_bid, max_bid, deadline, accepted_payment_token)
-      // For fixed price: min_bid = max_bid = price
-      const txData = `ESDTNFTTransfer@${collectionHex}@${nonceHex}@${qtyHex}@${marketHex}@${functionHex}@${priceHex}@${priceHex}@${deadlineHex}@${paymentTokenHex}`;
-
-      const accountNonce = accountInfo?.account?.nonce ?? 0;
-
-      const tx = new Transaction({
-        nonce: BigInt(accountNonce),
-        value: 0n,
-        receiver: new Address(walletAddress),
-        sender: new Address(walletAddress),
-        gasLimit: 15000000n,
-        chainID: network.chainId,
-        data: new TextEncoder().encode(txData),
-        version: 1
+      const transfer = new TokenTransfer({
+        token: new Token({ identifier: collection, nonce: BigInt(nonce) }),
+        amount: BigInt(nftToSell.type === 'NFT' ? 1 : 1)
       });
 
-      // Convert to a plain object and back to ensure compatibility with signers
-      const plainTx = tx.toPlainObject();
+      const factoryConfig = new TransactionsFactoryConfig({ chainID: network.chainId });
+      const factory = new SmartContractTransactionsFactory({ config: factoryConfig });
+
+      const txPromise = factory.createTransactionForExecute(
+        new Address(walletAddress),
+        {
+          contract: new Address(OOX_CONTRACT_ADDRESS),
+          function: 'auctionToken',
+          arguments: [
+            BigInt(priceRaw), // min_bid
+            BigInt(priceRaw), // max_bid
+            BigInt(deadline),
+            selectedPaymentToken,
+          ],
+          tokenTransfers: [transfer],
+          gasLimit: 15000000n,
+        }
+      );
+
+      const tx = await txPromise;
 
       await signAndSendTransactions({
-        transactions: [Transaction.newFromPlainObject(plainTx)],
+        transactions: [tx],
         transactionsDisplayInfo: {
           processingMessage: `Listing ${nftToSell.name} for ${sellPrice} ${selectedPaymentToken.split('-')[0]}...`,
           errorMessage: 'Failed to list Asset.',
