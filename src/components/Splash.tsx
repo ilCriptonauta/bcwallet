@@ -16,10 +16,10 @@ const Splash: React.FC<SplashProps> = ({ onLogin }) => {
         <div className="w-[120vw] h-[120vw] sm:w-[600px] sm:h-[600px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-orange/5 via-brand-orange/0 to-transparent" />
       </div>
 
-      <div className="z-10 flex flex-col items-center justify-between w-full h-full animate-in fade-in zoom-in-95 duration-1000 ease-out">
+      <div className="z-10 flex flex-col items-center justify-between md:justify-center md:gap-16 lg:gap-20 w-full h-full animate-in fade-in zoom-in-95 duration-1000 ease-out">
 
         {/* Top: Powered By Badge */}
-        <div className="pt-8 sm:pt-4">
+        <div className="pt-8 sm:pt-4 md:pt-0">
           <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-brand-orange/10 border border-brand-orange/20 animate-bounce">
             <span className="w-2 h-2 rounded-full bg-brand-orange"></span>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange">Powered by MultiversX</span>
@@ -27,9 +27,9 @@ const Splash: React.FC<SplashProps> = ({ onLogin }) => {
         </div>
 
         {/* Center: Logo and Name */}
-        <div className="flex flex-col items-center justify-center -mt-8 sm:-mt-12">
+        <div className="flex flex-col items-center justify-center -mt-8 sm:-mt-12 md:mt-0">
           {/* Large Logo */}
-          <div className="relative mb-8 sm:mb-12 group flex items-center justify-center">
+          <div className="relative mb-8 sm:mb-12 md:mb-10 group flex items-center justify-center">
             <div className="absolute -inset-20 sm:-inset-32 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-orange/30 via-brand-orange/0 to-transparent opacity-100 transition-opacity duration-700" />
             <img
               src="/bacon-icon.png"
@@ -50,7 +50,7 @@ const Splash: React.FC<SplashProps> = ({ onLogin }) => {
         </div>
 
         {/* Bottom: Login Button */}
-        <div className="pb-8 sm:pb-4 w-full px-6 flex justify-center">
+        <div className="pb-8 sm:pb-4 md:pb-0 w-full px-6 flex justify-center">
           <button
             onClick={onLogin}
             className="group relative flex w-full max-w-[280px] sm:max-w-[240px] items-center justify-center space-x-3 bg-white text-black px-6 py-4 sm:py-3 rounded-2xl sm:rounded-xl font-black sm:font-bold text-base sm:text-sm hover:bg-brand-orange hover:text-black transition-all active:scale-95 shadow-xl shadow-brand-orange/10"
