@@ -2269,7 +2269,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               {activeFolder && (
                 <button
                   onClick={() => setIsRemoveConfirmationOpen(true)}
-                  className="flex items-center justify-center px-4 md:px-6 h-[44px] md:h-[48px] bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-[1.5rem] font-black text-sm md:text-base hover:scale-105 transition-all"
+                  className="flex items-center justify-center w-[44px] h-[44px] md:w-auto md:h-[48px] md:px-6 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-[1.5rem] font-black text-sm md:text-base hover:scale-105 transition-all shrink-0"
                 >
                   <Trash2 className="w-5 h-5 md:mr-2" />
                   <span className="hidden md:inline">Remove</span>
