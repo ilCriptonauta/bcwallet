@@ -12,19 +12,57 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Bacon Wallet - Let's Cook NFTs",
-  description: 'The ultimate hub to manage and create your digital Collectibles on MultiversX.',
+  title: {
+    default: "Bacon Wallet - Let's Cook NFTs",
+    template: "%s | Bacon Wallet"
+  },
+  description: 'The ultimate hub to manage, create and experience your digital Collectibles on MultiversX.',
   applicationName: 'Bacon Wallet',
+  authors: [{ name: 'OnionX Labs', url: 'https://x.com/onionxlabs' }],
+  generator: 'Next.js',
+  keywords: ['MultiversX', 'NFT', 'SFT', 'Wallet', 'Crypto', 'Web3', 'dApp', 'Bacon', 'OnionX'],
+  creator: 'OnionX Labs',
+  publisher: 'OnionX Labs',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
     type: 'website',
-    siteName: 'Bacon',
+    siteName: 'Bacon Wallet',
     title: "Bacon Wallet - Let's Cook NFTs",
-    description: 'The ultimate hub to manage and create your digital Collectibles on MultiversX.',
+    description: 'The ultimate hub to manage, create and experience your digital Collectibles on MultiversX.',
+    locale: 'en_US',
+    images: [{
+      url: '/bacon-icon.png', // The public application icon
+      width: 512,
+      height: 512,
+      alt: 'Bacon Wallet - MultiversX NFT Manager',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Bacon Wallet - Let's Cook NFTs",
     description: "The ultimate hub to manage and create your digital Collectibles on MultiversX.",
+    creator: '@onionxlabs',
+    images: ['/bacon-icon.png'],
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'Bacon',
+    statusBarStyle: 'black-translucent',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
