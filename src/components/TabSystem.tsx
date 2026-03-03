@@ -192,6 +192,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [folderDesc, setFolderDesc] = useState('');
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isRemoveConfirmationOpen, setIsRemoveConfirmationOpen] = useState(false);
   const [nftToMove, setNftToMove] = useState<NormalizedNft | null>(null);
   const [collectionFloorPrice, setCollectionFloorPrice] = useState<string | null>(null);
@@ -259,11 +260,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
   const handleShareFolder = (e: React.MouseEvent, folder: UserFolder) => {
     e.stopPropagation();
-    // Simplified sharing logic: copy current URL or a mock share URL
-    const mockUrl = `${window.location.origin}/folder/${folder.id}`;
-    navigator.clipboard.writeText(mockUrl).then(() => {
-      alert('Folder link copied to clipboard!');
-    });
+    setIsShareModalOpen(true);
     setOpenFolderMenuId(null);
   };
 
@@ -2372,6 +2369,34 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               >
                 <span>Create Now</span>
                 <Plus className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Coming Soon Modal */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsShareModalOpen(false)}></div>
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
+            <div className="flex flex-col items-center justify-center text-center space-y-6">
+              <div className="w-20 h-20 rounded-[2rem] bg-orange-500/10 flex items-center justify-center border border-orange-500/20 shadow-inner">
+                <Share2 className="w-10 h-10 text-orange-500" />
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white">Coming Soon</h3>
+                <p className="text-sm font-bold text-gray-500 dark:text-gray-400 leading-relaxed max-w-[280px] mx-auto">
+                  Folder sharing will be available in an upcoming update. Soon you'll be able to share your collections with everyone!
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsShareModalOpen(false)}
+                className="w-full mt-4 py-4 md:py-5 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10 font-black rounded-3xl hover:scale-[1.02] active:scale-95 transition-all"
+              >
+                Okay, got it
               </button>
             </div>
           </div>
