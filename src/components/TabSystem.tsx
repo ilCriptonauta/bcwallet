@@ -151,7 +151,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     }
     return 'Collectibles';
   });
-  const setViewMode = (v: ViewMode) => { setViewModeState(v); localStorage.setItem('bcw_viewMode', v); };
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -161,7 +160,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     }
     return 'Overview';
   });
-  const setActiveTab = (t: TabId) => { setActiveTabState(t); localStorage.setItem('bcw_activeTab', t); };
 
   const [activeFolder, setActiveFolder] = useState<UserFolder | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
@@ -176,7 +174,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     }
     return false;
   });
-  const setIsLargeGrid = (v: boolean) => { setIsLargeGridState(v); localStorage.setItem('bcw_isLargeGrid', String(v)); };
   const { network } = useGetNetworkConfig();
   const accountInfo = useGetAccountInfo();
   const walletAddress = accountInfo?.account?.address;
@@ -185,12 +182,51 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     folderContents: firebaseFolderContents,
     favorites: firebaseFavorites,
     isPro: firebaseIsPro,
+    preferences: firebasePreferences,
     createFolder: fbCreateFolder,
     deleteFolder: fbDeleteFolder,
     addItemToFolder: fbAddItemToFolder,
     removeItemFromFolder: fbRemoveItemFromFolder,
-    toggleFavorite: fbToggleFavorite
+    toggleFavorite: fbToggleFavorite,
+    updatePreferences: fbUpdatePreferences
   } = useFirebaseFolders(walletAddress);
+
+  // Sync Firestore preferences → local state (cross-device sync)
+  const prefsAppliedRef = React.useRef(false);
+  useEffect(() => {
+    if (!firebasePreferences || Object.keys(firebasePreferences).length === 0) return;
+    if (prefsAppliedRef.current) return;
+    prefsAppliedRef.current = true;
+    if (firebasePreferences.viewMode) {
+      setViewModeState(firebasePreferences.viewMode as ViewMode);
+      localStorage.setItem('bcw_viewMode', firebasePreferences.viewMode);
+    }
+    if (firebasePreferences.activeTab) {
+      setActiveTabState(firebasePreferences.activeTab as TabId);
+      localStorage.setItem('bcw_activeTab', firebasePreferences.activeTab);
+    }
+    if (firebasePreferences.isLargeGrid !== undefined) {
+      setIsLargeGridState(firebasePreferences.isLargeGrid);
+      localStorage.setItem('bcw_isLargeGrid', String(firebasePreferences.isLargeGrid));
+    }
+  }, [firebasePreferences]);
+
+  // Wrapper setters: localStorage (instant) + Firestore (sync)
+  const setViewMode = (v: ViewMode) => {
+    setViewModeState(v);
+    localStorage.setItem('bcw_viewMode', v);
+    fbUpdatePreferences({ viewMode: v });
+  };
+  const setActiveTab = (t: TabId) => {
+    setActiveTabState(t);
+    localStorage.setItem('bcw_activeTab', t);
+    fbUpdatePreferences({ activeTab: t });
+  };
+  const setIsLargeGrid = (v: boolean) => {
+    setIsLargeGridState(v);
+    localStorage.setItem('bcw_isLargeGrid', String(v));
+    fbUpdatePreferences({ isLargeGrid: v });
+  };
 
   const hasProAccess = firebaseIsPro || isFullVersion;
   const maxFolders = hasProAccess ? 50 : 3;

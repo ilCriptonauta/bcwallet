@@ -22,11 +22,18 @@ export interface UserFolder {
     previewImages: string[];
 }
 
+export interface UserPreferences {
+    viewMode?: string;
+    activeTab?: string;
+    isLargeGrid?: boolean;
+}
+
 export const useFirebaseFolders = (walletAddress: string | undefined) => {
     const [folders, setFolders] = useState<UserFolder[]>([]);
     const [folderContents, setFolderContents] = useState<Record<string, NormalizedNft[]>>({});
     const [favorites, setFavorites] = useState<NormalizedNft[]>([]);
     const [isPro, setIsPro] = useState(false);
+    const [preferences, setPreferences] = useState<UserPreferences>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -45,6 +52,9 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
                 const data = snap.data();
                 setIsPro(data.isPro || false);
                 setFavorites(data.favorites || []);
+                if (data.preferences) {
+                    setPreferences(data.preferences);
+                }
             } else {
                 setDoc(userRef, { isPro: false, favorites: [] }, { merge: true });
             }
@@ -245,5 +255,17 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
         }
     };
 
-    return { folders, folderContents, favorites, isPro, loading, createFolder, deleteFolder, addItemToFolder, removeItemFromFolder, toggleFavorite };
+    const updatePreferences = async (prefs: Partial<UserPreferences>) => {
+        if (!walletAddress) return;
+        const merged = { ...preferences, ...prefs };
+        setPreferences(merged);
+        try {
+            const userRef = doc(db, 'users', walletAddress);
+            await setDoc(userRef, { preferences: merged }, { merge: true });
+        } catch (err) {
+            console.error('Firebase updatePreferences error:', err);
+        }
+    };
+
+    return { folders, folderContents, favorites, isPro, preferences, loading, createFolder, deleteFolder, addItemToFolder, removeItemFromFolder, toggleFavorite, updatePreferences };
 };
