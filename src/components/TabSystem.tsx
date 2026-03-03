@@ -1680,14 +1680,22 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
           <div className="flex items-center gap-3 p-1.5 bg-white dark:bg-white/5 rounded-[2rem] border border-gray-100 dark:border-white/10 shadow-xl backdrop-blur-xl">
             <button
-              onClick={() => setViewMode('Collectibles')}
+              onClick={() => {
+                setViewMode('Collectibles');
+                setActiveTab('Overview');
+                setSearchQuery('');
+              }}
               className={`flex items-center gap-2 px-6 py-3.5 rounded-[1.5rem] text-sm font-black transition-all ${viewMode === 'Collectibles' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
             >
               <LayoutDashboard className="w-4 h-4" />
               <span>Collectibles</span>
             </button>
             <button
-              onClick={() => setViewMode('Management')}
+              onClick={() => {
+                setViewMode('Management');
+                setActiveFolder(null);
+                setSearchQuery('');
+              }}
               className={`flex items-center gap-2 px-6 py-3.5 rounded-[1.5rem] text-sm font-black transition-all ${viewMode === 'Management' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
             >
               <Folder className="w-4 h-4" />
