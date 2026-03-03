@@ -132,12 +132,13 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
 
         const foldersRef = collection(db, 'users', walletAddress, 'folders');
         try {
-            await addDoc(foldersRef, {
+            const docRef = await addDoc(foldersRef, {
                 name,
                 description,
                 items: [],
                 createdAt: new Date()
             });
+            return docRef.id;
         } catch (error) {
             // Revert state on error (note: onSnapshot will naturally sync this, but manual revert is safer for edge cases)
             setFolders(prev => prev.filter(f => f.id !== tempId));

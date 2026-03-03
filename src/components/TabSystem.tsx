@@ -234,7 +234,16 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       return;
     }
 
-    await fbCreateFolder(folderTitle, folderDesc);
+    const newFolderId = await fbCreateFolder(folderTitle, folderDesc);
+
+    if (newFolderId) {
+      if (isSelectionMode && selectedNfts.length > 0) {
+        handleMoveMultipleNfts(newFolderId);
+      } else if (nftToMove) {
+        handleMoveNft(newFolderId);
+      }
+    }
+
     setFolderTitle('');
     setFolderDesc('');
     setIsCreateModalOpen(false);
@@ -2173,7 +2182,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       {/* Move Modal */}
       {isMoveModalOpen && (
         <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsMoveModalOpen(false)}></div>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setIsMoveModalOpen(false); setNftToMove(null); }}></div>
           <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
@@ -2185,55 +2194,53 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Organize your collection</p>
                 </div>
               </div>
-              <button onClick={() => setIsMoveModalOpen(false)} className="p-3 hover:bg-gray-100 dark:hover:bg-white/5 rounded-2xl transition-all">
+              <button onClick={() => { setIsMoveModalOpen(false); setNftToMove(null); }} className="p-3 hover:bg-gray-100 dark:hover:bg-white/5 rounded-2xl transition-all">
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
 
             <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
-              {firebaseFolders.length === 0 ? (
+              <button
+                onClick={() => {
+                  if (firebaseFolders.length >= maxFolders) {
+                    alert(`You've reached the limit of ${maxFolders} folders!`);
+                    return;
+                  }
+                  setIsMoveModalOpen(false);
+                  setIsCreateModalOpen(true);
+                }}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-orange-50 dark:bg-orange-500/10 border-2 border-dashed border-orange-200 dark:border-orange-500/20 hover:border-orange-500/50 hover:bg-orange-500/20 transition-all text-left group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors shadow-sm text-orange-500 group-hover:shadow-orange-500/20">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-black text-orange-600 dark:text-orange-400 text-sm">Create New Folder</h4>
+                  <p className="text-[10px] text-orange-500/70 font-bold uppercase tracking-widest">Move instantly</p>
+                </div>
+              </button>
+
+              {firebaseFolders.map((folder) => (
                 <button
+                  key={folder.id}
                   onClick={() => {
-                    if (firebaseFolders.length >= maxFolders) {
-                      alert(`You've reached the limit of ${maxFolders} folders!`);
-                      return;
+                    if (isSelectionMode) {
+                      handleMoveMultipleNfts(folder.id);
+                    } else {
+                      handleMoveNft(folder.id);
                     }
-                    setIsMoveModalOpen(false);
-                    setIsCreateModalOpen(true);
                   }}
-                  className="flex flex-col items-center justify-center gap-4 p-8 rounded-[2rem] bg-gray-50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all text-center group"
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all text-left group"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                    <Plus className="w-8 h-8" />
+                  <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                    <Folder className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h4 className="font-black text-gray-900 dark:text-white text-sm">Create New Folder</h4>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Organize your collection</p>
+                  <div className="flex-1">
+                    <h4 className="font-black text-gray-900 dark:text-white text-sm">{folder.name}</h4>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{folder.itemCount} items</p>
                   </div>
                 </button>
-              ) : (
-                firebaseFolders.map((folder) => (
-                  <button
-                    key={folder.id}
-                    onClick={() => {
-                      if (isSelectionMode) {
-                        handleMoveMultipleNfts(folder.id);
-                      } else {
-                        handleMoveNft(folder.id);
-                      }
-                    }}
-                    className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all text-left group"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                      <Folder className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-black text-gray-900 dark:text-white text-sm">{folder.name}</h4>
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{folder.itemCount} items</p>
-                    </div>
-                  </button>
-                ))
-              )}
+              ))}
             </div>
           </div>
         </div>
@@ -2310,7 +2317,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       {/* Create Folder Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsCreateModalOpen(false)}></div>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setIsCreateModalOpen(false); setNftToMove(null); }}></div>
           <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
@@ -2322,7 +2329,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Organize your assets</p>
                 </div>
               </div>
-              <button onClick={() => setIsCreateModalOpen(false)} className="p-3 hover:bg-gray-100 dark:hover:bg-white/5 rounded-2xl transition-all">
+              <button onClick={() => { setIsCreateModalOpen(false); setNftToMove(null); }} className="p-3 hover:bg-gray-100 dark:hover:bg-white/5 rounded-2xl transition-all">
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
