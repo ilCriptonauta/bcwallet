@@ -1835,35 +1835,33 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <div className="shrink-0 p-6 pb-2 md:p-10 md:pb-4 space-y-6 md:space-y-8 bg-white dark:bg-[#121212] z-10 border-b border-gray-100 dark:border-white/5">
                 {/* Header Info */}
                 <div className="flex items-start justify-between">
-                  <div className="space-y-4 flex-1">
+                  <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
-                      <span className="px-4 py-1.5 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
+                      <h1 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white leading-tight">
+                        {selectedItem.name}
+                      </h1>
+                      <span className="px-3 py-1 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-sm shrink-0">
                         {selectedItem.type || 'NFT'}
                       </span>
                       {selectedItem.type === 'SFT' && parseInt(selectedItem.balance || '1') > 1 && (
-                        <span className="px-3 py-1.5 bg-orange-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                        <span className="px-2.5 py-1 bg-orange-500 text-white rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm shrink-0">
                           {selectedItem.balance} Assets
                         </span>
                       )}
                       {selectedItem.collection === 'BCNPASS-40e72d' && (
-                        <span className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-500 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
-                          Bacon Premium
+                        <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-sm shrink-0">
+                          Premium
                         </span>
                       )}
                     </div>
-                    <div>
-                      <h1 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white leading-tight">
-                        {selectedItem.name}
-                      </h1>
-                      <div className="flex items-center gap-2 mt-3 cursor-pointer group/id" onClick={() => {
-                        navigator.clipboard.writeText(selectedItem.identifier || '');
-                        alert('Identifier copied!');
-                      }}>
-                        <p className="text-[10px] text-gray-400 font-bold group-hover/id:text-orange-500 transition-colors">
-                          ID: {selectedItem.identifier?.slice(0, 16)}...
-                        </p>
-                        <Share2 className="w-3 h-3 text-gray-400" />
-                      </div>
+                    <div className="flex items-center gap-2 cursor-pointer group/id" onClick={() => {
+                      navigator.clipboard.writeText(selectedItem.identifier || '');
+                      alert('Identifier copied!');
+                    }}>
+                      <p className="text-[10px] text-gray-400 font-bold group-hover/id:text-orange-500 transition-colors">
+                        ID: {selectedItem.identifier?.slice(0, 16)}...
+                      </p>
+                      <Share2 className="w-3 h-3 text-gray-400" />
                     </div>
                   </div>
                   <button
@@ -1878,16 +1876,16 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               {/* Scrollable Content */}
               <div className="flex-1 overflow-y-auto scrollbar-hide p-6 md:p-10 pt-4 md:pt-6 space-y-8 md:space-y-10">
                 {/* Main Stats Card */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-5 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex flex-col justify-between group hover:border-orange-500/30 transition-all relative overflow-hidden">
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1 z-10 text-nowrap">Collection</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="px-4 py-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 group hover:border-orange-500/30 transition-all relative overflow-hidden">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5 z-10 text-nowrap">Collection</p>
                     <p className="text-xs font-black dark:text-white truncate z-10">{selectedItem.collection}</p>
-                    <Folder className="absolute -right-2 -bottom-2 w-10 h-10 text-gray-400/10 group-hover:text-orange-500/10 transition-colors" />
+                    <Folder className="absolute -right-1.5 -bottom-1.5 w-8 h-8 text-gray-400/10 group-hover:text-orange-500/10 transition-colors" />
                   </div>
-                  <div className="p-5 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex flex-col justify-between group hover:border-orange-500/30 transition-all relative overflow-hidden">
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1 z-10 text-nowrap">Floor Price</p>
+                  <div className="px-4 py-3 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 group hover:border-orange-500/30 transition-all relative overflow-hidden">
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-0.5 z-10 text-nowrap">Floor Price</p>
                     <p className="text-xs font-black dark:text-white z-10">{itemFloorPrice ?? '...'}</p>
-                    <Zap className="absolute -right-2 -bottom-2 w-10 h-10 text-gray-400/10 group-hover:text-orange-500/10 transition-colors" />
+                    <Zap className="absolute -right-1.5 -bottom-1.5 w-8 h-8 text-gray-400/10 group-hover:text-orange-500/10 transition-colors" />
                   </div>
                 </div>
 
@@ -1932,8 +1930,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 </div>
               </div>
 
-              {/* Action Footer - Fixed at bottom */}
-              <div className="shrink-0 px-6 pt-[22px] pb-[calc(30px+env(safe-area-inset-bottom))] md:px-8 md:pt-6 md:pb-8 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/10 flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3">
+              {/* Action Footer */}
+              <div className="shrink-0 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] md:px-6 md:py-4 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/10 flex items-center gap-2">
                 <button
                   onClick={(e) => {
                     setSelectedItem(null);
@@ -1948,19 +1946,19 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 h-[54px] bg-red-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-red-500/20 group/burn"
+                  className="flex-1 h-[44px] bg-red-500/10 dark:bg-red-500/15 text-red-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-red-500 hover:text-white active:scale-95 transition-all"
                   title="Burn Asset"
                 >
-                  <Flame className="w-4 h-4 group-hover/burn:scale-110 transition-transform" />
+                  <Flame className="w-4 h-4" />
                   <span className="hidden md:inline">Burn</span>
                 </button>
 
                 <button
                   onClick={(e) => handleDownload(e, selectedItem.imageUrl, selectedItem.name || 'nft')}
-                  className="flex-1 h-[54px] bg-slate-800 dark:bg-slate-700 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase md:normal-case tracking-wider md:tracking-normal flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-slate-800/20"
+                  className="flex-1 h-[44px] bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-gray-700 hover:text-white dark:hover:bg-white/20 active:scale-95 transition-all"
                 >
-                  <Download className="w-4 h-4 text-white" />
-                  <span className="hidden md:inline">Download</span>
+                  <Download className="w-4 h-4" />
+                  <span className="hidden md:inline">Save</span>
                 </button>
 
                 <button
@@ -1977,7 +1975,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 h-[54px] bg-blue-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-blue-500/20"
+                  className="flex-1 h-[44px] bg-blue-500/10 dark:bg-blue-500/15 text-blue-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-blue-500 hover:text-white active:scale-95 transition-all"
                 >
                   <Send className="w-4 h-4" />
                   <span className="hidden md:inline">Send</span>
@@ -1997,7 +1995,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 h-[54px] bg-orange-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-orange-500/20"
+                  className="flex-1 h-[44px] bg-orange-500/10 dark:bg-orange-500/15 text-orange-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-orange-500 hover:text-white active:scale-95 transition-all"
                 >
                   <DollarSign className="w-4 h-4" />
                   <span className="hidden md:inline">List</span>
