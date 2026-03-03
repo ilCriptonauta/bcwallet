@@ -1837,7 +1837,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 <div className="flex items-start justify-between">
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-3">
-                      <h1 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white leading-tight">
+                      <h1 className="text-[23px] md:text-[29px] font-black text-gray-900 dark:text-white leading-tight">
                         {selectedItem.name}
                       </h1>
                       <span className="px-3 py-1 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-sm shrink-0">

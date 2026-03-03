@@ -35,8 +35,8 @@ const Header: React.FC<HeaderProps> = ({
   const account = useGetAccountInfo()?.account;
   const address = account?.address;
   const balances = account?.balance
-    ? BigNumber(account.balance).dividedBy(1e18).toFixed(3)
-    : '0.000';
+    ? BigNumber(account.balance).dividedBy(1e18).toFixed(2)
+    : '0.00';
   const username = account?.username || 'User';
 
   // NFT portfolio value
@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-orange to-brand-yellow flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand-orange/20">
             <User className="w-5 h-5 text-black" />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="text-sm font-black text-slate-900 dark:text-white truncate">{username}</div>
             {isFullVersion && (
               <div className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-brand-orange to-brand-yellow shadow-sm">
@@ -82,6 +82,12 @@ const Header: React.FC<HeaderProps> = ({
               </div>
             )}
           </div>
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            className="md:hidden p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-all flex-shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -112,7 +118,7 @@ const Header: React.FC<HeaderProps> = ({
           <span className="text-sm font-black text-slate-900 dark:text-white">
             {nftsValueLoading
               ? <span className="inline-block w-16 h-4 bg-slate-200 dark:bg-white/10 rounded animate-pulse" />
-              : <>{nftsValue.toFixed(3)} <span className="text-[10px] text-slate-400 font-bold">EGLD</span></>}
+              : <>{nftsValue.toFixed(2)} <span className="text-[10px] text-slate-400 font-bold">EGLD</span></>}
           </span>
         </div>
       </div>
@@ -241,21 +247,6 @@ const Header: React.FC<HeaderProps> = ({
           <div
             className={`md:hidden fixed top-0 right-0 z-[160] h-full w-[85vw] max-w-sm bg-white dark:bg-[#111] border-l border-slate-100 dark:border-white/10 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
           >
-            {/* Drawer header bar */}
-            <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-slate-100 dark:border-white/5 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-orange to-brand-yellow flex items-center justify-center">
-                  <User className="w-3.5 h-3.5 text-black" />
-                </div>
-                <span className="text-sm font-black text-slate-900 dark:text-white">My Account</span>
-              </div>
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-all"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto py-2">
