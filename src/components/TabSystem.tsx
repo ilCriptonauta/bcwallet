@@ -207,6 +207,27 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
   // No longer needed: local localStorage effects removed since we use Firebase real-time sync.
 
+  // Lock body scroll when any modal is open (prevents iOS scroll-through)
+  const isAnyModalOpen = !!(selectedItem || isSendModalOpen || isSellModalOpen || isBurnModalOpen || isMoveModalOpen || isCreateModalOpen || isShareModalOpen || isRemoveConfirmationOpen);
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isAnyModalOpen]);
+
   // Fetch floor price when an NFT detail is opened
   useEffect(() => {
     if (selectedItem?.collection) {
@@ -1774,10 +1795,10 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       {/* NFT Detail Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 z-[300] flex items-end md:items-center justify-center p-0 md:p-10 animate-in fade-in duration-400">
+        <div className="fixed inset-0 z-[300] flex items-end md:items-center justify-center p-0 md:p-10 animate-in fade-in duration-400 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 md:bg-black/90 backdrop-blur-md md:backdrop-blur-3xl" onClick={() => setSelectedItem(null)}></div>
 
-          <div className="relative w-full max-w-5xl bg-white dark:bg-[#121212] rounded-t-[2.5rem] md:rounded-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_0_100px_rgba(249,115,22,0.15)] overflow-hidden border-t md:border border-gray-100 dark:border-white/10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-10 duration-500 flex flex-col md:flex-row h-[96dvh] md:h-[75vh] max-h-[100dvh]">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-[#121212] rounded-t-[2.5rem] md:rounded-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_0_100px_rgba(249,115,22,0.15)] overflow-hidden border-t md:border border-gray-100 dark:border-white/10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-10 duration-500 flex flex-col md:flex-row h-[100dvh] md:h-[75vh] max-h-[100dvh]" style={{ touchAction: 'auto' }}>
 
             {/* Mobile Drag Indicator */}
             <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full md:hidden z-50 pointer-events-none"></div>
@@ -1912,7 +1933,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
 
               {/* Action Footer - Fixed at bottom */}
-              <div className="shrink-0 px-6 pt-[22px] pb-[calc(30px+env(safe-area-inset-bottom))] md:px-8 md:pt-6 md:pb-8 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3 z-50">
+              <div className="shrink-0 px-6 pt-[22px] pb-[calc(30px+env(safe-area-inset-bottom))] md:px-8 md:pt-6 md:pb-8 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/10 flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3">
                 <button
                   onClick={(e) => {
                     setSelectedItem(null);
@@ -1989,9 +2010,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       {/* Asset Send Modal */}
       {isSendModalOpen && nftToSend && (
-        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsSendModalOpen(false)}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
@@ -2072,9 +2093,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       {/* Sell Modal */}
       {isSellModalOpen && nftToSell && (
-        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsSellModalOpen(false)}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
@@ -2186,9 +2207,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       {/* Move Modal */}
       {isMoveModalOpen && (
-        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setIsMoveModalOpen(false); setNftToMove(null); }}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
@@ -2284,9 +2305,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       {/* Remove Confirmation Modal */}
       {isRemoveConfirmationOpen && (
-        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsRemoveConfirmationOpen(false)}></div>
-          <div className="relative w-full max-w-sm bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-t border-gray-100 dark:border-white/10 md:border p-8 pb-10 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
+          <div className="relative w-full max-w-sm bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-t border-gray-100 dark:border-white/10 md:border p-8 pb-10 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shrink-0">
                 <Trash2 className="w-6 h-6 text-red-500" />
@@ -2321,9 +2342,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       {/* Create Folder Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setIsCreateModalOpen(false); setNftToMove(null); }}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
@@ -2377,9 +2398,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       {/* Share Coming Soon Modal */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsShareModalOpen(false)}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
             <div className="flex flex-col items-center justify-center text-center space-y-6">
               <div className="w-20 h-20 rounded-[2rem] bg-orange-500/10 flex items-center justify-center border border-orange-500/20 shadow-inner">
                 <Share2 className="w-10 h-10 text-orange-500" />
@@ -2403,9 +2424,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         </div>
       )}
       {isBurnModalOpen && nftToBurn && (
-        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsBurnModalOpen(false)}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300">
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
