@@ -1657,7 +1657,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c0e]">
+    <div className="min-h-[100dvh] bg-gray-50 dark:bg-[#0c0c0e]">
 
       {/* Header Section */}
       <div className="bg-gray-50/90 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 pt-6 pb-4 w-full px-4">
@@ -1763,7 +1763,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         <div className="fixed inset-0 z-[300] flex items-end md:items-center justify-center p-0 md:p-10 animate-in fade-in duration-400">
           <div className="absolute inset-0 bg-black/80 md:bg-black/90 backdrop-blur-md md:backdrop-blur-3xl" onClick={() => setSelectedItem(null)}></div>
 
-          <div className="relative w-full max-w-5xl bg-white dark:bg-[#121212] rounded-t-[2.5rem] md:rounded-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_0_100px_rgba(249,115,22,0.15)] overflow-hidden border-t md:border border-gray-100 dark:border-white/10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-10 duration-500 flex flex-col md:flex-row h-[96dvh] md:h-[75vh] max-h-screen">
+          <div className="relative w-full max-w-5xl bg-white dark:bg-[#121212] rounded-t-[2.5rem] md:rounded-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_0_100px_rgba(249,115,22,0.15)] overflow-hidden border-t md:border border-gray-100 dark:border-white/10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-10 duration-500 flex flex-col md:flex-row h-[96dvh] md:h-[75vh] max-h-[100dvh]">
 
             {/* Mobile Drag Indicator */}
             <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full md:hidden z-50 pointer-events-none"></div>

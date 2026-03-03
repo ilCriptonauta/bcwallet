@@ -78,7 +78,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col transition-colors duration-500 dark:bg-[#0c0c0e] bg-slate-50 text-slate-900 dark:text-white">
+    <div className="min-h-[100dvh] flex flex-col transition-colors duration-500 dark:bg-[#0c0c0e] bg-slate-50 text-slate-900 dark:text-white">
       <Header
         isDarkMode={isDarkMode}
         toggleTheme={() => setIsDarkMode(!isDarkMode)}
