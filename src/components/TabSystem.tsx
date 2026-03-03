@@ -145,16 +145,38 @@ const NftActivityHistory = ({ identifier }: { identifier: string }) => {
 };
 
 const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
-  const [viewMode, setViewMode] = useState<ViewMode>('Collectibles');
+  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('bcw_viewMode') as ViewMode) || 'Collectibles';
+    }
+    return 'Collectibles';
+  });
+  const setViewMode = (v: ViewMode) => { setViewModeState(v); localStorage.setItem('bcw_viewMode', v); };
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<TabId>('Overview');
+
+  const [activeTab, setActiveTabState] = useState<TabId>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('bcw_activeTab') as TabId) || 'Overview';
+    }
+    return 'Overview';
+  });
+  const setActiveTab = (t: TabId) => { setActiveTabState(t); localStorage.setItem('bcw_activeTab', t); };
+
   const [activeFolder, setActiveFolder] = useState<UserFolder | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [openFolderMenuId, setOpenFolderMenuId] = useState<string | number | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
   const [selectedNfts, setSelectedNfts] = useState<NormalizedNft[]>([]);
-  const [isLargeGrid, setIsLargeGrid] = useState(false);
+
+  const [isLargeGrid, setIsLargeGridState] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('bcw_isLargeGrid') === 'true';
+    }
+    return false;
+  });
+  const setIsLargeGrid = (v: boolean) => { setIsLargeGridState(v); localStorage.setItem('bcw_isLargeGrid', String(v)); };
   const { network } = useGetNetworkConfig();
   const accountInfo = useGetAccountInfo();
   const walletAddress = accountInfo?.account?.address;
@@ -1696,16 +1718,24 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-1.5 bg-white dark:bg-white/5 rounded-[2rem] border border-gray-100 dark:border-white/10 shadow-xl backdrop-blur-xl">
+          <div className="relative flex items-center p-1 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 shadow-lg backdrop-blur-xl">
+            {/* Sliding pill */}
+            <div
+              className="absolute top-1 bottom-1 rounded-full bg-orange-500 shadow-lg shadow-orange-500/20 transition-all duration-300 ease-out"
+              style={{
+                width: 'calc(50% - 4px)',
+                left: viewMode === 'Collectibles' ? '4px' : 'calc(50%)',
+              }}
+            />
             <button
               onClick={() => {
                 setViewMode('Collectibles');
                 setActiveTab('Overview');
                 setSearchQuery('');
               }}
-              className={`flex items-center gap-2 px-6 py-3.5 rounded-[1.5rem] text-sm font-black transition-all ${viewMode === 'Collectibles' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
+              className={`relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black transition-colors duration-300 ${viewMode === 'Collectibles' ? 'text-white' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
             >
-              <LayoutDashboard className="w-4 h-4" />
+              <LayoutDashboard className="w-3.5 h-3.5" />
               <span>Collectibles</span>
             </button>
             <button
@@ -1714,9 +1744,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 setActiveFolder(null);
                 setSearchQuery('');
               }}
-              className={`flex items-center gap-2 px-6 py-3.5 rounded-[1.5rem] text-sm font-black transition-all ${viewMode === 'Management' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
+              className={`relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black transition-colors duration-300 ${viewMode === 'Management' ? 'text-white' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
             >
-              <Folder className="w-4 h-4" />
+              <Folder className="w-3.5 h-3.5" />
               <span>Management</span>
             </button>
           </div>
@@ -1740,16 +1770,24 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 </button>
               )}
             </div>
-            <div className="flex items-center gap-1 p-1 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 shadow-sm shrink-0">
+            <div className="relative flex items-center p-1 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 shadow-sm shrink-0">
+              {/* Sliding pill */}
+              <div
+                className="absolute top-1 bottom-1 rounded-full bg-orange-500 shadow-md shadow-orange-500/20 transition-all duration-300 ease-out"
+                style={{
+                  width: 'calc(50% - 4px)',
+                  left: !isLargeGrid ? '4px' : 'calc(50%)',
+                }}
+              />
               <button
                 onClick={() => setIsLargeGrid(false)}
-                className={`p-2 rounded-full transition-all ${!isLargeGrid ? 'bg-orange-500 text-white shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                className={`relative z-10 p-2 rounded-full transition-colors duration-300 ${!isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setIsLargeGrid(true)}
-                className={`p-2 rounded-full transition-all ${isLargeGrid ? 'bg-orange-500 text-white shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                className={`relative z-10 p-2 rounded-full transition-colors duration-300 ${isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
               >
                 <Square className="w-4 h-4" />
               </button>
