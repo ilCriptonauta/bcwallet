@@ -151,14 +151,14 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
       {
         id: 'collection',
         title: "New Collection",
-        desc: "Initialize a collection identifier on the blockchain.",
+        desc: "Create a collection identifier on the blockchain.",
         icon: <Layers className="w-8 h-8 text-brand-orange" />,
         color: "from-brand-orange/20 to-brand-orange/5"
       },
       {
         id: 'asset',
-        title: "Create NFT",
-        desc: "Mint unique assets or SFTs directly into your collection.",
+        title: "Mint NFT/SFT",
+        desc: "Create single NFT or SFT directly into your collections.",
         icon: <Diamond className="w-8 h-8 text-brand-yellow" />,
         color: "from-brand-yellow/20 to-brand-yellow/5"
       }
@@ -687,8 +687,8 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
                     {/* Icon */}
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${col.type === 'NFT' ? 'bg-brand-orange/10' : 'bg-brand-yellow/10'}`}>
                       {col.type === 'NFT'
-                        ? <Layers className="w-5 h-5 text-brand-orange" />
-                        : <Diamond className="w-5 h-5 text-brand-yellow" />
+                        ? <Diamond className="w-5 h-5 text-brand-orange" />
+                        : <Layers className="w-5 h-5 text-brand-yellow" />
                       }
                     </div>
 
@@ -1375,8 +1375,8 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${col.type === 'NFT' ? 'bg-brand-orange/10' : 'bg-brand-yellow/10'}`}>
                           {col.type === 'NFT'
-                            ? <Layers className="w-5 h-5 text-brand-orange" />
-                            : <Diamond className="w-5 h-5 text-brand-yellow" />
+                            ? <Diamond className="w-5 h-5 text-brand-orange" />
+                            : <Layers className="w-5 h-5 text-brand-yellow" />
                           }
                         </div>
                         <div className="flex-1 min-w-0">
