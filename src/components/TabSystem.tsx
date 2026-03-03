@@ -1898,7 +1898,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
 
               {/* Action Footer - Fixed at bottom */}
-              <div className="shrink-0 p-6 pb-8 md:p-8 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3 z-50">
+              <div className="shrink-0 px-6 pt-[22px] pb-[calc(30px+env(safe-area-inset-bottom))] md:px-8 md:pt-6 md:pb-8 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 flex flex-wrap sm:flex-nowrap items-center gap-2 md:gap-3 z-50">
                 <button
                   onClick={(e) => {
                     setSelectedItem(null);
@@ -1913,7 +1913,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-red-500/20 group/burn"
+                  className="flex-1 h-[54px] bg-red-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-red-500/20 group/burn"
                   title="Burn Asset"
                 >
                   <Flame className="w-4 h-4 group-hover/burn:scale-110 transition-transform" />
@@ -1922,7 +1922,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
                 <button
                   onClick={(e) => handleDownload(e, selectedItem.imageUrl, selectedItem.name || 'nft')}
-                  className="flex-1 py-4 bg-slate-800 dark:bg-slate-700 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase md:normal-case tracking-wider md:tracking-normal flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-slate-800/20"
+                  className="flex-1 h-[54px] bg-slate-800 dark:bg-slate-700 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase md:normal-case tracking-wider md:tracking-normal flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-slate-800/20"
                 >
                   <Download className="w-4 h-4 text-white" />
                   <span className="hidden md:inline">Download</span>
@@ -1942,7 +1942,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-blue-500/20"
+                  className="flex-1 h-[54px] bg-blue-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-blue-500/20"
                 >
                   <Send className="w-4 h-4" />
                   <span className="hidden md:inline">Send</span>
@@ -1962,7 +1962,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-orange-500/20"
+                  className="flex-1 h-[54px] bg-orange-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-orange-500/20"
                 >
                   <DollarSign className="w-4 h-4" />
                   <span className="hidden md:inline">List</span>
