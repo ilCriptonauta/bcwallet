@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NormalizedNft, MultiversxNftApiItem, UseAccountNftsOptions } from './useAccountNfts';
-import { pickBestImageUrl, pickOriginalImageUrl } from './useAccountNfts';
+import { pickBestImageUrl, pickOriginalImageUrl, normalizeMediaUrl } from './useAccountNfts';
 import { useGetNetworkConfig } from '@/lib';
 
 import useSWRInfinite from 'swr/infinite';
@@ -59,6 +59,7 @@ export const useCollectionNfts = ({
       collectionName: nft.collectionName ? nft.collectionName.split('-')[0].trim() : (nft.collection ? nft.collection.split('-')[0].trim() : 'Unknown Collection'),
       imageUrl: pickBestImageUrl(nft),
       originalImageUrl: pickOriginalImageUrl(nft),
+      thumbnailUrl: nft.media?.[0]?.thumbnailUrl ? normalizeMediaUrl(nft.media[0].thumbnailUrl) : null,
       type: (nft.type === 'SemiFungibleESDT' || nft.type === 'MetaESDT') ? 'SFT' : 'NFT',
       balance: nft.balance,
       metadata: nft.metadata,

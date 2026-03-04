@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 type NftMediaProps = {
     src: string;
@@ -6,10 +6,18 @@ type NftMediaProps = {
     className?: string;
     mimeType?: string;
     loading?: "eager" | "lazy";
+    thumbnailFallback?: string;
 };
 
-export const NftMedia: React.FC<NftMediaProps> = ({ src, alt, className, mimeType, loading = 'lazy' }) => {
-    const isVideo = mimeType?.startsWith('video/') || src.endsWith('.mp4') || src.endsWith('.webm') || src.endsWith('.mov');
+export const NftMedia: React.FC<NftMediaProps> = ({ src, alt, className, mimeType, loading = 'lazy', thumbnailFallback }) => {
+    const [videoError, setVideoError] = useState(false);
+
+    const isVideo = !videoError && (
+        mimeType?.startsWith('video/') ||
+        /\.(mp4|webm|mov|ogv)(\?|$)/i.test(src)
+    );
+
+    const isSvg = mimeType === 'image/svg+xml' || /\.svg(\?|$)/i.test(src);
 
     if (isVideo) {
         return (
@@ -21,13 +29,33 @@ export const NftMedia: React.FC<NftMediaProps> = ({ src, alt, className, mimeTyp
                 muted
                 playsInline
                 title={alt}
+                onError={() => setVideoError(true)}
+                crossOrigin="anonymous"
             />
+        );
+    }
+
+    if (isSvg) {
+        return (
+            <object
+                data={src}
+                type="image/svg+xml"
+                className={className}
+                title={alt}
+            >
+                <img
+                    src={thumbnailFallback || src}
+                    alt={alt}
+                    className={className}
+                    loading={loading}
+                />
+            </object>
         );
     }
 
     return (
         <img
-            src={src}
+            src={videoError && thumbnailFallback ? thumbnailFallback : src}
             alt={alt}
             className={className}
             loading={loading}

@@ -13,6 +13,7 @@ import { useGetAccountInfo, Transaction, Address, useGetNetworkConfig } from '@/
 import { useAccountNfts, signAndSendTransactions, type NormalizedNft } from '@/helpers';
 import { useFirebaseFolders } from '@/hooks/useFirebaseFolders';
 import { NftMedia } from './NftMedia';
+import { useWebHaptics } from 'web-haptics/react';
 import {
   TokenTransfer,
   TransferTransactionsFactory,
@@ -37,6 +38,7 @@ interface SelectedItem {
   tab: string;
   imageUrl: string;
   originalImageUrl?: string | null;
+  thumbnailUrl?: string | null;
   mimeType?: string;
   identifier?: string;
   collection?: string;
@@ -145,6 +147,7 @@ const NftActivityHistory = ({ identifier }: { identifier: string }) => {
 };
 
 const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
+  const haptics = useWebHaptics();
   const [viewMode, setViewMode] = useState<ViewMode>('Collectibles');
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -249,6 +252,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [itemFloorPrice, setItemFloorPrice] = useState<string | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const isLongPressActive = useRef(false);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
 
   // No longer needed: local localStorage effects removed since we use Firebase real-time sync.
 
@@ -685,8 +689,13 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     });
   };
 
-  const startLongPress = (nft: NormalizedNft) => {
+  const startLongPress = (nft: NormalizedNft, e?: React.TouchEvent) => {
     isLongPressActive.current = false;
+    if (e?.touches?.[0]) {
+      touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    } else {
+      touchStartPos.current = null;
+    }
     longPressTimer.current = setTimeout(() => {
       isLongPressActive.current = true;
       setIsSelectionMode(true);
@@ -696,16 +705,23 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         }
         return prev;
       });
-      if (window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate(50);
-      }
-    }, 600);
+      haptics.trigger('medium');
+    }, 400);
   };
 
   const clearLongPress = () => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPos.current || !longPressTimer.current) return;
+    const dx = e.touches[0].clientX - touchStartPos.current.x;
+    const dy = e.touches[0].clientY - touchStartPos.current.y;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      clearLongPress();
     }
   };
 
@@ -960,6 +976,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       collection: nft.collection,
       imageUrl: nft.imageUrl || `https://picsum.photos/seed/NFTs-${index}/1200/1200`,
       originalImageUrl: nft.originalImageUrl,
+      thumbnailUrl: nft.thumbnailUrl,
       mimeType: nft.mimeType,
       name: nft.name,
       type: nft.type,
@@ -1080,7 +1097,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 onMouseDown={() => startLongPress(nft)}
                 onMouseUp={clearLongPress}
                 onMouseLeave={clearLongPress}
-                onTouchStart={() => startLongPress(nft)}
+                onTouchStart={(e) => startLongPress(nft, e)}
+                onTouchMove={handleTouchMove}
                 onTouchEnd={clearLongPress}
                 className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
               >
@@ -1108,6 +1126,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/400/400`}
                     alt={nft.name}
                     mimeType={nft.mimeType}
+                    thumbnailFallback={nft.thumbnailUrl || undefined}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
@@ -1164,7 +1183,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onMouseDown={() => startLongPress(nft)}
                   onMouseUp={clearLongPress}
                   onMouseLeave={clearLongPress}
-                  onTouchStart={() => startLongPress(nft)}
+                  onTouchStart={(e) => startLongPress(nft, e)}
+                  onTouchMove={handleTouchMove}
                   onTouchEnd={clearLongPress}
                   className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                 >
@@ -1183,6 +1203,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       src={imageUrl}
                       alt={nft.name}
                       mimeType={nft.mimeType}
+                      thumbnailFallback={nft.thumbnailUrl || undefined}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       loading="lazy"
                     />
@@ -1260,6 +1281,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                           src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/200/200`}
                           alt="preview"
                           mimeType={nft.mimeType}
+                          thumbnailFallback={nft.thumbnailUrl || undefined}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                         {isTop && (
@@ -1311,7 +1333,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     onMouseDown={() => startLongPress(nft)}
                     onMouseUp={clearLongPress}
                     onMouseLeave={clearLongPress}
-                    onTouchStart={() => startLongPress(nft)}
+                    onTouchStart={(e) => startLongPress(nft, e)}
+                    onTouchMove={handleTouchMove}
                     onTouchEnd={clearLongPress}
                     className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
                   >
@@ -1330,6 +1353,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                         src={imageUrl}
                         alt={nft.name}
                         mimeType={nft.mimeType}
+                        thumbnailFallback={nft.thumbnailUrl || undefined}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
                       />
@@ -1395,7 +1419,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 onMouseDown={() => startLongPress(nft)}
                 onMouseUp={clearLongPress}
                 onMouseLeave={clearLongPress}
-                onTouchStart={() => startLongPress(nft)}
+                onTouchStart={(e) => startLongPress(nft, e)}
+                onTouchMove={handleTouchMove}
                 onTouchEnd={clearLongPress}
                 className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}
               >
@@ -1414,6 +1439,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     src={imageUrl}
                     alt={nft.name}
                     mimeType={nft.mimeType}
+                    thumbnailFallback={nft.thumbnailUrl || undefined}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
                   />
@@ -1495,7 +1521,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     onMouseDown={() => startLongPress(nft)}
                     onMouseUp={clearLongPress}
                     onMouseLeave={clearLongPress}
-                    onTouchStart={() => startLongPress(nft)}
+                    onTouchStart={(e) => startLongPress(nft, e)}
+                    onTouchMove={handleTouchMove}
                     onTouchEnd={clearLongPress}
                     className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
                     <div className="aspect-square bg-gray-100 dark:bg-zinc-800/50 overflow-hidden relative">
@@ -1513,6 +1540,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                         src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/400/400`}
                         alt={nft.name}
                         mimeType={nft.mimeType}
+                        thumbnailFallback={nft.thumbnailUrl || undefined}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
 
@@ -1577,7 +1605,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   onMouseDown={() => startLongPress(nft)}
                   onMouseUp={clearLongPress}
                   onMouseLeave={clearLongPress}
-                  onTouchStart={() => startLongPress(nft)}
+                  onTouchStart={(e) => startLongPress(nft, e)}
+                  onTouchMove={handleTouchMove}
                   onTouchEnd={clearLongPress}
                   className={`nft-card group relative cursor-pointer overflow-hidden rounded-3xl bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 active:scale-[0.98] ${selectedNfts.some(n => n.identifier === nft.identifier) ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-gray-100 dark:border-white/5'}`}>
                   <div className="aspect-square bg-gray-100 dark:bg-zinc-800/50 overflow-hidden relative">
@@ -1595,6 +1624,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/400/400`}
                       alt={nft.name}
                       mimeType={nft.mimeType}
+                      thumbnailFallback={nft.thumbnailUrl || undefined}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
 
@@ -1903,6 +1933,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   src={selectedItem.originalImageUrl || selectedItem.imageUrl}
                   alt={selectedItem.name || ''}
                   mimeType={selectedItem.mimeType}
+                  thumbnailFallback={selectedItem.thumbnailUrl || undefined}
                   className="max-w-full max-h-full w-auto h-auto object-contain xl:object-cover rounded-xl md:rounded-[2rem] drop-shadow-2xl transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
@@ -2026,6 +2057,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       collectionName: selectedItem.collection!,
                       imageUrl: selectedItem.imageUrl,
                       originalImageUrl: selectedItem.originalImageUrl || null,
+                      thumbnailUrl: selectedItem.thumbnailUrl || null,
                       type: selectedItem.type!,
                       balance: selectedItem.balance
                     }), 100);
@@ -2055,6 +2087,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       collectionName: selectedItem.collection!,
                       imageUrl: selectedItem.imageUrl,
                       originalImageUrl: selectedItem.originalImageUrl || null,
+                      thumbnailUrl: selectedItem.thumbnailUrl || null,
                       type: selectedItem.type!,
                       balance: selectedItem.balance
                     }), 100);
@@ -2075,6 +2108,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       collectionName: selectedItem.collection!,
                       imageUrl: selectedItem.imageUrl,
                       originalImageUrl: selectedItem.originalImageUrl || null,
+                      thumbnailUrl: selectedItem.thumbnailUrl || null,
                       type: selectedItem.type!,
                       balance: selectedItem.balance
                     }), 100);

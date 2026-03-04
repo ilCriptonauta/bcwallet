@@ -31,13 +31,14 @@ export type NormalizedNft = {
   collectionName: string;
   imageUrl: string | null;
   originalImageUrl: string | null;
+  thumbnailUrl: string | null;
   type: 'NFT' | 'SFT' | 'MetaESDT';
   balance?: string;
   metadata?: Record<string, any>;
   mimeType?: string;
 };
 
-const normalizeMediaUrl = (url: string): string => {
+export const normalizeMediaUrl = (url: string): string => {
   if (url.startsWith('ipfs://')) {
     return `https://ipfs.io/ipfs/${url.replace('ipfs://', '')}`;
   }
@@ -142,6 +143,7 @@ export const useAccountNfts = ({
       collectionName: nft.collectionName ? nft.collectionName.split('-')[0].trim() : (nft.collection ? nft.collection.split('-')[0].trim() : 'Unknown Collection'),
       imageUrl: pickBestImageUrl(nft),
       originalImageUrl: pickOriginalImageUrl(nft),
+      thumbnailUrl: nft.media?.[0]?.thumbnailUrl ? normalizeMediaUrl(nft.media[0].thumbnailUrl) : null,
       type: nft.type === 'SemiFungibleESDT' ? 'SFT' : nft.type === 'MetaESDT' ? 'MetaESDT' : 'NFT',
       balance: nft.balance,
       metadata: nft.metadata,
