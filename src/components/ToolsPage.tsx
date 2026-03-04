@@ -63,6 +63,27 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
   const { address } = useGetAccountInfo();
   const { network } = useGetNetworkConfig();
   const [userCollections, setUserCollections] = useState<Array<{ id: string, name: string, type: string }>>([]);
+
+  // Lock body scroll when any modal is open (prevents iOS scroll-through)
+  const isAnyToolsModalOpen = !!(modalType || showSetRoleModal);
+  useEffect(() => {
+    if (isAnyToolsModalOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isAnyToolsModalOpen]);
   const [isFetchingCollections, setIsFetchingCollections] = useState(false);
   const [selectedCollectionDetails, setSelectedCollectionDetails] = useState<any | null>(null);
   const [isFetchingCollectionDetails, setIsFetchingCollectionDetails] = useState(false);
