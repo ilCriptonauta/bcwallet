@@ -725,6 +725,26 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const folderMenuRef = useRef<HTMLDivElement>(null);
 
+  // Tab sliding indicator
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [tabIndicatorStyle, setTabIndicatorStyle] = useState<React.CSSProperties>({ left: 0, width: 0, opacity: 0 });
+
+  useEffect(() => {
+    const activeEl = tabRefs.current[activeTab];
+    if (activeEl) {
+      const parent = activeEl.parentElement;
+      if (parent) {
+        const parentRect = parent.getBoundingClientRect();
+        const elRect = activeEl.getBoundingClientRect();
+        setTabIndicatorStyle({
+          left: elRect.left - parentRect.left,
+          width: elRect.width,
+          opacity: 1,
+        });
+      }
+    }
+  }, [activeTab, viewMode]);
+
   const dynamicUserFolders: UserFolder[] = [
     {
       id: "favorites",
@@ -1819,24 +1839,27 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
           {/* Horizontal Tabs */}
           {viewMode === 'Collectibles' && (
-            <div className="flex items-center justify-start md:justify-center gap-6 md:gap-8 overflow-x-auto scrollbar-hide no-scrollbar w-full px-1">
+            <div className="relative flex items-center justify-center gap-6 md:gap-8 overflow-x-auto scrollbar-hide no-scrollbar w-full px-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
+                  ref={(el) => { tabRefs.current[tab.id] = el; }}
                   onClick={() => {
                     setActiveTab(tab.id);
                     setActiveCollectionId(null);
                   }}
-                  className="relative pb-2 group"
+                  className="relative pb-2 group whitespace-nowrap"
                 >
                   <span className={`text-sm font-black transition-colors ${activeTab === tab.id ? 'text-gray-900 dark:text-white' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200'}`}>
                     {tab.label}
                   </span>
-                  {activeTab === tab.id && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-orange-500 rounded-full animate-in fade-in slide-in-from-left-4 duration-300" />
-                  )}
                 </button>
               ))}
+              {/* Sliding underline */}
+              <div
+                className="absolute bottom-0 h-1 bg-orange-500 rounded-full transition-all duration-300 ease-out"
+                style={tabIndicatorStyle}
+              />
             </div>
           )}
 
