@@ -47,13 +47,17 @@ export const normalizeMediaUrl = (url: string): string => {
 
 export const pickBestImageUrl = (nft: MultiversxNftApiItem): string | null => {
   const fileType = nft.media?.[0]?.fileType || '';
-  const isVideoOrGif = fileType.startsWith('video/') || fileType === 'image/gif';
+  const isVideoOrGif =
+    fileType.startsWith('video/') ||
+    fileType === 'image/gif' ||
+    /\.(mp4|webm|mov|ogv|gif)(\?|$)/i.test(nft.media?.[0]?.url || '') ||
+    /\.(mp4|webm|mov|ogv|gif)(\?|$)/i.test(nft.url || '');
 
   let candidate;
   if (isVideoOrGif) {
     candidate =
-      nft.media?.[0]?.originalUrl ||
       nft.media?.[0]?.url ||
+      nft.media?.[0]?.originalUrl ||
       nft.url ||
       nft.media?.[0]?.thumbnailUrl;
   } else {
@@ -132,24 +136,31 @@ export const useAccountNfts = ({
     }
   );
 
+  const [optimisticOverrides, setOptimisticOverrides] = useState<Record<string, { balance?: string; removed?: boolean }>>({});
+
   const flatData = useMemo(() => {
     if (!data) return [];
 
     const raw = data.flat();
-    return raw.map((nft) => ({
-      identifier: nft.identifier,
-      name: nft.name ? nft.name.split('-')[0].trim() : (nft.identifier ? nft.identifier.split('-')[0].trim() : ''),
-      collection: nft.collection || '',
-      collectionName: nft.collectionName ? nft.collectionName.split('-')[0].trim() : (nft.collection ? nft.collection.split('-')[0].trim() : 'Unknown Collection'),
-      imageUrl: pickBestImageUrl(nft),
-      originalImageUrl: pickOriginalImageUrl(nft),
-      thumbnailUrl: nft.media?.[0]?.thumbnailUrl ? normalizeMediaUrl(nft.media[0].thumbnailUrl) : null,
-      type: nft.type === 'SemiFungibleESDT' ? 'SFT' : nft.type === 'MetaESDT' ? 'MetaESDT' : 'NFT',
-      balance: nft.balance,
-      metadata: nft.metadata,
-      mimeType: nft.media?.[0]?.fileType,
-    })) as NormalizedNft[];
-  }, [data]);
+    return raw.map((nft) => {
+      const overrides = optimisticOverrides[nft.identifier];
+      if (overrides?.removed) return null;
+
+      return {
+        identifier: nft.identifier,
+        name: nft.name ? nft.name.split('-')[0].trim() : (nft.identifier ? nft.identifier.split('-')[0].trim() : ''),
+        collection: nft.collection || '',
+        collectionName: nft.collectionName ? nft.collectionName.split('-')[0].trim() : (nft.collection ? nft.collection.split('-')[0].trim() : 'Unknown Collection'),
+        imageUrl: pickBestImageUrl(nft),
+        originalImageUrl: pickOriginalImageUrl(nft),
+        thumbnailUrl: nft.media?.[0]?.thumbnailUrl ? normalizeMediaUrl(nft.media[0].thumbnailUrl) : null,
+        type: nft.type === 'SemiFungibleESDT' ? 'SFT' : nft.type === 'MetaESDT' ? 'MetaESDT' : 'NFT',
+        balance: overrides?.balance ?? nft.balance,
+        metadata: nft.metadata,
+        mimeType: nft.media?.[0]?.fileType,
+      };
+    }).filter(Boolean) as NormalizedNft[];
+  }, [data, optimisticOverrides]);
 
   const isEmpty = data?.[0]?.length === 0;
   const isReachingEnd =
@@ -162,15 +173,29 @@ export const useAccountNfts = ({
     }
   }, [isReachingEnd, isValidating, size, setSize]);
 
-  // Provide a setter to locally mutate the flattened data array
-  // useful for optimistic UI if needed
   const setItems = useCallback(
     (updater: (prev: NormalizedNft[]) => NormalizedNft[]) => {
-      // In SWR infinite, to fully optimistically update nested pages we'd need complex mutate logic.
-      // Easiest approach for a simple refresh is just to trigger revalidation.
-      mutate();
+      setOptimisticOverrides(prevOverrides => {
+        const prevNormalized = [...flatData];
+        const nextNormalized = updater(prevNormalized);
+
+        const nextIds = new Set(nextNormalized.map(n => n.identifier));
+        const newOverrides = { ...prevOverrides };
+
+        for (const prev of prevNormalized) {
+          if (!nextIds.has(prev.identifier)) {
+            newOverrides[prev.identifier] = { removed: true };
+          } else {
+            const next = nextNormalized.find(n => n.identifier === prev.identifier);
+            if (next && next.balance !== prev.balance) {
+              newOverrides[prev.identifier] = { balance: next.balance };
+            }
+          }
+        }
+        return newOverrides;
+      });
     },
-    [mutate]
+    [flatData]
   );
 
   const reset = useCallback(() => {

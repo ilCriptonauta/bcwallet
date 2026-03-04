@@ -184,7 +184,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     createFolder: fbCreateFolder,
     deleteFolder: fbDeleteFolder,
     addItemToFolder: fbAddItemToFolder,
+    addItemsToFolder: fbAddItemsToFolder,
     removeItemFromFolder: fbRemoveItemFromFolder,
+    removeItemsFromFolder: fbRemoveItemsFromFolder,
     toggleFavorite: fbToggleFavorite,
     updatePreferences: fbUpdatePreferences
   } = useFirebaseFolders(walletAddress);
@@ -233,7 +235,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [burnQuantity, setBurnQuantity] = useState('1');
   const [sellPrice, setSellPrice] = useState('');
   const [selectedPaymentToken, setSelectedPaymentToken] = useState('EGLD');
-  const [userTokens, setUserTokens] = useState<{ identifier: string; balance: string }[]>([]);
   const [recipient, setRecipient] = useState('');
   const [sendQuantity, setSendQuantity] = useState('1');
   const [folderTitle, setFolderTitle] = useState('');
@@ -533,16 +534,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     setSelectedPaymentToken('EGLD');
     setIsSellModalOpen(true);
     setOpenMenuId(null);
-
-    // Fetch user's fungible tokens to validate payment token ownership
-    if (walletAddress) {
-      fetch(`${network.apiAddress}/accounts/${walletAddress}/tokens?size=100`)
-        .then(res => res.json())
-        .then((tokens: { identifier: string; balance: string }[]) => {
-          setUserTokens(tokens);
-        })
-        .catch(() => setUserTokens([]));
-    }
   };
 
   const handleSellNft = async () => {
@@ -552,6 +543,11 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       const toHex = (str: string) => Array.from(new TextEncoder().encode(str))
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
+
+      const hexToUint8Array = (hex: string) => {
+        const matches = hex.match(/.{1,2}/g);
+        return new Uint8Array(matches ? matches.map(byte => parseInt(byte, 16)) : []);
+      };
 
       const priceBN = new BigNumber(sellPrice);
       const tokenConfig = OOX_PAYMENT_TOKENS.find(t => t.identifier === selectedPaymentToken);
@@ -571,6 +567,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       let deadlineHex = deadline.toString(16);
       if (deadlineHex.length % 2 !== 0) deadlineHex = '0' + deadlineHex;
 
+      let paymentTokenHex = toHex(selectedPaymentToken);
+
       const transfer = new TokenTransfer({
         token: new Token({ identifier: collection, nonce: BigInt(nonce) }),
         amount: BigInt(nftToSell.type === 'NFT' ? 1 : 1)
@@ -585,10 +583,10 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           contract: new Address(OOX_CONTRACT_ADDRESS),
           function: 'auctionToken',
           arguments: [
-            BigInt(priceRaw), // min_bid
-            BigInt(priceRaw), // max_bid
-            BigInt(deadline),
-            selectedPaymentToken,
+            hexToUint8Array(priceHex), // min_bid
+            hexToUint8Array(priceHex), // max_bid
+            hexToUint8Array(deadlineHex),
+            hexToUint8Array(paymentTokenHex),
           ],
           tokenTransfers: [transfer],
           gasLimit: 15000000n,
@@ -637,7 +635,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const handleMoveMultipleNfts = async (targetFolderId: string | number) => {
     if (selectedNfts.length === 0) return;
 
-    await Promise.all(selectedNfts.map((nft) => fbAddItemToFolder(targetFolderId.toString(), nft)));
+    await fbAddItemsToFolder(targetFolderId.toString(), selectedNfts);
 
     if (activeFolder && activeFolder.id !== targetFolderId.toString()) {
       if (activeFolder.id === 'favorites') {
@@ -647,7 +645,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           }
         }
       } else {
-        await Promise.all(selectedNfts.map((nft) => fbRemoveItemFromFolder(activeFolder.id.toString(), nft.identifier)));
+        await fbRemoveItemsFromFolder(activeFolder.id.toString(), selectedNfts.map(nft => nft.identifier));
       }
     }
 
@@ -667,7 +665,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         }
       }
     } else {
-      await Promise.all(selectedNfts.map((nft) => fbRemoveItemFromFolder(activeFolder.id.toString(), nft.identifier)));
+      await fbRemoveItemsFromFolder(activeFolder.id.toString(), selectedNfts.map(nft => nft.identifier));
     }
 
     setIsSelectionMode(false);
@@ -1804,6 +1802,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               onClick={() => {
                 setViewMode('Collectibles');
                 setActiveTab('Overview');
+                setActiveCollectionId(null);
                 setSearchQuery('');
               }}
               className={`relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black transition-colors duration-300 ${viewMode === 'Collectibles' ? 'text-white' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
@@ -1926,7 +1925,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </button>
 
             {/* Left Side: Large Image Preview */}
-            <div className="w-full md:w-[45%] shrink-0 h-[45%] sm:h-[50%] md:h-full relative group bg-[#080808] flex items-center justify-center p-0 md:p-8">
+            <div className="w-full md:w-[45%] shrink-0 h-[45%] sm:h-[50%] md:h-full relative group bg-white dark:bg-[#080808] flex items-center justify-center p-0 md:p-8">
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-all duration-500" />
               <div className="relative z-0 w-full h-full flex items-center justify-center">
                 <NftMedia
@@ -2287,33 +2286,23 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                         </select>
                       </div>
                     </div>
-                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest px-1">Choose your preferred payment token</p>
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest px-1">Choose your preferred token</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {(() => {
-              const isEgld = selectedPaymentToken === 'EGLD';
-              const hasToken = isEgld || userTokens.some(t => t.identifier === selectedPaymentToken && BigInt(t.balance) > 0n);
-              const canList = !!sellPrice && hasToken;
+              const canList = !!sellPrice;
               return (
-                <>
-                  {!hasToken && !isEgld && (
-                    <div className="flex items-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-2xl mb-3">
-                      <Lock className="w-4 h-4 text-red-500 flex-shrink-0" />
-                      <p className="text-xs text-red-500 font-bold">The selected token is not present in your wallet.</p>
-                    </div>
-                  )}
-                  <button
-                    onClick={handleSellNft}
-                    disabled={!canList}
-                    className="w-full py-5 bg-gradient-to-r from-orange-500 to-yellow-500 text-gray-900 font-black rounded-3xl shadow-2xl shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
-                  >
-                    <span>List Now</span>
-                    <DollarSign className="w-5 h-5" />
-                  </button>
-                </>
+                <button
+                  onClick={handleSellNft}
+                  disabled={!canList}
+                  className="w-full py-5 bg-gradient-to-r from-orange-500 to-yellow-500 text-gray-900 font-black rounded-3xl shadow-2xl shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+                >
+                  <span>List Now</span>
+                  <DollarSign className="w-5 h-5" />
+                </button>
               );
             })()}
             <p className="text-[10px] text-gray-500 font-bold text-center mt-6 uppercase tracking-widest">Powered by <a href="https://oox.art" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">oox.art</a></p>

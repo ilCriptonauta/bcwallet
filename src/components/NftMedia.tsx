@@ -48,6 +48,14 @@ export const NftMedia: React.FC<NftMediaProps> = ({ src, alt, className, mimeTyp
                     alt={alt}
                     className={className}
                     loading={loading}
+                    onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (thumbnailFallback && target.src !== thumbnailFallback) {
+                            target.src = thumbnailFallback;
+                        } else {
+                            target.src = `https://picsum.photos/seed/${alt.replace(/\s/g, '').toLowerCase()}/400/400`;
+                        }
+                    }}
                 />
             </object>
         );
@@ -59,6 +67,14 @@ export const NftMedia: React.FC<NftMediaProps> = ({ src, alt, className, mimeTyp
             alt={alt}
             className={className}
             loading={loading}
+            onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                if (!videoError && thumbnailFallback && target.src !== thumbnailFallback) {
+                    target.src = thumbnailFallback;
+                } else {
+                    target.src = `https://picsum.photos/seed/${alt.replace(/\s/g, '').toLowerCase()}/400/400`;
+                }
+            }}
         />
     );
 };

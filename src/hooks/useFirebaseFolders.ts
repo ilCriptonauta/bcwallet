@@ -224,6 +224,39 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
         }
     };
 
+    const addItemsToFolder = async (folderId: string, nfts: NormalizedNft[]) => {
+        if (!walletAddress || nfts.length === 0) return;
+
+        const currentItems = folderContents[folderId] || [];
+        const newItemsToAdd = nfts.filter(nft => !currentItems.some(item => item.identifier === nft.identifier)).map(n => JSON.parse(JSON.stringify(n)));
+
+        if (newItemsToAdd.length === 0) return;
+
+        const newItems = [...currentItems, ...newItemsToAdd];
+
+        setFolderContents(prev => ({ ...prev, [folderId]: newItems }));
+        setFolders(prev => prev.map(f => f.id === folderId ? { ...f, itemCount: newItems.length, previewImages: newItems.slice(0, 4).map(i => i.imageUrl || i.identifier) } : f));
+
+        try {
+            const folderRef = doc(db, 'users', walletAddress, 'folders', folderId);
+            const snap = await getDoc(folderRef);
+            if (snap.exists()) {
+                const remoteItems = snap.data().items || [];
+                const missingRemoteItems = newItemsToAdd.filter(nft => !remoteItems.find((item: NormalizedNft) => item.identifier === nft.identifier));
+
+                if (missingRemoteItems.length > 0) {
+                    await updateDoc(folderRef, {
+                        items: [...remoteItems, ...missingRemoteItems]
+                    });
+                }
+            }
+        } catch (err: unknown) {
+            setFolderContents(prev => ({ ...prev, [folderId]: currentItems }));
+            setFolders(prev => prev.map(f => f.id === folderId ? { ...f, itemCount: currentItems.length, previewImages: currentItems.slice(0, 4).map(i => i.imageUrl || i.identifier) } : f));
+            console.error("Firebase addItemsToFolder error:", err);
+        }
+    };
+
     const removeItemFromFolder = async (folderId: string, nftIdentifier: string) => {
         if (!walletAddress) return;
 
@@ -255,6 +288,33 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
         }
     };
 
+    const removeItemsFromFolder = async (folderId: string, nftIdentifiers: string[]) => {
+        if (!walletAddress || nftIdentifiers.length === 0) return;
+
+        const currentItems = folderContents[folderId] || [];
+        const identifiersSet = new Set(nftIdentifiers);
+        const updatedItems = currentItems.filter(item => !identifiersSet.has(item.identifier));
+
+        if (updatedItems.length === currentItems.length) return;
+
+        setFolderContents(prev => ({ ...prev, [folderId]: updatedItems }));
+        setFolders(prev => prev.map(f => f.id === folderId ? { ...f, itemCount: updatedItems.length, previewImages: updatedItems.slice(0, 4).map(i => i.imageUrl || i.identifier) } : f));
+
+        try {
+            const folderRef = doc(db, 'users', walletAddress, 'folders', folderId);
+            const snap = await getDoc(folderRef);
+            if (snap.exists()) {
+                const remoteItems = snap.data().items || [];
+                const finalItems = remoteItems.filter((item: NormalizedNft) => !identifiersSet.has(item.identifier));
+                await updateDoc(folderRef, { items: finalItems });
+            }
+        } catch (err: unknown) {
+            setFolderContents(prev => ({ ...prev, [folderId]: currentItems }));
+            setFolders(prev => prev.map(f => f.id === folderId ? { ...f, itemCount: currentItems.length, previewImages: currentItems.slice(0, 4).map(i => i.imageUrl || i.identifier) } : f));
+            console.error("Firebase removeItemsFromFolder error:", err);
+        }
+    };
+
     const updatePreferences = async (prefs: Partial<UserPreferences>) => {
         if (!walletAddress) return;
         const merged = { ...preferences, ...prefs };
@@ -267,5 +327,5 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
         }
     };
 
-    return { folders, folderContents, favorites, isPro, preferences, loading, createFolder, deleteFolder, addItemToFolder, removeItemFromFolder, toggleFavorite, updatePreferences };
+    return { folders, folderContents, favorites, isPro, preferences, loading, createFolder, deleteFolder, addItemToFolder, addItemsToFolder, removeItemFromFolder, removeItemsFromFolder, toggleFavorite, updatePreferences };
 };
