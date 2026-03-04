@@ -145,12 +145,7 @@ const NftActivityHistory = ({ identifier }: { identifier: string }) => {
 };
 
 const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
-  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('bcw_viewMode') as ViewMode) || 'Collectibles';
-    }
-    return 'Collectibles';
-  });
+  const [viewMode, setViewMode] = useState<ViewMode>('Collectibles');
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -197,10 +192,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     if (!firebasePreferences || Object.keys(firebasePreferences).length === 0) return;
     if (prefsAppliedRef.current) return;
     prefsAppliedRef.current = true;
-    if (firebasePreferences.viewMode) {
-      setViewModeState(firebasePreferences.viewMode as ViewMode);
-      localStorage.setItem('bcw_viewMode', firebasePreferences.viewMode);
-    }
+
     if (firebasePreferences.activeTab) {
       setActiveTabState(firebasePreferences.activeTab as TabId);
       localStorage.setItem('bcw_activeTab', firebasePreferences.activeTab);
@@ -211,12 +203,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     }
   }, [firebasePreferences]);
 
-  // Wrapper setters: localStorage (instant) + Firestore (sync)
-  const setViewMode = (v: ViewMode) => {
-    setViewModeState(v);
-    localStorage.setItem('bcw_viewMode', v);
-    fbUpdatePreferences({ viewMode: v });
-  };
+
   const setActiveTab = (t: TabId) => {
     setActiveTabState(t);
     localStorage.setItem('bcw_activeTab', t);
