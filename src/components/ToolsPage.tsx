@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useGetAccountInfo, Transaction, Address, useGetNetworkConfig } from '@/lib';
+import { useGetAccountInfo, Transaction, Address, useGetNetworkConfig, useGetSuccessfulTransactionsSessions } from '@/lib';
 import { SmartContractTransactionsFactory, TransactionsFactoryConfig, TokenTransfer, TokenManagementTransactionsFactory } from '@multiversx/sdk-core';
 import { signAndSendTransactions } from '@/helpers';
 import {
   Layers, Diamond, Plus, ArrowRight, X, Hash,
   AlignLeft, ShieldCheck, Zap, Type, Tags, PlusCircle,
   Trash2, Boxes, Database, Upload,
-  ArrowLeft, Check, Clock
+  ArrowLeft, Check, Clock, DollarSign
 } from 'lucide-react';
 
 interface ToolsPageProps {
@@ -59,6 +59,9 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
   const [collectionsWithoutRole, setCollectionsWithoutRole] = useState<Array<{ id: string, name: string, type: string }>>([]);
   const [isFetchingRoles, setIsFetchingRoles] = useState(false);
   const [assigningRoleFor, setAssigningRoleFor] = useState<string | null>(null);
+
+  const [pendingMintSession, setPendingMintSession] = useState<{ id: string, name: string, collection: string } | null>(null);
+  const [mintSuccessData, setMintSuccessData] = useState<{ name: string, collection: string } | null>(null);
 
   const { address } = useGetAccountInfo();
   const { network } = useGetNetworkConfig();
@@ -143,11 +146,23 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
         try {
           localStorage.setItem('nft_mint_draft', JSON.stringify({ assetForm, mintStep, ipfsState, imagePreview: null }));
         } catch (e2) {
-          console.error("Draft save error:", e2);
+          // Ignore JSON error from huge images
         }
       }
     }
   }, [assetForm, mintStep, ipfsState, imagePreview]);
+
+  const successfulSessions = useGetSuccessfulTransactionsSessions();
+
+  useEffect(() => {
+    if (pendingMintSession && successfulSessions[pendingMintSession.id]) {
+      setMintSuccessData({
+        name: pendingMintSession.name,
+        collection: pendingMintSession.collection
+      });
+      setPendingMintSession(null);
+    }
+  }, [successfulSessions, pendingMintSession]);
 
   const clearAssetDraft = () => {
     setAssetForm({
@@ -613,15 +628,24 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
       );
 
       const tx = await txPromise;
+      tx.gasLimit = 30000000n; // Set explicit high gas limit for minting
 
-      await signAndSendTransactions({
+      const { sessionId } = await signAndSendTransactions({
         transactions: [tx],
         transactionsDisplayInfo: {
-          processingMessage: `Minting your ${assetForm.type} "${assetForm.name}"…`,
+          processingMessage: `Minting your ${assetForm.type} "${assetForm.name}"...`,
           errorMessage: `Failed to mint ${assetForm.type}.`,
           successMessage: `${assetForm.type} "${assetForm.name}" created successfully! 🎉`,
         },
       });
+
+      if (sessionId) {
+        setPendingMintSession({
+          id: sessionId,
+          name: assetForm.name.trim(),
+          collection: assetForm.collection
+        });
+      }
 
       clearAssetDraft();
       handleCloseModal();
@@ -635,6 +659,41 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
 
   return (
     <div className="py-10 max-w-5xl mx-auto">
+      {/* Mint Success Modal */}
+      {mintSuccessData && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setMintSuccessData(null)}></div>
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-[2.5rem] shadow-2xl border dark:border-white/10 p-10 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
+            <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
+              <Check className="w-10 h-10 text-green-500" />
+            </div>
+            <h2 className="text-3xl font-black mb-4 dark:text-white">Minting Completed!</h2>
+            <p className="text-slate-500 font-bold mb-8 text-lg">
+              Hai appena mintato <span className="text-brand-yellow font-black">{mintSuccessData.name}</span> nella collezione <span className="text-brand-orange font-black">{mintSuccessData.collection}</span>
+            </p>
+
+            <div className="w-full flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setMintSuccessData(null);
+                  window.open(`https://oox.art/collection/${mintSuccessData.collection}`, '_blank');
+                }}
+                className="w-full py-4 bg-orange-500 text-white font-black rounded-2xl flex items-center justify-center gap-2 hover:bg-orange-600 transition-all active:scale-95 shadow-xl shadow-orange-500/20"
+              >
+                <DollarSign className="w-5 h-5" />
+                <span>List on OOX</span>
+              </button>
+              <button
+                onClick={() => setMintSuccessData(null)}
+                className="w-full py-4 bg-slate-100 dark:bg-white/5 text-gray-900 dark:text-white font-black rounded-2xl hover:bg-slate-200 dark:hover:bg-white/10 transition-all active:scale-95"
+              >
+                Chiudi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col items-center justify-center gap-6 mb-16">
         <div className="flex items-center gap-4">
           <div className="inline-flex items-center justify-center h-7 px-4 bg-orange-500/10 border border-orange-500/20 rounded-full">

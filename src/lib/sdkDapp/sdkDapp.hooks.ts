@@ -4,3 +4,4 @@ export { useGetIsLoggedIn } from '@multiversx/sdk-dapp/out/react/account/useGetI
 export { useGetLoginInfo } from '@multiversx/sdk-dapp/out/react/loginInfo/useGetLoginInfo';
 export { useGetNetworkConfig } from '@multiversx/sdk-dapp/out/react/network/useGetNetworkConfig';
 export { useGetPendingTransactions } from '@multiversx/sdk-dapp/out/react/transactions/useGetPendingTransactions';
+export { useGetSuccessfulTransactionsSessions } from '@multiversx/sdk-dapp/out/react/transactions/useGetSuccessfulTransactionsSessions';
