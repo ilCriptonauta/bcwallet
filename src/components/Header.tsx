@@ -5,6 +5,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Sun, Moon, LogIn, LogOut, User, ChevronDown, Wrench, Wallet2, Coins, Crown, TrendingUp, X } from 'lucide-react';
 import { useGetAccountInfo } from '@/lib';
 import { useOnxBalance, useAccountNfts, useNftsValue } from '@/helpers';
+import { useFirebaseFolders } from '@/hooks/useFirebaseFolders';
 import BigNumber from 'bignumber.js';
 
 interface HeaderProps {
@@ -42,6 +43,8 @@ const Header: React.FC<HeaderProps> = ({
   // NFT portfolio value
   const { items: nfts } = useAccountNfts({ address, enabled: isLoggedIn });
   const { totalEgld: nftsValue, isLoading: nftsValueLoading } = useNftsValue(nfts);
+  const { preferences } = useFirebaseFolders(address);
+  const avatarUrl = preferences?.avatarUrl;
 
   // Close dropdown on outside click (desktop only)
   useEffect(() => {
@@ -80,8 +83,12 @@ const Header: React.FC<HeaderProps> = ({
       {/* Profile header */}
       <div className="px-4 py-4 border-b border-slate-100 dark:border-white/5 mb-2">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-orange to-brand-yellow flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand-orange/20">
-            <User className="w-5 h-5 text-black" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-orange to-brand-yellow flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand-orange/20 overflow-hidden relative">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <User className="w-5 h-5 text-black" />
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-black text-slate-900 dark:text-white truncate">{username}</div>
@@ -226,8 +233,12 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="flex items-center space-x-2 p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-brand-orange/50 transition-all active:scale-95"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-orange to-brand-yellow flex items-center justify-center">
-                    <User className="w-4 h-4 text-black" />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-orange to-brand-yellow flex items-center justify-center overflow-hidden relative">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-4 h-4 text-black" />
+                    )}
                   </div>
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
                 </button>

@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     description: 'The ultimate hub to manage, create and experience your digital Collectibles on MultiversX.',
     locale: 'en_US',
     images: [{
-      url: '/bacon-icon.png', // The public application icon
-      width: 512,
-      height: 512,
+      url: '/social.jpg', // The public application social sharing icon
+      width: 1200,
+      height: 630,
       alt: 'Bacon Wallet - MultiversX NFT Manager',
     }],
   },
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     title: "Bacon Wallet - Let's Cook NFTs",
     description: "The ultimate hub to manage and create your digital Collectibles on MultiversX.",
     creator: '@onionxlabs',
-    images: ['/bacon-icon.png'],
+    images: ['/social.jpg'],
   },
   appleWebApp: {
     capable: true,

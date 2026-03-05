@@ -7,7 +7,7 @@ import {
   X, Folder, Plus, LayoutDashboard, Search,
   DollarSign, Send, Flame, Download, Heart, Settings,
   Zap, ArrowLeft, Lock, Trash2, Share2, Square, LayoutGrid,
-  TrendingUp, TrendingDown, Clock, Users
+  TrendingUp, TrendingDown, Clock, Users, User
 } from 'lucide-react';
 import { useGetAccountInfo, Transaction, Address, useGetNetworkConfig } from '@/lib';
 import { useAccountNfts, signAndSendTransactions, type NormalizedNft } from '@/helpers';
@@ -2045,7 +2045,19 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
 
               {/* Action Footer */}
-              <div className="shrink-0 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] md:px-6 md:py-4 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/10 flex items-center gap-2">
+              <div className="shrink-0 px-4 py-3 pb-[calc(12px+env(safe-area-bottom))] md:px-6 md:py-4 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/10 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <button
+                  onClick={() => {
+                    const avatarUrl = selectedItem.originalImageUrl || selectedItem.imageUrl;
+                    fbUpdatePreferences({ avatarUrl });
+                    alert('Avatar successfully updated!');
+                  }}
+                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-purple-500/10 dark:bg-purple-500/15 text-purple-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-purple-500 hover:text-white active:scale-95 transition-all"
+                  title="Set as Avatar"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden md:inline">Avatar</span>
+                </button>
                 <button
                   onClick={(e) => {
                     setSelectedItem(null);
@@ -2061,7 +2073,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 h-[44px] bg-red-500/10 dark:bg-red-500/15 text-red-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-red-500 hover:text-white active:scale-95 transition-all"
+                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-red-500/10 dark:bg-red-500/15 text-red-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-red-500 hover:text-white active:scale-95 transition-all"
                   title="Burn Asset"
                 >
                   <Flame className="w-4 h-4" />
@@ -2070,7 +2082,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
                 <button
                   onClick={(e) => handleDownload(e, selectedItem.imageUrl, selectedItem.name || 'nft')}
-                  className="flex-1 h-[44px] bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-gray-700 hover:text-white dark:hover:bg-white/20 active:scale-95 transition-all"
+                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-gray-700 hover:text-white dark:hover:bg-white/20 active:scale-95 transition-all"
                 >
                   <Download className="w-4 h-4" />
                   <span className="hidden md:inline">Save</span>
@@ -2091,7 +2103,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 h-[44px] bg-blue-500/10 dark:bg-blue-500/15 text-blue-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-blue-500 hover:text-white active:scale-95 transition-all"
+                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-blue-500/10 dark:bg-blue-500/15 text-blue-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-blue-500 hover:text-white active:scale-95 transition-all"
                 >
                   <Send className="w-4 h-4" />
                   <span className="hidden md:inline">Send</span>
@@ -2112,7 +2124,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-1 h-[44px] bg-orange-500/10 dark:bg-orange-500/15 text-orange-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-orange-500 hover:text-white active:scale-95 transition-all"
+                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-orange-500/10 dark:bg-orange-500/15 text-orange-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-orange-500 hover:text-white active:scale-95 transition-all"
                 >
                   <DollarSign className="w-4 h-4" />
                   <span className="hidden md:inline">List</span>

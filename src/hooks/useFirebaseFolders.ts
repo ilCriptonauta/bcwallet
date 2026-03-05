@@ -26,6 +26,7 @@ export interface UserPreferences {
     viewMode?: string;
     activeTab?: string;
     isLargeGrid?: boolean;
+    avatarUrl?: string;
 }
 
 export const useFirebaseFolders = (walletAddress: string | undefined) => {
