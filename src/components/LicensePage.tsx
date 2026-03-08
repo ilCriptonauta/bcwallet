@@ -43,9 +43,9 @@ const LicensePage: React.FC = () => {
             </div>
 
             {/* Image Section - Centered 4:3 */}
-            <div className="w-full max-w-[550px] relative group mb-16">
-                <div className="absolute -inset-8 bg-gradient-to-tr from-brand-orange/20 to-brand-yellow/20 rounded-[3.5rem] opacity-0 group-hover:opacity-100 blur-3xl transition-opacity duration-1000" />
-                <div className="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-[0_48px_80px_-20px_rgba(0,0,0,0.4)] dark:shadow-[0_48px_80px_-20px_rgba(249,115,22,0.2)] bg-[#111] ring-1 ring-white/10 flex items-center justify-center">
+            <div className="w-full max-w-[550px] relative group mb-16 flex items-center justify-center">
+                <div className="absolute -inset-20 sm:-inset-32 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-orange/30 via-brand-orange/0 to-transparent opacity-100 transition-opacity duration-700" />
+                <div className="relative w-full aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-[0_48px_80px_-20px_rgba(0,0,0,0.4)] dark:shadow-[0_48px_80px_-20px_rgba(249,115,22,0.2)] bg-[#111] ring-1 ring-white/10 flex items-center justify-center">
                     {license ? (
                         <>
                             <NftMedia

@@ -18,6 +18,19 @@ type Page = 'home' | 'tools' | 'license';
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Initialize theme from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      setIsDarkMode(false);
+    } else if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    } else {
+      // Respect system preference if no saved theme
+      setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+  }, []);
   const isLoggedIn = useGetIsLoggedIn();
   const accountInfo = useGetAccountInfo();
   const address = accountInfo?.address;
@@ -68,9 +81,11 @@ export default function Home() {
     if (isDarkMode) {
       root.classList.add('dark');
       root.classList.remove('light');
+      localStorage.setItem('theme', 'dark');
     } else {
       root.classList.remove('dark');
       root.classList.add('light');
+      localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
 

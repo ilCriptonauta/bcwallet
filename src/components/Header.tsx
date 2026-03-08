@@ -31,6 +31,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   const { balance: onxBalance } = useOnxBalance();
   const account = useGetAccountInfo()?.account;
@@ -49,7 +50,13 @@ const Header: React.FC<HeaderProps> = ({
   // Close dropdown on outside click (desktop only)
   useEffect(() => {
     const closeMenu = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setIsMenuOpen(false);
+      // If clicking inside the desktop trigger/dropdown container, let it handle its own logic
+      if (menuRef.current && menuRef.current.contains(e.target as Node)) return;
+
+      // If clicking inside the mobile drawer, let it handle its own logic
+      if (drawerRef.current && drawerRef.current.contains(e.target as Node)) return;
+
+      setIsMenuOpen(false);
     };
     document.addEventListener('mousedown', closeMenu);
     return () => document.removeEventListener('mousedown', closeMenu);
@@ -74,6 +81,16 @@ const Header: React.FC<HeaderProps> = ({
       };
     }
   }, [isMenuOpen]);
+
+  const handleNavigate = (page: 'home' | 'tools' | 'license') => {
+    onNavigate(page);
+    setIsMenuOpen(false);
+  };
+
+  const handleCookToggle = () => {
+    const target = currentPage === 'tools' ? 'home' : 'tools';
+    handleNavigate(target);
+  };
 
   // Shared menu content — called as a render function (not a React component)
   // to avoid React unmounting/remounting it on every parent re-render, which
@@ -144,7 +161,7 @@ const Header: React.FC<HeaderProps> = ({
 
       {/* Tools navigation */}
       <button
-        onClick={() => { onNavigate(currentPage === 'home' ? 'tools' : 'home'); setIsMenuOpen(false); }}
+        onClick={handleCookToggle}
         className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] ${currentPage === 'tools'
           ? 'text-brand-orange bg-brand-orange/5 dark:bg-brand-orange/10'
           : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'
@@ -158,7 +175,7 @@ const Header: React.FC<HeaderProps> = ({
       </button>
 
       <button
-        onClick={() => { onNavigate('license'); setIsMenuOpen(false); }}
+        onClick={() => handleNavigate('license')}
         className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] ${currentPage === 'license'
           ? 'text-brand-orange bg-brand-orange/5 dark:bg-brand-orange/10'
           : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'
@@ -280,6 +297,7 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* Drawer panel */}
           <div
+            ref={drawerRef}
             className={`md:hidden fixed top-0 right-0 z-[160] h-full w-[85vw] max-w-sm bg-white dark:bg-[#111] border-l border-slate-100 dark:border-white/10 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
           >
 
