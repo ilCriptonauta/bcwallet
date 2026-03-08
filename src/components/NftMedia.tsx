@@ -17,6 +17,7 @@ export const NftMedia: React.FC<NftMediaProps> = ({ src, alt, className, mimeTyp
         /\.(mp4|webm|mov|ogv)(\?|$)/i.test(src)
     );
 
+    const isGif = mimeType === 'image/gif' || /\.gif(\?|$)/i.test(src);
     const isSvg = mimeType === 'image/svg+xml' || /\.svg(\?|$)/i.test(src);
 
     if (isVideo) {

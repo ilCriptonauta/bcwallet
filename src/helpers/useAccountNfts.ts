@@ -55,12 +55,15 @@ export const pickBestImageUrl = (nft: MultiversxNftApiItem): string | null => {
 
   let candidate;
   if (isVideoOrGif) {
+    // For animated assets, prioritize the main file URL (usually animated)
+    // over the generated static thumbnailUrl.
     candidate =
       nft.media?.[0]?.url ||
-      nft.media?.[0]?.originalUrl ||
       nft.url ||
+      nft.media?.[0]?.originalUrl ||
       nft.media?.[0]?.thumbnailUrl;
   } else {
+    // For static images, keep the optimized thumbnail as priority.
     candidate =
       nft.media?.[0]?.thumbnailUrl ||
       nft.media?.[0]?.url ||
@@ -157,7 +160,7 @@ export const useAccountNfts = ({
         type: nft.type === 'SemiFungibleESDT' ? 'SFT' : nft.type === 'MetaESDT' ? 'MetaESDT' : 'NFT',
         balance: overrides?.balance ?? nft.balance,
         metadata: nft.metadata,
-        mimeType: nft.media?.[0]?.fileType,
+        mimeType: nft.media?.[0]?.fileType || (nft.url && /\.(gif|mp4|webm|svg)(\?|$)/i.test(nft.url) ? `image/${nft.url.split('.').pop()?.split('?')[0]}` : undefined),
       };
     }).filter(Boolean) as NormalizedNft[];
   }, [data, optimisticOverrides]);
