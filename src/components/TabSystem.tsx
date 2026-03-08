@@ -434,16 +434,17 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       // 4. Optimistic UI Updates
       const sentId = nftToSend.identifier;
-      const sentAmount = parseInt(sendQuantity);
+      const sentAmountRaw = parseInt(sendQuantity, 10);
+      const sentAmount = isNaN(sentAmountRaw) ? 1 : sentAmountRaw;
 
       const updateList = (prev: NormalizedNft[]) => {
         return prev.map(n => {
           if (n.identifier === sentId) {
-            const currentBalance = parseInt(n.balance || '1');
+            const currentBalance = parseInt(n.balance || '1', 10);
             if (currentBalance > sentAmount) {
               return { ...n, balance: (currentBalance - sentAmount).toString() };
             }
-            return null;
+            return null; // Remove if balance becomes 0
           }
           return n;
         }).filter((n): n is NormalizedNft => n !== null);
@@ -503,16 +504,17 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       // 3. Optimistic UI Updates
       const burnedId = nftToBurn.identifier;
-      const burnedAmount = parseInt(burnQuantity);
+      const burnedAmountRaw = parseInt(burnQuantity, 10);
+      const burnedAmount = isNaN(burnedAmountRaw) ? 1 : burnedAmountRaw;
 
       const updateList = (prev: NormalizedNft[]) => {
         return prev.map(n => {
           if (n.identifier === burnedId) {
-            const currentBalance = parseInt(n.balance || '1');
+            const currentBalance = parseInt(n.balance || '1', 10);
             if (currentBalance > burnedAmount) {
               return { ...n, balance: (currentBalance - burnedAmount).toString() };
             }
-            return null;
+            return null; // Remove if balance becomes 0
           }
           return n;
         }).filter((n): n is NormalizedNft => n !== null);
@@ -570,11 +572,12 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       let deadlineHex = deadline.toString(16);
       if (deadlineHex.length % 2 !== 0) deadlineHex = '0' + deadlineHex;
 
-      let paymentTokenHex = toHex(selectedPaymentToken);
+      const paymentTokenHex = toHex(selectedPaymentToken);
+      const finalQuantity = nftToSell.type === 'NFT' ? 1 : (parseInt(sellQuantity, 10) || 1);
 
       const transfer = new TokenTransfer({
         token: new Token({ identifier: collection, nonce: BigInt(nonce) }),
-        amount: BigInt(nftToSell.type === 'NFT' ? 1 : sellQuantity)
+        amount: BigInt(finalQuantity)
       });
 
       const factoryConfig = new TransactionsFactoryConfig({ chainID: network.chainId });
@@ -609,16 +612,17 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       // Optimistic UI Update: Remove listed Unit from wallet
       const listedId = nftToSell.identifier;
-      const listedAmount = parseInt(sellQuantity);
+      const listedAmountRaw = parseInt(sellQuantity, 10);
+      const listedAmount = isNaN(listedAmountRaw) ? 1 : listedAmountRaw;
 
       const updateList = (prev: NormalizedNft[]) => {
         return prev.map(n => {
           if (n.identifier === listedId) {
-            const currentBalance = parseInt(n.balance || '1');
+            const currentBalance = parseInt(n.balance || '1', 10);
             if (currentBalance > listedAmount) {
               return { ...n, balance: (currentBalance - listedAmount).toString() };
             }
-            return null;
+            return null; // Remove if balance becomes 0
           }
           return n;
         }).filter((n): n is NormalizedNft => n !== null);
@@ -2332,7 +2336,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </div>
 
             {(() => {
-              const canList = !!sellPrice;
+              const q = parseInt(sellQuantity, 10) || 1;
+              const b = parseInt(nftToSell.balance || '1', 10);
+              const canList = !!sellPrice && q >= 1 && q <= b;
               return (
                 <button
                   onClick={handleSellNft}
