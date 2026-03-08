@@ -13,6 +13,10 @@ const LicensePage: React.FC = () => {
     const address = account?.address;
     const { items: nfts, isLoading } = useAccountNfts({ address, enabled: !!address });
 
+    React.useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     const license = useMemo(() => {
         return nfts.find(nft =>
             nft.collection === LICENSE_COLLECTION ||
