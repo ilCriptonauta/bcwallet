@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Sun, Moon, LogIn, LogOut, User, ChevronDown, Wrench, Wallet2, Coins, Crown, TrendingUp, X } from 'lucide-react';
+import { Sun, Moon, LogIn, LogOut, User, ChevronDown, Wrench, Wallet2, Coins, Crown, TrendingUp, X, BadgeCheck } from 'lucide-react';
 import { useGetAccountInfo } from '@/lib';
 import { useOnxBalance, useAccountNfts, useNftsValue } from '@/helpers';
 import { useFirebaseFolders } from '@/hooks/useFirebaseFolders';
@@ -14,8 +14,8 @@ interface HeaderProps {
   isLoggedIn: boolean;
   onLogin: () => void;
   onLogout: () => void;
-  onNavigate: (page: 'home' | 'tools') => void;
-  currentPage: 'home' | 'tools';
+  onNavigate: (page: 'home' | 'tools' | 'license') => void;
+  currentPage: 'home' | 'tools' | 'license';
   isFullVersion?: boolean;
 }
 
@@ -154,6 +154,20 @@ const Header: React.FC<HeaderProps> = ({
         <span>{currentPage === 'tools' ? 'Back to Wallet' : "Let's Cook"}</span>
         {currentPage === 'tools' && (
           <span className="ml-auto text-[10px] font-black uppercase tracking-widest text-brand-orange bg-brand-orange/10 px-2 py-1 rounded-md">Active</span>
+        )}
+      </button>
+
+      <button
+        onClick={() => { onNavigate('license'); setIsMenuOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] ${currentPage === 'license'
+          ? 'text-brand-orange bg-brand-orange/5 dark:bg-brand-orange/10'
+          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'
+          }`}
+      >
+        <BadgeCheck className={`w-4 h-4 ${currentPage === 'license' ? 'text-brand-orange' : 'text-slate-500 dark:text-slate-400'}`} />
+        <span>License</span>
+        {currentPage === 'license' && (
+          <span className="ml-auto text-[10px] font-black uppercase tracking-widest text-brand-orange bg-brand-orange/10 px-2 py-1 rounded-md">View</span>
         )}
       </button>
 

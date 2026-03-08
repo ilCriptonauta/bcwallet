@@ -8,8 +8,10 @@ import {
   Layers, Diamond, Plus, ArrowRight, X, Hash,
   AlignLeft, ShieldCheck, Zap, Type, Tags, PlusCircle,
   Trash2, Boxes, Database, Upload,
-  ArrowLeft, Check, Clock, DollarSign
+  ArrowLeft, Check, Clock, DollarSign, Lock
 } from 'lucide-react';
+import { useAccountNfts } from '@/helpers';
+import { useFirebaseFolders } from '@/hooks/useFirebaseFolders';
 
 interface ToolsPageProps {
   isFullVersion: boolean;
@@ -65,6 +67,18 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
 
   const { address } = useGetAccountInfo();
   const { network } = useGetNetworkConfig();
+
+  const { isPro: firebaseIsPro } = useFirebaseFolders(address);
+  const nftsQuery = useAccountNfts({
+    address: address,
+    enabled: !!address,
+    pageSize: 30
+  });
+
+  const hasProAccess = React.useMemo(() => {
+    return firebaseIsPro || isFullVersion || nftsQuery.items.some(nft => nft.collection === 'BCNPASS-40e72d');
+  }, [firebaseIsPro, isFullVersion, nftsQuery.items]);
+
   const [userCollections, setUserCollections] = useState<Array<{ id: string, name: string, type: string }>>([]);
 
   // Lock body scroll when any modal is open (prevents iOS scroll-through)
@@ -177,28 +191,6 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
     localStorage.removeItem('nft_mint_draft');
   };
 
-  const tools: Array<{
-    id: ModalType;
-    title: string;
-    desc: string;
-    icon: React.ReactNode;
-    color: string;
-  }> = [
-      {
-        id: 'collection',
-        title: "New Collection",
-        desc: "Create a collection identifier on the blockchain.",
-        icon: <Layers className="w-8 h-8 text-brand-orange" />,
-        color: "from-brand-orange/20 to-brand-orange/5"
-      },
-      {
-        id: 'asset',
-        title: "Mint NFT/SFT",
-        desc: "Create single NFT or SFT directly into your collections.",
-        icon: <Diamond className="w-8 h-8 text-brand-yellow" />,
-        color: "from-brand-yellow/20 to-brand-yellow/5"
-      }
-    ];
 
   const handleCloseModal = () => {
     setModalType(null);
@@ -705,22 +697,55 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {tools.map((tool) => (
+        {[
+          {
+            id: 'collection',
+            title: "New Collection",
+            desc: "Create a collection identifier on the blockchain.",
+            icon: <Layers className="w-8 h-8 text-brand-orange" />,
+            color: "from-brand-orange/20 to-brand-orange/5"
+          },
+          {
+            id: 'asset',
+            title: "Mint NFT/SFT",
+            desc: "Create single NFT or SFT directly into your collections.",
+            icon: <Diamond className="w-8 h-8 text-brand-yellow" />,
+            color: "from-brand-yellow/20 to-brand-yellow/5"
+          }
+        ].map((tool) => (
           <div
             key={tool.id}
-            onClick={() => setModalType(tool.id)}
-            className="group relative p-10 rounded-[2.5rem] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/5 cursor-pointer hover:shadow-2xl hover:shadow-brand-orange/10 transition-all hover:-translate-y-2 active:scale-[0.98] overflow-hidden"
+            onClick={() => {
+              if (!hasProAccess) {
+                alert('This feature is only for PRO users. Get a Bacon PASS license to unlock it!');
+                return;
+              }
+              setModalType(tool.id as ModalType);
+            }}
+            className={`group relative p-10 rounded-[2.5rem] bg-white dark:bg-zinc-900 border transition-all overflow-hidden ${hasProAccess
+              ? "border-slate-200 dark:border-white/5 cursor-pointer hover:shadow-2xl hover:shadow-brand-orange/10 hover:-translate-y-2 active:scale-[0.98]"
+              : "border-slate-100 dark:border-white/[0.02] cursor-not-allowed opacity-80"
+              }`}
           >
             <div className={`absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br ${tool.color} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity`} />
             <div className="relative z-10">
-              <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-white/5 flex items-center justify-center mb-8 border dark:border-white/10">
-                {tool.icon}
+              <div className="flex items-center justify-between mb-8">
+                <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-white/5 flex items-center justify-center border dark:border-white/10">
+                  {tool.icon}
+                </div>
+                {!hasProAccess && (
+                  <div className="p-3 bg-gray-100 dark:bg-white/5 rounded-xl">
+                    <Lock className="w-5 h-5 text-gray-400" />
+                  </div>
+                )}
               </div>
-              <h3 className="text-3xl font-black mb-4 group-hover:text-brand-orange transition-colors">{tool.title}</h3>
+              <h3 className={`text-3xl font-black mb-4 transition-colors ${hasProAccess ? "group-hover:text-brand-orange" : "text-gray-400"}`}>
+                {tool.title}
+              </h3>
               <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium">{tool.desc}</p>
-              <div className="flex items-center space-x-2 text-sm font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-orange">
-                <span>Start</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+              <div className={`flex items-center space-x-2 text-sm font-black uppercase tracking-widest transition-transform ${hasProAccess ? "text-slate-400 group-hover:text-brand-orange" : "text-gray-300"}`}>
+                <span>{hasProAccess ? "Start" : "Pro Feature"}</span>
+                {hasProAccess && <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />}
               </div>
             </div>
           </div>

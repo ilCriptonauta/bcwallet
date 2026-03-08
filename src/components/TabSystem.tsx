@@ -1,7 +1,7 @@
 'use client';
 
 import { createPortal } from 'react-dom';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import {
   X, Folder, Plus, LayoutDashboard, Search,
@@ -220,8 +220,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     fbUpdatePreferences({ isLargeGrid: v });
   };
 
-  const hasProAccess = firebaseIsPro || isFullVersion;
-  const maxFolders = hasProAccess ? 50 : 3;
+
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -856,6 +855,12 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     pageSize: 30
   });
 
+  const hasProAccess = useMemo(() => {
+    return firebaseIsPro || isFullVersion || nftsQuery.items.some(nft => nft.collection === 'BCNPASS-40e72d');
+  }, [firebaseIsPro, isFullVersion, nftsQuery.items]);
+
+  const maxFolders = hasProAccess ? 50 : 3;
+
   useEffect(() => {
     if (!isMainTabActive) {
       return;
@@ -1004,11 +1009,15 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
   const renderCollectibles = () => {
     const searchLower = searchQuery.toLowerCase();
-    const allItems = nftsQuery.items.filter(item =>
-      !searchQuery ||
-      (item.name && item.name.toLowerCase().includes(searchLower)) ||
-      (item.collection && item.collection.toLowerCase().includes(searchLower))
-    );
+    const allItems = nftsQuery.items.filter(item => {
+      const matchesSearch = !searchQuery ||
+        (item.name && item.name.toLowerCase().includes(searchLower)) ||
+        (item.collection && item.collection.toLowerCase().includes(searchLower));
+
+      const isOfficialLicense = item.collection === 'BCNPASS-40e72d';
+
+      return matchesSearch && !isOfficialLicense;
+    });
 
     // Grouping logic used by Overview and Collections
     const collectionsMap = new Map<string, NormalizedNft[]>();
@@ -2055,14 +2064,21 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <div className="shrink-0 px-4 py-3 pb-[calc(12px+env(safe-area-bottom))] md:px-6 md:py-4 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/10 flex items-center gap-2 overflow-x-auto no-scrollbar">
                 <button
                   onClick={() => {
+                    if (!hasProAccess) {
+                      alert('This feature is only for PRO users. Get a Bacon PASS license to unlock it!');
+                      return;
+                    }
                     const avatarUrl = selectedItem.originalImageUrl || selectedItem.imageUrl;
                     fbUpdatePreferences({ avatarUrl });
                     alert('Avatar successfully updated!');
                   }}
-                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-purple-500/10 dark:bg-purple-500/15 text-purple-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-purple-500 hover:text-white active:scale-95 transition-all"
-                  title="Set as Avatar"
+                  className={`flex-[1_0_auto] min-w-[70px] h-[44px] rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 transition-all ${hasProAccess
+                    ? "bg-purple-500/10 dark:bg-purple-500/15 text-purple-500 hover:bg-purple-500 hover:text-white active:scale-95"
+                    : "bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed"
+                    }`}
+                  title={hasProAccess ? "Set as Avatar" : "Pro Feature: Set as Avatar"}
                 >
-                  <User className="w-4 h-4" />
+                  {hasProAccess ? <User className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                   <span className="hidden md:inline">Avatar</span>
                 </button>
                 <button
