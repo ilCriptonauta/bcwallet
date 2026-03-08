@@ -371,9 +371,10 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
         );
 
       const tx = await txPromise;
+      tx.gasLimit = 60000000n; // Set explicit high gas limit for role setting
 
       await signAndSendTransactions({
-        transactions: [tx],
+        transactions: [Transaction.newFromPlainObject(tx.toPlainObject())],
         transactionsDisplayInfo: {
           processingMessage: `Setting creator role for ${collectionId}…`,
           errorMessage: 'Failed to set creator role.',
@@ -444,9 +445,10 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
         );
 
       const tx = await txPromise;
+      tx.gasLimit = ISSUANCE_GAS_LIMIT; // Set explicit high gas limit for issuance
 
       await signAndSendTransactions({
-        transactions: [tx],
+        transactions: [Transaction.newFromPlainObject(tx.toPlainObject())],
         transactionsDisplayInfo: {
           processingMessage: `Creating ${collectionForm.type} collection "${name}"…`,
           errorMessage: 'Collection creation failed.',
@@ -631,7 +633,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
       tx.gasLimit = 30000000n; // Set explicit high gas limit for minting
 
       const { sessionId } = await signAndSendTransactions({
-        transactions: [tx],
+        transactions: [Transaction.newFromPlainObject(tx.toPlainObject())],
         transactionsDisplayInfo: {
           processingMessage: `Minting your ${assetForm.type} "${assetForm.name}"...`,
           errorMessage: `Failed to mint ${assetForm.type}.`,

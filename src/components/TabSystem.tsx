@@ -234,6 +234,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [nftToBurn, setNftToBurn] = useState<NormalizedNft | null>(null);
   const [burnQuantity, setBurnQuantity] = useState('1');
   const [sellPrice, setSellPrice] = useState('');
+  const [sellQuantity, setSellQuantity] = useState('1');
   const [selectedPaymentToken, setSelectedPaymentToken] = useState('EGLD');
   const [recipient, setRecipient] = useState('');
   const [sendQuantity, setSendQuantity] = useState('1');
@@ -489,9 +490,10 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       );
 
       const tx = await txPromise;
+      tx.gasLimit = 10000000n; // Set explicit high gas limit for burning
 
       await signAndSendTransactions({
-        transactions: [tx],
+        transactions: [Transaction.newFromPlainObject(tx.toPlainObject())],
         transactionsDisplayInfo: {
           processingMessage: `Burning ${burnQuantity} edition(s) of ${nftToBurn.name}...`,
           errorMessage: 'Failed to burn Asset.',
@@ -531,6 +533,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     e.stopPropagation();
     setNftToSell(nft);
     setSellPrice('');
+    setSellQuantity('1');
     setSelectedPaymentToken('EGLD');
     setIsSellModalOpen(true);
     setOpenMenuId(null);
@@ -571,7 +574,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       const transfer = new TokenTransfer({
         token: new Token({ identifier: collection, nonce: BigInt(nonce) }),
-        amount: BigInt(nftToSell.type === 'NFT' ? 1 : 1)
+        amount: BigInt(nftToSell.type === 'NFT' ? 1 : sellQuantity)
       });
 
       const factoryConfig = new TransactionsFactoryConfig({ chainID: network.chainId });
@@ -598,7 +601,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       await signAndSendTransactions({
         transactions: [tx],
         transactionsDisplayInfo: {
-          processingMessage: `Listing ${nftToSell.name} for ${sellPrice} ${selectedPaymentToken.split('-')[0]}...`,
+          processingMessage: `Listing ${sellQuantity} edition(s) of ${nftToSell.name} for ${sellPrice} ${selectedPaymentToken.split('-')[0]}...`,
           errorMessage: 'Failed to list Asset.',
           successMessage: 'Asset listed successfully!'
         }
@@ -606,7 +609,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
       // Optimistic UI Update: Remove listed Unit from wallet
       const listedId = nftToSell.identifier;
-      const listedAmount = 1;
+      const listedAmount = parseInt(sellQuantity);
 
       const updateList = (prev: NormalizedNft[]) => {
         return prev.map(n => {
@@ -2300,6 +2303,30 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     </div>
                     <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest px-1">Choose your preferred token</p>
                   </div>
+
+                  {nftToSell.type === 'SFT' && parseInt(nftToSell.balance || '1') > 1 && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex justify-between px-1">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Set Listing Quantity</label>
+                        <button
+                          onClick={() => setSellQuantity(nftToSell.balance || '1')}
+                          className="text-[10px] font-black text-orange-500 uppercase tracking-widest hover:underline"
+                        >
+                          Max Avail ({nftToSell.balance})
+                        </button>
+                      </div>
+                      <div className="relative group/input">
+                        <input
+                          type="number"
+                          value={sellQuantity}
+                          onChange={(e) => setSellQuantity(e.target.value)}
+                          max={nftToSell.balance}
+                          min="1"
+                          className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all dark:text-white"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
