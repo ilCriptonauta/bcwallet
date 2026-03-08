@@ -2162,7 +2162,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       {isSendModalOpen && nftToSend && (
         <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsSendModalOpen(false)}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[92dvh] overflow-y-auto scrollbar-hide" style={{ touchAction: 'auto' }}>
+            {/* Mobile Drag Indicator */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full md:hidden" />
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
@@ -2213,7 +2215,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 <div className="space-y-2">
                   <div className="flex justify-between px-1">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Transfer Quantity</label>
-                    <button onClick={() => setSendQuantity(nftToSend.balance || '1')} className="text-[10px] font-black text-blue-500 uppercase tracking-widest hover:underline">Max Available</button>
+                    <button onClick={() => setSendQuantity(nftToSend.balance || '1')} className="text-[10px] font-black text-blue-500 uppercase tracking-widest hover:underline">Max</button>
                   </div>
                   <div className="relative group/input">
                     <input
@@ -2245,7 +2247,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       {isSellModalOpen && nftToSell && (
         <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsSellModalOpen(false)}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[92dvh] overflow-y-auto scrollbar-hide" style={{ touchAction: 'auto' }}>
+            {/* Mobile Drag Indicator */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full md:hidden" />
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
@@ -2332,7 +2336,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                           onClick={() => setSellQuantity(nftToSell.balance || '1')}
                           className="text-[10px] font-black text-orange-500 uppercase tracking-widest hover:underline"
                         >
-                          Max Avail ({nftToSell.balance})
+                          Max ({nftToSell.balance})
                         </button>
                       </div>
                       <div className="relative group/input">
@@ -2375,7 +2379,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       {isMoveModalOpen && (
         <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setIsMoveModalOpen(false); setNftToMove(null); }}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[92dvh] overflow-y-auto scrollbar-hide" style={{ touchAction: 'auto' }}>
+            {/* Mobile Drag Indicator */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full md:hidden" />
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
@@ -2473,7 +2479,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       {isRemoveConfirmationOpen && (
         <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsRemoveConfirmationOpen(false)}></div>
-          <div className="relative w-full max-w-sm bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-t border-gray-100 dark:border-white/10 md:border p-8 pb-10 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
+          <div className="relative w-full max-w-sm bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-t border-gray-100 dark:border-white/10 md:border p-8 pb-10 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[92dvh] overflow-y-auto scrollbar-hide" style={{ touchAction: 'auto' }}>
+            {/* Mobile Drag Indicator */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full md:hidden" />
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shrink-0">
                 <Trash2 className="w-6 h-6 text-red-500" />
@@ -2510,7 +2518,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => { setIsCreateModalOpen(false); setNftToMove(null); }}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[92dvh] overflow-y-auto scrollbar-hide" style={{ touchAction: 'auto' }}>
+            {/* Mobile Drag Indicator */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full md:hidden" />
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
@@ -2566,7 +2576,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       {isShareModalOpen && (
         <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsShareModalOpen(false)}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[92dvh] overflow-y-auto scrollbar-hide" style={{ touchAction: 'auto' }}>
+            {/* Mobile Drag Indicator */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full md:hidden" />
             <div className="flex flex-col items-center justify-center text-center space-y-6">
               <div className="w-20 h-20 rounded-[2rem] bg-orange-500/10 flex items-center justify-center border border-orange-500/20 shadow-inner">
                 <Share2 className="w-10 h-10 text-orange-500" />
@@ -2592,7 +2604,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       {isBurnModalOpen && nftToBurn && (
         <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsBurnModalOpen(false)}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300" style={{ touchAction: 'auto' }}>
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#1a1a1a] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] md:shadow-2xl border-t border-gray-100 dark:border-white/10 md:border p-8 md:p-10 animate-in slide-in-from-bottom-full md:zoom-in-95 md:slide-in-from-bottom-0 duration-300 max-h-[92dvh] overflow-y-auto scrollbar-hide" style={{ touchAction: 'auto' }}>
+            {/* Mobile Drag Indicator */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full md:hidden" />
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
