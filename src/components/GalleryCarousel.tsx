@@ -1,0 +1,240 @@
+'use client';
+
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { NftMedia } from './NftMedia';
+
+export interface GalleryNft {
+  identifier: string;
+  name: string;
+  imageUrl?: string;
+  originalImageUrl?: string | null;
+  mimeType?: string;
+  collection?: string;
+  collectionName?: string;
+  thumbnailUrl?: string | null;
+  type?: string;
+  balance?: string;
+  metadata?: Record<string, any>;
+}
+
+interface GalleryCarouselProps {
+  items: GalleryNft[];
+  onItemClick?: (item: GalleryNft, index: number) => void;
+}
+
+const GalleryCarousel: React.FC<GalleryCarouselProps> = ({ items, onItemClick }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragX = useMotionValue(0);
+  const isDragging = useRef(false);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') paginate(-1);
+      if (e.key === 'ArrowRight') paginate(1);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex]);
+
+  const paginate = useCallback((newDirection: number) => {
+    setDirection(newDirection);
+    setCurrentIndex((prev) => {
+      let next = prev + newDirection;
+      if (next < 0) next = items.length - 1;
+      if (next >= items.length) next = 0;
+      return next;
+    });
+  }, [items.length]);
+
+  const handleDragStart = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
+  const handleDrag = useCallback(
+    (_: any, info: { offset: { x: number } }) => {
+      if (Math.abs(info.offset.x) > 5) {
+        isDragging.current = true;
+      }
+    },
+    []
+  );
+
+  const handleDragEnd = useCallback(
+    (_: any, info: { offset: { x: number }; velocity: { x: number } }) => {
+      const swipeThreshold = 50;
+      const velocityThreshold = 500;
+
+      if (
+        info.offset.x < -swipeThreshold ||
+        info.velocity.x < -velocityThreshold
+      ) {
+        paginate(1);
+      } else if (
+        info.offset.x > swipeThreshold ||
+        info.velocity.x > velocityThreshold
+      ) {
+        paginate(-1);
+      }
+    },
+    [paginate]
+  );
+
+  const handleItemClick = useCallback(() => {
+    // Only fire click if this wasn't a drag gesture
+    if (!isDragging.current && onItemClick) {
+      onItemClick(items[currentIndex], currentIndex);
+    }
+  }, [currentIndex, items, onItemClick]);
+
+  if (items.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500">
+        <p className="text-sm font-bold">This folder is empty</p>
+      </div>
+    );
+  }
+
+  const currentItem = items[currentIndex];
+
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.9,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.9,
+    }),
+  };
+
+  return (
+    <div className="w-full flex flex-col items-center gap-6 md:gap-8">
+      {/* Carousel Container */}
+      <div
+        ref={containerRef}
+        className="relative w-full max-w-md aspect-square overflow-hidden rounded-3xl md:rounded-[2rem] bg-black/20 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/30 cursor-pointer"
+        onClick={handleItemClick}
+      >
+        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: 'spring', stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 },
+              scale: { duration: 0.2 },
+            }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.7}
+            onDragStart={handleDragStart}
+            onDrag={handleDrag}
+            onDragEnd={handleDragEnd}
+            className="absolute inset-0 cursor-grab active:cursor-grabbing"
+            style={{ x: dragX }}
+          >
+            <NftMedia
+              src={currentItem.imageUrl || `https://picsum.photos/seed/${currentItem.identifier}/600/600`}
+              alt={currentItem.name}
+              mimeType={currentItem.mimeType}
+              thumbnailFallback={currentItem.thumbnailUrl || undefined}
+              className="w-full h-full object-cover pointer-events-none select-none"
+              loading="eager"
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Desktop Navigation Arrows */}
+        {items.length > 1 && (
+          <>
+            <button
+              onClick={(e) => { e.stopPropagation(); paginate(-1); }}
+              className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 items-center justify-center text-white hover:bg-black/70 hover:scale-110 active:scale-95 transition-all"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); paginate(1); }}
+              className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 items-center justify-center text-white hover:bg-black/70 hover:scale-110 active:scale-95 transition-all"
+              aria-label="Next"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </>
+        )}
+
+        {/* Counter Badge */}
+        {items.length > 1 && (
+          <div className="absolute top-4 right-4 z-20 bg-black/50 backdrop-blur-xl text-white text-[10px] font-black px-3 py-1.5 rounded-full border border-white/10">
+            {currentIndex + 1} / {items.length}
+          </div>
+        )}
+
+        {/* Tap hint overlay */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black/40 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/10">
+          <span className="text-[9px] font-bold text-white/60 uppercase tracking-wider md:hidden">Tap for details · Swipe to browse</span>
+          <span className="text-[9px] font-bold text-white/60 uppercase tracking-wider hidden md:inline">Click for details</span>
+        </div>
+      </div>
+
+      {/* NFT Name */}
+      <motion.div
+        key={`name-${currentIndex}`}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="text-center cursor-pointer"
+        onClick={handleItemClick}
+      >
+        <h3 className="text-lg md:text-xl font-black text-white">
+          {currentItem.name}
+        </h3>
+        {currentItem.collection && (
+          <p className="text-xs font-bold text-white/40 uppercase tracking-widest mt-1">
+            {currentItem.collection}
+          </p>
+        )}
+      </motion.div>
+
+      {/* Dot Indicators */}
+      {items.length > 1 && items.length <= 20 && (
+        <div className="flex items-center gap-1.5 flex-wrap justify-center max-w-[280px]">
+          {items.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setDirection(index > currentIndex ? 1 : -1);
+                setCurrentIndex(index);
+              }}
+              className={`rounded-full transition-all duration-300 ${
+                index === currentIndex
+                  ? 'w-6 h-2 bg-orange-500 shadow-lg shadow-orange-500/30'
+                  : 'w-2 h-2 bg-white/20 hover:bg-white/40'
+              }`}
+              aria-label={`Go to item ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default GalleryCarousel;
