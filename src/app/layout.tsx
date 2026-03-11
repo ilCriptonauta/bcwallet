@@ -12,6 +12,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://baconwallet.vercel.app'),
   title: {
     default: "Bacon Wallet - Let's Cook NFTs",
     template: "%s | Bacon Wallet"
