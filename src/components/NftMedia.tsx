@@ -14,6 +14,10 @@ export const NftMedia: React.FC<NftMediaProps> = ({ src, alt, className, mimeTyp
 
     const isVideo = !videoError && (
         mimeType?.startsWith('video/') ||
+        mimeType === 'image/mp4' ||
+        mimeType === 'image/webm' ||
+        mimeType === 'image/mov' ||
+        mimeType === 'image/ogv' ||
         /\.(mp4|webm|mov|ogv)(\?|$)/i.test(src)
     );
 
@@ -54,7 +58,7 @@ export const NftMedia: React.FC<NftMediaProps> = ({ src, alt, className, mimeTyp
                         if (thumbnailFallback && target.src !== thumbnailFallback) {
                             target.src = thumbnailFallback;
                         } else {
-                            target.src = `https://picsum.photos/seed/${alt.replace(/\s/g, '').toLowerCase()}/400/400`;
+                            target.src = `https://picsum.photos/seed/${alt.replace(/\\s/g, '').toLowerCase()}/400/400`;
                         }
                     }}
                 />
@@ -73,7 +77,7 @@ export const NftMedia: React.FC<NftMediaProps> = ({ src, alt, className, mimeTyp
                 if (!videoError && thumbnailFallback && target.src !== thumbnailFallback) {
                     target.src = thumbnailFallback;
                 } else {
-                    target.src = `https://picsum.photos/seed/${alt.replace(/\s/g, '').toLowerCase()}/400/400`;
+                    target.src = `https://picsum.photos/seed/${alt.replace(/\\s/g, '').toLowerCase()}/400/400`;
                 }
             }}
         />

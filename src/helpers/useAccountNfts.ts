@@ -160,7 +160,11 @@ export const useAccountNfts = ({
         type: nft.type === 'SemiFungibleESDT' ? 'SFT' : nft.type === 'MetaESDT' ? 'MetaESDT' : 'NFT',
         balance: overrides?.balance ?? nft.balance,
         metadata: nft.metadata,
-        mimeType: nft.media?.[0]?.fileType || (nft.url && /\.(gif|mp4|webm|svg)(\?|$)/i.test(nft.url) ? `image/${nft.url.split('.').pop()?.split('?')[0]}` : undefined),
+        mimeType: nft.media?.[0]?.fileType || (nft.url && /\.(mp4|webm|mov|ogv)(\?|$)/i.test(nft.url)
+          ? `video/${nft.url.split('.').pop()?.toLowerCase().split('?')[0]}`
+          : nft.url && /\.(gif|svg)(\?|$)/i.test(nft.url)
+          ? `image/${nft.url.split('.').pop()?.toLowerCase().split('?')[0]}`
+          : undefined),
       };
     }).filter(Boolean) as NormalizedNft[];
   }, [data, optimisticOverrides]);

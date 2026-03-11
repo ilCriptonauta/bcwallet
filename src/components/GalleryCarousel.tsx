@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { NftMedia } from './NftMedia';
 
@@ -24,12 +24,16 @@ interface GalleryCarouselProps {
   onItemClick?: (item: GalleryNft, index: number) => void;
 }
 
+const SWIPE_THRESHOLD = 50;
+const VELOCITY_THRESHOLD = 300;
+
 const GalleryCarousel: React.FC<GalleryCarouselProps> = ({ items, onItemClick }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
+  const [[page, direction], setPage] = useState([0, 0]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const dragX = useMotionValue(0);
   const isDragging = useRef(false);
+
+  // Wrap index
+  const currentIndex = ((page % items.length) + items.length) % items.length;
 
   // Keyboard navigation
   useEffect(() => {
@@ -39,53 +43,34 @@ const GalleryCarousel: React.FC<GalleryCarouselProps> = ({ items, onItemClick })
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex]);
-
-  const paginate = useCallback((newDirection: number) => {
-    setDirection(newDirection);
-    setCurrentIndex((prev) => {
-      let next = prev + newDirection;
-      if (next < 0) next = items.length - 1;
-      if (next >= items.length) next = 0;
-      return next;
-    });
-  }, [items.length]);
-
-  const handleDragStart = useCallback(() => {
-    isDragging.current = false;
   }, []);
 
-  const handleDrag = useCallback(
-    (_: any, info: { offset: { x: number } }) => {
-      if (Math.abs(info.offset.x) > 5) {
-        isDragging.current = true;
-      }
-    },
-    []
-  );
+  const paginate = useCallback((newDirection: number) => {
+    setPage(([prevPage]) => [prevPage + newDirection, newDirection]);
+  }, []);
 
   const handleDragEnd = useCallback(
-    (_: any, info: { offset: { x: number }; velocity: { x: number } }) => {
-      const swipeThreshold = 50;
-      const velocityThreshold = 500;
+    (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      const { offset, velocity } = info;
 
-      if (
-        info.offset.x < -swipeThreshold ||
-        info.velocity.x < -velocityThreshold
-      ) {
+      if (offset.x < -SWIPE_THRESHOLD || velocity.x < -VELOCITY_THRESHOLD) {
         paginate(1);
-      } else if (
-        info.offset.x > swipeThreshold ||
-        info.velocity.x > velocityThreshold
-      ) {
+      } else if (offset.x > SWIPE_THRESHOLD || velocity.x > VELOCITY_THRESHOLD) {
         paginate(-1);
       }
     },
     [paginate]
   );
 
+  const handlePointerDown = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
+  const handlePointerMove = useCallback(() => {
+    isDragging.current = true;
+  }, []);
+
   const handleItemClick = useCallback(() => {
-    // Only fire click if this wasn't a drag gesture
     if (!isDragging.current && onItemClick) {
       onItemClick(items[currentIndex], currentIndex);
     }
@@ -102,20 +87,17 @@ const GalleryCarousel: React.FC<GalleryCarouselProps> = ({ items, onItemClick })
   const currentItem = items[currentIndex];
 
   const variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 300 : -300,
+    enter: (dir: number) => ({
+      x: dir > 0 ? '100%' : '-100%',
       opacity: 0,
-      scale: 0.9,
     }),
     center: {
       x: 0,
       opacity: 1,
-      scale: 1,
     },
-    exit: (direction: number) => ({
-      x: direction < 0 ? 300 : -300,
+    exit: (dir: number) => ({
+      x: dir < 0 ? '100%' : '-100%',
       opacity: 0,
-      scale: 0.9,
     }),
   };
 
@@ -125,29 +107,28 @@ const GalleryCarousel: React.FC<GalleryCarouselProps> = ({ items, onItemClick })
       <div
         ref={containerRef}
         className="relative w-full max-w-md aspect-square overflow-hidden rounded-3xl md:rounded-[2rem] bg-black/20 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/30 cursor-pointer"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
         onClick={handleItemClick}
       >
-        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+        <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
-            key={currentIndex}
+            key={page}
             custom={direction}
             variants={variants}
             initial="enter"
             animate="center"
             exit="exit"
             transition={{
-              x: { type: 'spring', stiffness: 300, damping: 30 },
+              x: { type: 'tween', duration: 0.3, ease: 'easeInOut' },
               opacity: { duration: 0.2 },
-              scale: { duration: 0.2 },
             }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.7}
-            onDragStart={handleDragStart}
-            onDrag={handleDrag}
+            dragElastic={0.15}
             onDragEnd={handleDragEnd}
-            className="absolute inset-0 cursor-grab active:cursor-grabbing"
-            style={{ x: dragX }}
+            className="absolute inset-0 will-change-transform"
+            style={{ touchAction: 'pan-y' }}
           >
             <NftMedia
               src={currentItem.imageUrl || `https://picsum.photos/seed/${currentItem.identifier}/600/600`}
@@ -220,8 +201,8 @@ const GalleryCarousel: React.FC<GalleryCarouselProps> = ({ items, onItemClick })
             <button
               key={index}
               onClick={() => {
-                setDirection(index > currentIndex ? 1 : -1);
-                setCurrentIndex(index);
+                const dir = index > currentIndex ? 1 : -1;
+                setPage([index, dir]);
               }}
               className={`rounded-full transition-all duration-300 ${
                 index === currentIndex
