@@ -199,6 +199,13 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     updatePreferences: fbUpdatePreferences
   } = useFirebaseFolders(walletAddress);
 
+  const isMainTabActive = viewMode === 'Collectibles' && (activeTab === 'Overview' || activeTab === 'SFTs' || activeTab === 'Collections');
+  const nftsQuery = useAccountNfts({
+    address: walletAddress,
+    enabled: isMainTabActive,
+    pageSize: 30
+  });
+
   // Sync Firestore preferences → local state (cross-device sync)
   const prefsAppliedRef = React.useRef(false);
   useEffect(() => {
@@ -878,13 +885,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     }
     return contentJSX;
   };
-
-  const isMainTabActive = viewMode === 'Collectibles' && (activeTab === 'Overview' || activeTab === 'SFTs' || activeTab === 'Collections');
-  const nftsQuery = useAccountNfts({
-    address: walletAddress,
-    enabled: isMainTabActive,
-    pageSize: 30
-  });
 
   const hasProAccess = useMemo(() => {
     return firebaseIsPro || isFullVersion || nftsQuery.items.some(nft => nft.collection === 'BCNPASS-40e72d');
