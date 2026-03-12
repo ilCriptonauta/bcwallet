@@ -2066,7 +2066,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
 
               {/* Action Footer */}
-              <div className="shrink-0 px-4 py-3 pb-[calc(12px+env(safe-area-bottom))] md:px-6 md:py-4 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/10 flex items-center gap-2 overflow-x-auto no-scrollbar">
+              <div className="shrink-0 px-4 py-3 pb-[calc(12px+env(safe-area-bottom))] md:px-6 md:py-4 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/10 flex items-center justify-center gap-2 overflow-visible flex-wrap">
                 <button
                   onClick={() => {
                     if (!hasProAccess) {
@@ -2084,9 +2084,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 >
                   {hasProAccess ? <User className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                   <span className="hidden md:inline">Avatar</span>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
+                  <div className="absolute bottom-full left-0 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
                     {hasProAccess ? "Set as Avatar" : "Pro Feature: Set as Avatar"}
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
+                    <div className="absolute -bottom-1 left-4 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
                   </div>
                 </button>
                 <button
@@ -2170,9 +2170,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 >
                   <DollarSign className="w-4 h-4" />
                   <span className="hidden md:inline">List</span>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
+                  <div className="absolute bottom-full right-0 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
                     List on OOX
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
+                    <div className="absolute -bottom-1 right-4 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
                   </div>
                 </button>
               </div>

@@ -5,7 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import GalleryCarousel, { type GalleryNft } from '@/components/GalleryCarousel';
 import { NftMedia } from '@/components/NftMedia';
-import { Folder, ExternalLink, Loader2, X, Share2, Zap, Copy, Check } from 'lucide-react';
+import { Folder, ExternalLink, Loader2, X, Share2, Zap, Copy, Check, LayoutGrid, Square } from 'lucide-react';
 import { use } from 'react';
 
 interface NftApiDetails {
@@ -38,6 +38,9 @@ export default function GalleryPage({ params }: { params: Promise<PageParams> })
   const [nftDetails, setNftDetails] = useState<NftApiDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [idCopied, setIdCopied] = useState(false);
+
+  // View Mode
+  const [viewMode, setViewMode] = useState<'carousel' | 'grid'>('carousel');
 
   const folderSlug = decodeURIComponent(folder);
 
@@ -266,21 +269,91 @@ export default function GalleryPage({ params }: { params: Promise<PageParams> })
 
         {/* Description */}
         {folderData.description && (
-          <p className="text-sm md:text-base font-medium text-white/40 text-center max-w-md mb-10 md:mb-14 leading-relaxed">
+          <p className="text-sm md:text-base font-medium text-white/40 text-center max-w-md mb-8 leading-relaxed">
             {folderData.description}
           </p>
         )}
 
-        {!folderData.description && <div className="mb-10 md:mb-14" />}
+        {!folderData.description && <div className="mb-8" />}
 
-        {/* NFT Carousel */}
-        <GalleryCarousel
-          items={folderData.items}
-          onItemClick={(item) => {
-            setSelectedNft(item);
-            setIdCopied(false);
-          }}
-        />
+        {/* View Mode Toggle */}
+        <div className="flex items-center justify-center mb-10 md:mb-14">
+          <div className="relative flex items-center bg-white/5 border border-white/10 rounded-full p-1.5 shadow-inner">
+            {/* Animated Slider Background */}
+            <div 
+              className={`absolute top-1.5 bottom-1.5 w-10 bg-orange-500 rounded-full shadow-lg shadow-orange-500/20 transition-transform duration-300 ease-out z-0 ${
+                viewMode === 'carousel' ? 'translate-x-0' : 'translate-x-full'
+              }`}
+            />
+            
+            <button
+              onClick={() => setViewMode('carousel')}
+              className={`relative w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-300 z-10 ${
+                viewMode === 'carousel' 
+                  ? 'text-white' 
+                  : 'text-white/40 hover:text-white'
+              }`}
+              aria-label="Carousel view"
+            >
+              <Square className={`w-5 h-5 transition-transform duration-300 ${viewMode === 'carousel' ? 'scale-110' : 'scale-100'}`} />
+            </button>
+
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`relative w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-300 z-10 ${
+                viewMode === 'grid' 
+                  ? 'text-white' 
+                  : 'text-white/40 hover:text-white'
+              }`}
+              aria-label="Grid view"
+            >
+              <LayoutGrid className={`w-5 h-5 transition-transform duration-300 ${viewMode === 'grid' ? 'scale-110' : 'scale-100'}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Content (Carousel or Grid) */}
+        {viewMode === 'carousel' ? (
+          <GalleryCarousel
+            items={folderData.items}
+            onItemClick={(item) => {
+              setSelectedNft(item);
+              setIdCopied(false);
+            }}
+          />
+        ) : (
+          <div className="w-full grid grid-cols-2 gap-4 md:gap-6 w-full max-w-4xl mx-auto px-2">
+            {folderData.items.map((item, idx) => (
+              <div 
+                key={idx}
+                onClick={() => {
+                  setSelectedNft(item);
+                  setIdCopied(false);
+                }}
+                className="group relative aspect-square bg-white/5 rounded-2xl md:rounded-[2rem] overflow-hidden cursor-pointer border border-white/10 hover:border-orange-500/50 transition-all duration-500 shadow-xl"
+              >
+                <NftMedia
+                  src={item.imageUrl || `https://picsum.photos/seed/${item.identifier}/400/400`}
+                  alt={item.name}
+                  mimeType={item.mimeType}
+                  loading="lazy"
+                  thumbnailFallback={item.thumbnailUrl || undefined}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-6">
+                  <h3 className="text-sm md:text-xl font-black text-white truncate drop-shadow-md">
+                    {item.name}
+                  </h3>
+                  <p className="text-[9px] md:text-xs font-bold text-orange-400 mt-1 uppercase tracking-widest truncate drop-shadow-md">
+                    {item.collectionName || item.collection}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* CTA */}
         <div className="mt-12 md:mt-16 flex flex-col items-center gap-3">
