@@ -840,6 +840,25 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           <button onClick={(e) => openMoveModal(e, nft)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all">
             <div className="flex items-center gap-4 md:gap-2"><Folder className="w-5 h-5 md:w-4 md:h-4 text-orange-500" /><span>Move to Folder</span></div>
           </button>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenMenuId(null);
+              if (!hasProAccess) {
+                alert('This feature is only for PRO users. Get a Bacon PASS license to unlock it!');
+                return;
+              }
+              const avatarUrl = nft.originalImageUrl || nft.imageUrl;
+              fbUpdatePreferences({ avatarUrl });
+              alert('Avatar successfully updated!');
+            }} 
+            className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all"
+          >
+            <div className="flex items-center gap-4 md:gap-2">
+              {hasProAccess ? <User className="w-5 h-5 md:w-4 md:h-4 text-purple-500" /> : <Lock className="w-5 h-5 md:w-4 md:h-4 text-gray-400" />}
+              <span className={!hasProAccess ? "text-gray-400" : ""}>{hasProAccess ? "Set as Avatar" : "Pro Feature: Avatar"}</span>
+            </div>
+          </button>
           <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-2 md:my-1" />
           <button onClick={(e) => openBurnModal(e, nft)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 active:scale-95 transition-all">
             <div className="flex items-center gap-4 md:gap-2"><Flame className="w-5 h-5 md:w-4 md:h-4" /><span>Burn</span></div>
@@ -2068,28 +2087,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               {/* Action Footer */}
               <div className="shrink-0 px-4 py-3 pb-[calc(12px+env(safe-area-bottom))] md:px-6 md:py-4 bg-white dark:bg-[#121212] border-t border-gray-100 dark:border-white/10 flex items-center justify-center gap-2 overflow-visible flex-wrap">
                 <button
-                  onClick={() => {
-                    if (!hasProAccess) {
-                      alert('This feature is only for PRO users. Get a Bacon PASS license to unlock it!');
-                      return;
-                    }
-                    const avatarUrl = selectedItem.originalImageUrl || selectedItem.imageUrl;
-                    fbUpdatePreferences({ avatarUrl });
-                    alert('Avatar successfully updated!');
-                  }}
-                  className={`group relative flex-[1_0_auto] min-w-[70px] h-[44px] rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 transition-all ${hasProAccess
-                    ? "bg-purple-500/10 dark:bg-purple-500/15 text-purple-500 hover:bg-purple-500 hover:text-white active:scale-95"
-                    : "bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed"
-                    }`}
-                >
-                  {hasProAccess ? <User className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                  <span className="hidden md:inline">Avatar</span>
-                  <div className="absolute bottom-full left-0 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
-                    {hasProAccess ? "Set as Avatar" : "Pro Feature: Set as Avatar"}
-                    <div className="absolute -bottom-1 left-4 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
-                  </div>
-                </button>
-                <button
                   onClick={(e) => {
                     setSelectedItem(null);
                     setTimeout(() => openBurnModal(e, {
@@ -2108,9 +2105,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 >
                   <Flame className="w-4 h-4" />
                   <span className="hidden md:inline">Burn</span>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
+                  <div className="absolute bottom-full left-0 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
                     Burn Asset
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
+                    <div className="absolute -bottom-1 left-4 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
                   </div>
                 </button>
 
