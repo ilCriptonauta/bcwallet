@@ -2077,14 +2077,17 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     fbUpdatePreferences({ avatarUrl });
                     alert('Avatar successfully updated!');
                   }}
-                  className={`flex-[1_0_auto] min-w-[70px] h-[44px] rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 transition-all ${hasProAccess
+                  className={`group relative flex-[1_0_auto] min-w-[70px] h-[44px] rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 transition-all ${hasProAccess
                     ? "bg-purple-500/10 dark:bg-purple-500/15 text-purple-500 hover:bg-purple-500 hover:text-white active:scale-95"
                     : "bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed"
                     }`}
-                  title={hasProAccess ? "Set as Avatar" : "Pro Feature: Set as Avatar"}
                 >
                   {hasProAccess ? <User className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                   <span className="hidden md:inline">Avatar</span>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
+                    {hasProAccess ? "Set as Avatar" : "Pro Feature: Set as Avatar"}
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
+                  </div>
                 </button>
                 <button
                   onClick={(e) => {
@@ -2101,19 +2104,26 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-red-500/10 dark:bg-red-500/15 text-red-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-red-500 hover:text-white active:scale-95 transition-all"
-                  title="Burn Asset"
+                  className="group relative flex-[1_0_auto] min-w-[70px] h-[44px] bg-red-500/10 dark:bg-red-500/15 text-red-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-red-500 hover:text-white active:scale-95 transition-all"
                 >
                   <Flame className="w-4 h-4" />
                   <span className="hidden md:inline">Burn</span>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
+                    Burn Asset
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
+                  </div>
                 </button>
 
                 <button
                   onClick={(e) => handleDownload(e, selectedItem.imageUrl, selectedItem.name || 'nft')}
-                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-gray-700 hover:text-white dark:hover:bg-white/20 active:scale-95 transition-all"
+                  className="group relative flex-[1_0_auto] min-w-[70px] h-[44px] bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-gray-700 hover:text-white dark:hover:bg-white/20 active:scale-95 transition-all"
                 >
                   <Download className="w-4 h-4" />
                   <span className="hidden md:inline">Save</span>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
+                    Save Image
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
+                  </div>
                 </button>
 
                 <button
@@ -2131,10 +2141,14 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-blue-500/10 dark:bg-blue-500/15 text-blue-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-blue-500 hover:text-white active:scale-95 transition-all"
+                  className="group relative flex-[1_0_auto] min-w-[70px] h-[44px] bg-blue-500/10 dark:bg-blue-500/15 text-blue-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-blue-500 hover:text-white active:scale-95 transition-all"
                 >
                   <Send className="w-4 h-4" />
                   <span className="hidden md:inline">Send</span>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
+                    Send Asset
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
+                  </div>
                 </button>
 
                 <button
@@ -2152,10 +2166,14 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       balance: selectedItem.balance
                     }), 100);
                   }}
-                  className="flex-[1_0_auto] min-w-[70px] h-[44px] bg-orange-500/10 dark:bg-orange-500/15 text-orange-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-orange-500 hover:text-white active:scale-95 transition-all"
+                  className="group relative flex-[1_0_auto] min-w-[70px] h-[44px] bg-orange-500/10 dark:bg-orange-500/15 text-orange-500 rounded-xl font-black text-[11px] flex items-center justify-center gap-1.5 hover:bg-orange-500 hover:text-white active:scale-95 transition-all"
                 >
                   <DollarSign className="w-4 h-4" />
                   <span className="hidden md:inline">List</span>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg pointer-events-none whitespace-nowrap shadow-xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-[300]">
+                    List on OOX
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45" />
+                  </div>
                 </button>
               </div>
             </div>

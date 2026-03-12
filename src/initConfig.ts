@@ -7,7 +7,7 @@ import { EnvironmentsEnum, InitAppType } from './lib';
 const DEFAULT_TOAST_LIEFTIME = 5000;
 
 export const config: InitAppType = {
-  storage: { getStorageCallback: () => sessionStorage },
+  storage: { getStorageCallback: () => localStorage },
   dAppConfig: {
     nativeAuth: true,
     environment: EnvironmentsEnum.mainnet,
