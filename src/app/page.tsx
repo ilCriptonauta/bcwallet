@@ -9,12 +9,13 @@ import Splash from '@/components/Splash';
 import TabSystem from '@/components/TabSystem';
 import ToolsPage from '@/components/ToolsPage';
 import LicensePage from '@/components/LicensePage';
+import VaultPage from '@/components/VaultPage';
 import { useRouter } from 'next/navigation';
 import { RouteNamesEnum } from '@/localConstants';
 import { useGetIsLoggedIn, useGetAccountInfo, useGetNetworkConfig } from '@/lib';
 import axios from 'axios';
 
-type Page = 'home' | 'tools' | 'license';
+type Page = 'home' | 'tools' | 'license' | 'vault';
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -115,6 +116,10 @@ export default function Home() {
         ) : currentPage === 'tools' ? (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             <ToolsPage isFullVersion={isPro} />
+          </div>
+        ) : currentPage === 'vault' ? (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <VaultPage isFullVersion={isPro} />
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 flex justify-center">

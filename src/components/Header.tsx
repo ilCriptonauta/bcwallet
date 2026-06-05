@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Sun, Moon, LogIn, LogOut, User, ChevronDown, Wrench, Wallet2, Coins, Crown, TrendingUp, X, BadgeCheck } from 'lucide-react';
+import { Sun, Moon, LogIn, LogOut, User, ChevronDown, Wrench, Wallet2, Coins, Crown, TrendingUp, X, BadgeCheck, Vault } from 'lucide-react';
 import { useGetAccountInfo } from '@/lib';
 import { useOnxBalance, useAccountNfts, useNftsValue } from '@/helpers';
 import { useFirebaseFolders } from '@/hooks/useFirebaseFolders';
@@ -14,8 +14,8 @@ interface HeaderProps {
   isLoggedIn: boolean;
   onLogin: () => void;
   onLogout: () => void;
-  onNavigate: (page: 'home' | 'tools' | 'license') => void;
-  currentPage: 'home' | 'tools' | 'license';
+  onNavigate: (page: 'home' | 'tools' | 'license' | 'vault') => void;
+  currentPage: 'home' | 'tools' | 'license' | 'vault';
   isFullVersion?: boolean;
 }
 
@@ -82,7 +82,7 @@ const Header: React.FC<HeaderProps> = ({
     }
   }, [isMenuOpen]);
 
-  const handleNavigate = (page: 'home' | 'tools' | 'license') => {
+  const handleNavigate = (page: 'home' | 'tools' | 'license' | 'vault') => {
     onNavigate(page);
     setIsMenuOpen(false);
   };
@@ -158,6 +158,21 @@ const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="h-px bg-slate-100 dark:bg-white/5 my-1" />
+
+      {/* BOOX Vault navigation */}
+      <button
+        onClick={() => handleNavigate('vault')}
+        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] ${currentPage === 'vault'
+          ? 'text-brand-orange bg-brand-orange/5 dark:bg-brand-orange/10'
+          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'
+          }`}
+      >
+        <Vault className={`w-4 h-4 ${currentPage === 'vault' ? 'text-brand-orange' : 'text-slate-500 dark:text-slate-400'}`} />
+        <span>BOOX Vault</span>
+        {currentPage === 'vault' && (
+          <span className="ml-auto text-[10px] font-black uppercase tracking-widest text-brand-orange bg-brand-orange/10 px-2 py-1 rounded-md">Open</span>
+        )}
+      </button>
 
       {/* Tools navigation */}
       <button
