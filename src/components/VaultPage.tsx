@@ -49,6 +49,8 @@ interface UserAssets {
   customChubbies: NftItem[];
   onionxCards: NftItem[];
   tickets: number; // Quantity of OOXTCK-08aa7c-02 SFT
+  blackBoxes: number; // Quantity of BOOX-39e0c4-01 SFT
+  goldBoxes: number;  // Quantity of BOOX-39e0c4-02 SFT
 }
 
 // Badge definition
@@ -77,6 +79,8 @@ const VaultPage: React.FC<VaultPageProps> = ({ isFullVersion }) => {
     customChubbies: [],
     onionxCards: [],
     tickets: 0,
+    blackBoxes: 0,
+    goldBoxes: 0,
   });
 
   // OnionxCards view mode and index state
@@ -251,12 +255,36 @@ const VaultPage: React.FC<VaultPageProps> = ({ isFullVersion }) => {
           // 404 is returned if the user does not own this SFT
         }
 
+        // 6. Fetch Black Box SFT (BOOX-39e0c4-01)
+        let blackBoxesVal = 0;
+        try {
+          const blackBoxRes = await axios.get(`${network.apiAddress}/accounts/${address}/nfts/BOOX-39e0c4-01`);
+          if (blackBoxRes.data && blackBoxRes.data.balance) {
+            blackBoxesVal = parseInt(blackBoxRes.data.balance) || 0;
+          }
+        } catch (e) {
+          // 404 is returned if the user does not own this SFT
+        }
+
+        // 7. Fetch Gold Box SFT (BOOX-39e0c4-02)
+        let goldBoxesVal = 0;
+        try {
+          const goldBoxRes = await axios.get(`${network.apiAddress}/accounts/${address}/nfts/BOOX-39e0c4-02`);
+          if (goldBoxRes.data && goldBoxRes.data.balance) {
+            goldBoxesVal = parseInt(goldBoxRes.data.balance) || 0;
+          }
+        } catch (e) {
+          // 404 is returned if the user does not own this SFT
+        }
+
         const newAssets: UserAssets = {
           onx: onxVal,
           chubbies: chubbiesVal,
           customChubbies: customChubbiesVal,
           onionxCards: cardsVal,
           tickets: ticketsVal,
+          blackBoxes: blackBoxesVal,
+          goldBoxes: goldBoxesVal,
         };
 
         setAssets(newAssets);
@@ -440,8 +468,10 @@ const VaultPage: React.FC<VaultPageProps> = ({ isFullVersion }) => {
                       (assets.chubbies.length > 0 ? 1 : 0) +
                       (assets.customChubbies.length > 0 ? 1 : 0) +
                       (assets.onionxCards.length > 0 ? 1 : 0) +
-                      (assets.tickets > 0 ? 1 : 0)
-                    } / 5
+                      (assets.tickets > 0 ? 1 : 0) +
+                      (assets.blackBoxes > 0 ? 1 : 0) +
+                      (assets.goldBoxes > 0 ? 1 : 0)
+                    } / 7
                   </div>
                 </div>
               </div>
@@ -746,6 +776,116 @@ const VaultPage: React.FC<VaultPageProps> = ({ isFullVersion }) => {
                   <span className="text-xs font-bold text-slate-400">Available Quantity</span>
                   <span className="text-2xl font-black text-slate-900 dark:text-white">
                     {assets.tickets}
+                  </span>
+                </div>
+              </div>
+
+              {/* Black Box SFT Card */}
+              <div className="p-6 rounded-3xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/5 flex flex-col justify-between hover:shadow-lg transition-all relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-slate-700/10 dark:bg-slate-400/5 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-slate-800/10 dark:bg-white/5 flex items-center justify-center border border-slate-700/20 dark:border-white/10">
+                        <span className="text-2xl">🖤</span>
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black dark:text-white text-slate-900">Black Box</h4>
+                        <span className="text-[10px] uppercase tracking-widest font-black text-slate-400">SFT Asset</span>
+                      </div>
+                    </div>
+                    <a
+                      href="https://explorer.multiversx.com/nfts/BOOX-39e0c4-01"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-black px-2.5 py-1 rounded-md bg-slate-700/10 dark:bg-white/5 text-slate-600 dark:text-slate-300 flex items-center gap-1 hover:bg-slate-700/20 dark:hover:bg-white/10 transition-colors border border-slate-300/30 dark:border-white/10"
+                    >
+                      <span>BOOX-39e0c4-01</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold mb-6">
+                    Exclusive Black Boxes from the BOOX collection. Rare and mysterious.
+                  </p>
+
+                  {assets.blackBoxes === 0 && (
+                    <div className="mb-6 p-4 rounded-2xl bg-slate-100/60 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs text-slate-600 dark:text-slate-400 font-semibold space-y-2">
+                      <p>You don't own any Black Boxes. Check the marketplace to get one:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <a
+                          href="https://explorer.multiversx.com/collections/BOOX-39e0c4"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-slate-800 dark:bg-white/10 text-white dark:text-white font-black rounded-lg hover:bg-slate-700 dark:hover:bg-white/20 transition-all active:scale-95 flex items-center gap-1"
+                        >
+                          <span>View Collection</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
+                  <span className="text-xs font-bold text-slate-400">Available Quantity</span>
+                  <span className="text-2xl font-black text-slate-900 dark:text-white">
+                    {assets.blackBoxes}
+                  </span>
+                </div>
+              </div>
+
+              {/* Gold Box SFT Card */}
+              <div className="p-6 rounded-3xl bg-white dark:bg-[#111] border border-slate-200 dark:border-white/5 flex flex-col justify-between hover:shadow-lg transition-all relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-400/10 rounded-full blur-2xl group-hover:scale-125 transition-transform" />
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-yellow-400/10 flex items-center justify-center border border-yellow-400/20">
+                        <span className="text-2xl">📦</span>
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black dark:text-white text-slate-900">Gold Box</h4>
+                        <span className="text-[10px] uppercase tracking-widest font-black text-slate-400">SFT Asset</span>
+                      </div>
+                    </div>
+                    <a
+                      href="https://explorer.multiversx.com/nfts/BOOX-39e0c4-02"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-black px-2.5 py-1 rounded-md bg-yellow-400/10 text-yellow-600 dark:text-yellow-400 flex items-center gap-1 hover:bg-yellow-400/20 transition-colors border border-yellow-400/20"
+                    >
+                      <span>BOOX-39e0c4-02</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold mb-6">
+                    Prestigious Gold Boxes from the BOOX collection. Premium and extremely valuable.
+                  </p>
+
+                  {assets.goldBoxes === 0 && (
+                    <div className="mb-6 p-4 rounded-2xl bg-yellow-400/5 dark:bg-yellow-400/10 border border-yellow-400/20 text-xs text-yellow-700 dark:text-yellow-400 font-semibold space-y-2">
+                      <p>You don't own any Gold Boxes. Check the marketplace to get one:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <a
+                          href="https://explorer.multiversx.com/collections/BOOX-39e0c4"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-yellow-500 text-black font-black rounded-lg hover:bg-yellow-400 transition-all active:scale-95 flex items-center gap-1"
+                        >
+                          <span>View Collection</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
+                  <span className="text-xs font-bold text-slate-400">Available Quantity</span>
+                  <span className="text-2xl font-black text-slate-900 dark:text-white">
+                    {assets.goldBoxes}
                   </span>
                 </div>
               </div>
