@@ -525,9 +525,17 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
 
     if (!assetForm.name.trim()) {
       errors.name = 'Asset name is required.';
+    } else if (assetForm.name.trim().length < 3 || assetForm.name.trim().length > 32) {
+      errors.name = 'Asset name must be between 3 and 32 characters.';
+    }
+    if (assetForm.description.trim().length > 1000) {
+      errors.description = 'Description cannot exceed 1000 characters.';
     }
     if (!assetForm.collection) {
       errors.collection = 'You must select a target collection.';
+    }
+    if (isNaN(assetForm.royalties) || assetForm.royalties < 0 || assetForm.royalties > 100) {
+      errors.royalties = 'Royalties must be between 0% and 100%.';
     }
     if (!assetForm.mediaUrl.trim()) {
       errors.mediaUrl = 'A public media URL (IPFS or HTTPS) is required.';

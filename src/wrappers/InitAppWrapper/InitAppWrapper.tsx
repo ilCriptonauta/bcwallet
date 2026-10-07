@@ -6,12 +6,21 @@ import { PropsWithChildren, useEffect, useState } from 'react';
 let isInitializing = false;
 
 if (typeof window !== 'undefined') {
-  // Suppress empty object {} console errors often thrown by WalletConnect/xPortal
+  // Suppress empty object {} console errors often thrown by WalletConnect/xPortal/sdk-dapp
   const originalConsoleError = console.error;
-  console.error = (...args) => {
-    if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null && Object.keys(args[0]).length === 0) {
-      return;
+  console.error = (...args: unknown[]) => {
+    const isEmptyObject = (val: unknown): boolean => {
+      if (typeof val !== 'object' || val === null) return false;
+      if (val instanceof Error) {
+        return !val.message && !val.stack;
+      }
+      return Object.keys(val).length === 0 && Object.getOwnPropertyNames(val).length === 0;
+    };
+
+    if (args.length === 0 || args.every(isEmptyObject)) {
+      return; // Suppress empty object logging
     }
+
     originalConsoleError(...args);
   };
 }

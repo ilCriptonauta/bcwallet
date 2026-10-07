@@ -7,23 +7,36 @@ interface GalleryLayoutProps {
 
 export async function generateMetadata({ params }: GalleryLayoutProps): Promise<Metadata> {
   const { owner, folder } = await params;
-  const folderName = decodeURIComponent(folder).replace(/-/g, ' ');
-  const displayOwner = owner.startsWith('erd1') ? `${owner.slice(0, 8)}...${owner.slice(-4)}` : `@${owner}`;
+  const rawFolderName = decodeURIComponent(folder).replace(/-/g, ' ');
+  const folderName = rawFolderName.charAt(0).toUpperCase() + rawFolderName.slice(1);
+  const displayOwner = owner.startsWith('erd1') 
+    ? `${owner.slice(0, 8)}...${owner.slice(-4)}` 
+    : owner.startsWith('@') ? owner : `@${owner}`;
+
+  const title = `${folderName} Collection — ${displayOwner}`;
+  const description = `Explore the curated ${folderName} NFT gallery on Bacon Wallet created by ${displayOwner}. Powered by MultiversX.`;
 
   return {
-    title: `${folderName} — ${displayOwner}`,
-    description: `Check out this NFT collection on Bacon Wallet by ${displayOwner}`,
+    title,
+    description,
     openGraph: {
       type: 'website',
       siteName: 'Bacon Wallet',
-      title: `${folderName} — Gallery`,
-      description: `Check out this NFT collection on Bacon Wallet by ${displayOwner}`,
-      images: ['/social.jpg'],
+      title,
+      description,
+      images: [
+        {
+          url: '/social.jpg',
+          width: 1200,
+          height: 630,
+          alt: `${folderName} Gallery by ${displayOwner}`,
+        }
+      ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${folderName} — Gallery`,
-      description: `Check out this NFT collection on Bacon Wallet by ${displayOwner}`,
+      title,
+      description,
       creator: '@onionxlabs',
       images: ['/social.jpg'],
     },

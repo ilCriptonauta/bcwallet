@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useGetAccountInfo, useGetNetworkConfig } from '@/lib';
-import axios from 'axios';
 import { 
   Vault, 
   Lock, 
@@ -16,72 +15,31 @@ import {
   CreditCard, 
   Trophy, 
   Sparkles, 
-  PartyPopper,
-  X,
   ExternalLink,
   ChevronRight,
   Info,
   Square,
   LayoutGrid
 } from 'lucide-react';
-import BigNumber from 'bignumber.js';
+import { useVaultAssets } from '@/hooks/useVaultAssets';
+import { BadgeUnlockModal } from '@/components/vault/BadgeUnlockModal';
 
 interface VaultPageProps {
   isFullVersion: boolean;
-}
-
-// Types for fetched asset data
-interface TokenData {
-  balance: string;
-  decimals: number;
-  name: string;
-}
-
-interface NftItem {
-  identifier: string;
-  name: string;
-  imageUrl: string | null;
-}
-
-interface UserAssets {
-  onx: number;
-  chubbies: NftItem[];
-  customChubbies: NftItem[];
-  onionxCards: NftItem[];
-  tickets: number; // Quantity of OOXTCK-08aa7c-02 SFT
-  blackBoxes: number; // Quantity of BOOX-39e0c4-01 SFT
-  goldBoxes: number;  // Quantity of BOOX-39e0c4-02 SFT
-}
-
-// Badge definition
-interface Badge {
-  id: string;
-  title: string;
-  description: string;
-  requirement: string;
-  icon: React.ReactNode;
-  colorClass: string; // Gradient Tailwind classes
-  check: (assets: UserAssets) => boolean;
 }
 
 const VaultPage: React.FC<VaultPageProps> = ({ isFullVersion }) => {
   const { address } = useGetAccountInfo();
   const { network } = useGetNetworkConfig();
 
-  // Loading and Error states
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Asset balances/items
-  const [assets, setAssets] = useState<UserAssets>({
-    onx: 0,
-    chubbies: [],
-    customChubbies: [],
-    onionxCards: [],
-    tickets: 0,
-    blackBoxes: 0,
-    goldBoxes: 0,
-  });
+  const {
+    assets,
+    badges,
+    isLoading,
+    error,
+    newBadgesModal,
+    setNewBadgesModal
+  } = useVaultAssets(address, network);
 
   // OnionxCards view mode and index state
   const [onionCardsIndex, setOnionCardsIndex] = useState(0);
@@ -90,246 +48,6 @@ const VaultPage: React.FC<VaultPageProps> = ({ isFullVersion }) => {
   // Badges view mode and index state
   const [badgesIndex, setBadgesIndex] = useState(0);
   const [badgesViewMode, setBadgesViewMode] = useState<'single' | 'grid'>('single');
-
-  // Modal for new badges
-  const [newBadgesModal, setNewBadgesModal] = useState<Badge[]>([]);
-
-  // List of all badges in the ecosystem
-  const badges: Badge[] = useMemo(() => [
-    {
-      id: 'onx_apprentice',
-      title: 'ONX Apprentice',
-      description: 'You have started accumulating ONX in your wallet.',
-      requirement: 'Own more than 0 ONX',
-      icon: <Coins className="w-6 h-6 text-yellow-400" />,
-      colorClass: 'from-amber-500/20 to-yellow-500/10 border-yellow-500/30 text-yellow-400',
-      check: (a) => a.onx > 0,
-    },
-    {
-      id: 'onx_baron',
-      title: 'ONX Baron',
-      description: 'You have become a major supporter by holding a significant amount of ONX.',
-      requirement: 'Own at least 10,000 ONX',
-      icon: <Trophy className="w-6 h-6 text-yellow-500" />,
-      colorClass: 'from-yellow-600/30 to-amber-600/10 border-yellow-600/40 text-yellow-500',
-      check: (a) => a.onx >= 10000,
-    },
-    {
-      id: 'millionx',
-      title: 'MilliONX',
-      description: 'You are an elite holder with a massive fortune of ONX.',
-      requirement: 'Own at least 1,000,000 ONX',
-      icon: <Trophy className="w-6 h-6 text-yellow-300 animate-pulse" />,
-      colorClass: 'from-amber-600/40 via-yellow-600/20 to-yellow-500/10 border-yellow-500/40 text-yellow-300 shadow-xl shadow-yellow-500/10',
-      check: (a) => a.onx >= 1000000,
-    },
-    {
-      id: 'chubby_fan',
-      title: 'CHUBBY Fan',
-      description: 'Own at least one cute CHUBBY OnionX NFT.',
-      requirement: 'Own 1+ CHUBBYs NFT',
-      icon: <Sparkles className="w-6 h-6 text-pink-400" />,
-      colorClass: 'from-pink-500/20 to-purple-500/10 border-pink-500/30 text-pink-400',
-      check: (a) => a.chubbies.length >= 1,
-    },
-    {
-      id: 'chubby_collector',
-      title: 'CHUBBY Collector',
-      description: 'You have gathered a splendid team of CHUBBY OnionX in your vault.',
-      requirement: 'Own 5+ CHUBBYs NFTs',
-      icon: <Gem className="w-6 h-6 text-fuchsia-400" />,
-      colorClass: 'from-purple-600/30 to-pink-600/10 border-purple-500/30 text-purple-400',
-      check: (a) => a.chubbies.length >= 5,
-    },
-    {
-      id: 'custom_collector',
-      title: 'Custom Collector',
-      description: 'Own a custom-tailored CUSTOM CHUBBY NFT.',
-      requirement: 'Own 1+ CUSTOM CHUBBY NFT',
-      icon: <Sparkles className="w-6 h-6 text-cyan-400" />,
-      colorClass: 'from-cyan-500/20 to-blue-500/10 border-cyan-500/30 text-cyan-400',
-      check: (a) => a.customChubbies.length >= 1,
-    },
-    {
-      id: 'card_holder',
-      title: 'Card Holder',
-      description: 'Jealously guard OnionxCards NFTs.',
-      requirement: 'Own 1+ OnionxCards NFT',
-      icon: <CreditCard className="w-6 h-6 text-indigo-400" />,
-      colorClass: 'from-indigo-500/20 to-blue-500/10 border-indigo-500/30 text-indigo-400',
-      check: (a) => a.onionxCards.length >= 1,
-    },
-    {
-      id: 'ticket_master',
-      title: 'Ticket Master',
-      description: 'Own special OOXTCK tickets to participate in exclusive events.',
-      requirement: 'Own 1+ Tickets (OOXTCK-08aa7c-02)',
-      icon: <Ticket className="w-6 h-6 text-emerald-400" />,
-      colorClass: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/30 text-emerald-400',
-      check: (a) => a.tickets >= 1,
-    },
-    {
-      id: 'ecosystem_champion',
-      title: 'Ecosystem Champion',
-      description: 'You have unlocked almost all badges, proving to be a true champion of the BOOX ecosystem!',
-      requirement: 'Unlock at least 4 different badges',
-      icon: <PartyPopper className="w-6 h-6 text-orange-400 animate-bounce" />,
-      colorClass: 'from-orange-500/30 via-yellow-500/10 to-red-500/10 border-orange-500/40 text-orange-400 shadow-lg shadow-orange-500/5',
-      check: (a) => {
-        // Count how many of the other badges are unlocked (excluding this one)
-        const activeOtherBadgesCount = [
-          a.onx > 0,
-          a.onx >= 10000,
-          a.onx >= 1000000,
-          a.chubbies.length >= 1,
-          a.chubbies.length >= 5,
-          a.customChubbies.length >= 1,
-          a.onionxCards.length >= 1,
-          a.tickets >= 1,
-        ].filter(Boolean).length;
-        return activeOtherBadgesCount >= 4;
-      },
-    }
-  ], []);
-
-  // Fetch balances on mount or address change
-  useEffect(() => {
-    if (!address || !network?.apiAddress) return;
-
-    const fetchVaultAssets = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        // 1. Fetch ONX Balance
-        let onxVal = 0;
-        try {
-          const onxRes = await axios.get(`${network.apiAddress}/accounts/${address}/tokens/ONX-3e51c8`);
-          if (onxRes.data && onxRes.data.balance) {
-            const dec = onxRes.data.decimals ?? 18;
-            onxVal = new BigNumber(onxRes.data.balance)
-              .dividedBy(new BigNumber(10).pow(dec))
-              .toNumber();
-          }
-        } catch (e) {
-          // Token might not be held, keep 0
-        }
-
-        // Helper to map API items to NftItem
-        const mapNfts = (items: any[]): NftItem[] => {
-          return (items || []).map((item: any) => ({
-            identifier: item.identifier,
-            name: item.name || item.identifier,
-            imageUrl: item.media?.[0]?.thumbnailUrl || item.media?.[0]?.url || item.url || null
-          }));
-        };
-
-        // 2. Fetch CHUBBY OnionX NFTs (CHBONX-3e0201)
-        let chubbiesVal: NftItem[] = [];
-        try {
-          const chubbiesRes = await axios.get(`${network.apiAddress}/accounts/${address}/nfts?collection=CHBONX-3e0201&size=100`);
-          chubbiesVal = mapNfts(chubbiesRes.data);
-        } catch (e) {}
-
-        // 3. Fetch CUSTOM CHUBBY NFTs (CTMCHUB-9298c1)
-        let customChubbiesVal: NftItem[] = [];
-        try {
-          const customRes = await axios.get(`${network.apiAddress}/accounts/${address}/nfts?collection=CTMCHUB-9298c1&size=100`);
-          customChubbiesVal = mapNfts(customRes.data);
-        } catch (e) {}
-
-        // 4. Fetch OnionxCards NFTs (ONXCRDS-ab712e)
-        let cardsVal: NftItem[] = [];
-        try {
-          const cardsRes = await axios.get(`${network.apiAddress}/accounts/${address}/nfts?collection=ONXCRDS-ab712e&size=100`);
-          cardsVal = mapNfts(cardsRes.data);
-        } catch (e) {}
-
-        // 5. Fetch Ticket SFT (OOXTCK-08aa7c-02)
-        let ticketsVal = 0;
-        try {
-          const ticketRes = await axios.get(`${network.apiAddress}/accounts/${address}/nfts/OOXTCK-08aa7c-02`);
-          if (ticketRes.data && ticketRes.data.balance) {
-            ticketsVal = parseInt(ticketRes.data.balance) || 0;
-          }
-        } catch (e) {
-          // 404 is returned if the user does not own this SFT
-        }
-
-        // 6. Fetch Black Box SFT (BOOX-39e0c4-01)
-        let blackBoxesVal = 0;
-        try {
-          const blackBoxRes = await axios.get(`${network.apiAddress}/accounts/${address}/nfts/BOOX-39e0c4-01`);
-          if (blackBoxRes.data && blackBoxRes.data.balance) {
-            blackBoxesVal = parseInt(blackBoxRes.data.balance) || 0;
-          }
-        } catch (e) {
-          // 404 is returned if the user does not own this SFT
-        }
-
-        // 7. Fetch Gold Box SFT (BOOX-39e0c4-02)
-        let goldBoxesVal = 0;
-        try {
-          const goldBoxRes = await axios.get(`${network.apiAddress}/accounts/${address}/nfts/BOOX-39e0c4-02`);
-          if (goldBoxRes.data && goldBoxRes.data.balance) {
-            goldBoxesVal = parseInt(goldBoxRes.data.balance) || 0;
-          }
-        } catch (e) {
-          // 404 is returned if the user does not own this SFT
-        }
-
-        const newAssets: UserAssets = {
-          onx: onxVal,
-          chubbies: chubbiesVal,
-          customChubbies: customChubbiesVal,
-          onionxCards: cardsVal,
-          tickets: ticketsVal,
-          blackBoxes: blackBoxesVal,
-          goldBoxes: goldBoxesVal,
-        };
-
-        setAssets(newAssets);
-
-        // --- Check for new badges ---
-        const unlockedIds = badges
-          .filter(b => b.check(newAssets))
-          .map(b => b.id);
-
-        const storageKey = `unlocked_badges_${address}`;
-        const previousUnlockedStr = localStorage.getItem(storageKey);
-        
-        if (previousUnlockedStr !== null) {
-          const previousUnlockedIds: string[] = JSON.parse(previousUnlockedStr);
-          // Find newly unlocked badges
-          const newlyUnlocked = badges.filter(
-            b => unlockedIds.includes(b.id) && !previousUnlockedIds.includes(b.id)
-          );
-
-          if (newlyUnlocked.length > 0) {
-            setNewBadgesModal(newlyUnlocked);
-          }
-        } else {
-          // First time loading for this address, save current badges without pop-up
-          // so user doesn't get spammed with history, or we can choose to show it.
-          // Let's show them if they have unlocked anything, as a welcome surprise!
-          const initialUnlocked = badges.filter(b => unlockedIds.includes(b.id));
-          if (initialUnlocked.length > 0) {
-            setNewBadgesModal(initialUnlocked);
-          }
-        }
-
-        // Save current list as the source of truth
-        localStorage.setItem(storageKey, JSON.stringify(unlockedIds));
-
-      } catch (err) {
-        console.error('Failed to load vault assets:', err);
-        setError('An error occurred while loading assets from your wallet. Please try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVaultAssets();
-  }, [address, network?.apiAddress, badges]);
 
   // Compute currently unlocked badges
   const unlockedBadges = useMemo(() => {
@@ -345,52 +63,10 @@ const VaultPage: React.FC<VaultPageProps> = ({ isFullVersion }) => {
       
       {/* Celebration / New Badge Notification Modal */}
       {newBadgesModal.length > 0 && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setNewBadgesModal([])}></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-[#151518] rounded-[2.5rem] shadow-2xl border dark:border-white/10 p-8 sm:p-10 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
-            <button 
-              onClick={() => setNewBadgesModal([])}
-              className="absolute top-6 right-6 p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="w-20 h-20 rounded-full bg-yellow-500/20 flex items-center justify-center mb-6 animate-pulse">
-              <PartyPopper className="w-10 h-10 text-yellow-500" />
-            </div>
-
-            <h2 className="text-3xl font-black mb-2 dark:text-white text-slate-900">
-              {newBadgesModal.length === 1 ? 'New Badge Unlocked!' : 'New Badges Unlocked!'}
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 font-bold mb-6 text-sm">
-              Your wallet assets have unlocked new achievements:
-            </p>
-
-            <div className="w-full space-y-3 mb-8 max-h-[300px] overflow-y-auto pr-1">
-              {newBadgesModal.map((badge) => (
-                <div 
-                  key={badge.id}
-                  className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-yellow-500/10 to-transparent border border-yellow-500/20 text-left"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
-                    {badge.icon}
-                  </div>
-                  <div>
-                    <h4 className="font-black dark:text-white text-slate-900">{badge.title}</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{badge.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setNewBadgesModal([])}
-              className="w-full py-4 bg-yellow-500 text-black font-black rounded-2xl hover:bg-yellow-600 transition-all active:scale-95 shadow-xl shadow-yellow-500/20"
-            >
-              Awesome!
-            </button>
-          </div>
-        </div>
+        <BadgeUnlockModal
+          badges={newBadgesModal}
+          onClose={() => setNewBadgesModal([])}
+        />
       )}
 
       {/* Header section */}

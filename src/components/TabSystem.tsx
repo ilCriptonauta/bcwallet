@@ -8,15 +8,19 @@ import {
   DollarSign, Send, Flame, Download, Heart, Settings,
   Zap, ArrowLeft, Lock, Trash2, Share2, Square, LayoutGrid,
   TrendingUp, TrendingDown, Clock, Users, User,
-  Copy, Check, ExternalLink
+  Copy, Check, ExternalLink, Filter
 } from 'lucide-react';
 import { useGetAccountInfo, useGetNetworkConfig } from '@/lib';
 import { useAccountNfts, type NormalizedNft } from '@/helpers';
 import { useFirebaseFolders } from '@/hooks/useFirebaseFolders';
 import { useNftTransactions } from '@/hooks/useNftTransactions';
 import { GalleryGrid } from './GalleryGrid';
+import { NftCardSkeleton } from './NftCardSkeleton';
 import { BurnModal } from './modals/BurnModal';
 import { SellModal } from './modals/SellModal';
+import { MultiSellModal } from './modals/MultiSellModal';
+import { MultiSendModal } from './modals/MultiSendModal';
+import { MultiBurnModal } from './modals/MultiBurnModal';
 import { MoveModal } from './modals/MoveModal';
 import { RemoveConfirmationModal } from './modals/RemoveConfirmationModal';
 import { CreateFolderModal } from './modals/CreateFolderModal';
@@ -24,6 +28,8 @@ import { ShareFolderModal } from './modals/ShareFolderModal';
 import { AssetSendModal } from './modals/AssetSendModal';
 import { NftMedia } from './NftMedia';
 import { useWebHaptics } from 'web-haptics/react';
+import { usePortfolioTracker } from '@/hooks/usePortfolioTracker';
+import { PortfolioSummaryCard } from './PortfolioSummaryCard';
 type ViewMode = 'Collectibles' | 'Management';
 type TabId = 'Overview' | 'SFTs' | 'Collections' | string;
 
@@ -200,13 +206,22 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     pageSize: 30
   });
 
-  const { handleSendNft: _handleSendNft, handleBurnNft: _handleBurnNft, handleSellNft: _handleSellNft } = useNftTransactions({
+  const { 
+    handleSendNft: _handleSendNft, 
+    handleBurnNft: _handleBurnNft, 
+    handleSellNft: _handleSellNft,
+    handleSellMultipleNfts: _handleSellMultipleNfts,
+    handleSendMultipleNfts: _handleSendMultipleNfts,
+    handleBurnMultipleNfts: _handleBurnMultipleNfts
+  } = useNftTransactions({
     walletAddress,
     network,
     setItems: nftsQuery.setItems,
     OOX_PAYMENT_TOKENS,
     OOX_CONTRACT_ADDRESS,
   });
+
+  const portfolio = usePortfolioTracker(nftsQuery.items);
 
   // Sync Firestore preferences → local state (cross-device sync)
   const prefsAppliedRef = React.useRef(false);
@@ -245,6 +260,30 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [nftToSend, setNftToSend] = useState<NormalizedNft | null>(null);
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
+  const [isMultiSellModalOpen, setIsMultiSellModalOpen] = useState(false);
+  const [isMultiSendModalOpen, setIsMultiSendModalOpen] = useState(false);
+  const [isMultiBurnModalOpen, setIsMultiBurnModalOpen] = useState(false);
+  const [filterType, setFilterType] = useState<'ALL' | 'NFT' | 'SFT'>('ALL');
+  const [selectedCollectionFilter, setSelectedCollectionFilter] = useState<string | null>(null);
+
+  const availableCollections = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; count: number }>();
+    for (const item of nftsQuery.items) {
+      if (!item.collection || item.collection === 'BCNPASS-40e72d') continue;
+      const existing = map.get(item.collection);
+      const qty = item.balance ? parseInt(item.balance, 10) || 1 : 1;
+      if (existing) {
+        existing.count += qty;
+      } else {
+        map.set(item.collection, {
+          id: item.collection,
+          name: item.collectionName || item.collection,
+          count: qty,
+        });
+      }
+    }
+    return Array.from(map.values());
+  }, [nftsQuery.items]);
   const [nftToSell, setNftToSell] = useState<NormalizedNft | null>(null);
   const [isBurnModalOpen, setIsBurnModalOpen] = useState(false);
   const [nftToBurn, setNftToBurn] = useState<NormalizedNft | null>(null);
@@ -803,6 +842,14 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
 
   const renderCollectibles = () => {
+    if (nftsQuery.isLoading && nftsQuery.items.length === 0) {
+      return (
+        <div className="py-6 space-y-6 animate-in fade-in duration-500">
+          <NftCardSkeleton count={10} />
+        </div>
+      );
+    }
+
     const searchLower = searchQuery.toLowerCase();
     const allItems = nftsQuery.items.filter(item => {
       const matchesSearch = !searchQuery ||
@@ -810,8 +857,13 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         (item.collection && item.collection.toLowerCase().includes(searchLower));
 
       const isOfficialLicense = item.collection === 'BCNPASS-40e72d';
+      if (isOfficialLicense) return false;
 
-      return matchesSearch && !isOfficialLicense;
+      if (filterType === 'NFT' && item.type !== 'NFT') return false;
+      if (filterType === 'SFT' && item.type !== 'SFT') return false;
+      if (selectedCollectionFilter && item.collection !== selectedCollectionFilter) return false;
+
+      return matchesSearch;
     });
 
     // Grouping logic used by Overview and Collections
@@ -1600,6 +1652,13 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </div>
           </div>
 
+          {/* Portfolio Valuation & Floor Price Tracker Card */}
+          {viewMode === 'Collectibles' && activeTab === 'Overview' && (
+            <div className="w-full max-w-4xl mx-auto my-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <PortfolioSummaryCard portfolio={portfolio} />
+            </div>
+          )}
+
           <div className="relative flex items-center p-1 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 shadow-lg backdrop-blur-xl">
             {/* Sliding pill */}
             <div
@@ -1676,6 +1735,84 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </button>
             </div>
           </div>
+
+          {/* Advanced Filter Toolbar (Type & Collection Pills) */}
+          {viewMode === 'Collectibles' && (
+            <div className="flex flex-col items-center gap-3 w-full max-w-2xl mx-auto pt-1 animate-in fade-in duration-300">
+              <div className="flex items-center justify-center gap-2 flex-wrap text-xs">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-1 flex items-center gap-1">
+                  <Filter className="w-3 h-3 text-orange-500" /> Filter:
+                </span>
+                {(['ALL', 'NFT', 'SFT'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => {
+                      setFilterType(t);
+                      haptics.trigger('selection');
+                    }}
+                    className={`px-3 py-1.5 rounded-full font-black text-[11px] transition-all ${
+                      filterType === t
+                        ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                        : 'bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {t === 'ALL' ? 'All Types' : t === 'NFT' ? 'NFTs Only' : 'SFTs Only'}
+                  </button>
+                ))}
+
+                {(filterType !== 'ALL' || selectedCollectionFilter) && (
+                  <button
+                    onClick={() => {
+                      setFilterType('ALL');
+                      setSelectedCollectionFilter(null);
+                      haptics.trigger('selection');
+                    }}
+                    className="px-2.5 py-1 text-[10px] font-black text-red-500 hover:text-red-600 underline"
+                  >
+                    Reset Filters
+                  </button>
+                )}
+              </div>
+
+              {/* Collection Pills Bar */}
+              {availableCollections.length > 0 && (
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide no-scrollbar w-full px-2 py-1">
+                  <button
+                    onClick={() => {
+                      setSelectedCollectionFilter(null);
+                      haptics.trigger('selection');
+                    }}
+                    className={`px-3 py-1 rounded-full font-black text-[10px] uppercase tracking-wider whitespace-nowrap shrink-0 transition-all ${
+                      selectedCollectionFilter === null
+                        ? 'bg-gray-900 text-white dark:bg-white dark:text-black shadow-sm'
+                        : 'bg-gray-100 dark:bg-white/5 text-gray-400 border border-gray-200 dark:border-white/10 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    All Collections
+                  </button>
+                  {availableCollections.map((col) => (
+                    <button
+                      key={col.id}
+                      onClick={() => {
+                        setSelectedCollectionFilter(selectedCollectionFilter === col.id ? null : col.id);
+                        haptics.trigger('selection');
+                      }}
+                      className={`px-3 py-1 rounded-full font-black text-[10px] whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-all ${
+                        selectedCollectionFilter === col.id
+                          ? 'bg-orange-500 text-white shadow-sm'
+                          : 'bg-gray-100 dark:bg-white/5 text-gray-400 border border-gray-200 dark:border-white/10 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <span>{col.name}</span>
+                      <span className="px-1.5 py-0.2 bg-black/20 rounded-full text-[9px]">
+                        {col.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Horizontal Tabs */}
           {viewMode === 'Collectibles' && (
@@ -2001,16 +2138,45 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <button onClick={() => setIsMoveModalOpen(true)} className="flex items-center justify-center px-6 md:px-8 h-[44px] md:h-[48px] bg-orange-500 text-white rounded-[1.5rem] font-black text-sm md:text-base hover:scale-105 transition-all shadow-xl shadow-orange-500/20">
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <button 
+                onClick={() => setIsMultiSellModalOpen(true)} 
+                className="flex items-center justify-center px-3 md:px-5 h-[42px] md:h-[48px] bg-gradient-to-r from-orange-500 to-yellow-500 text-gray-900 rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all shadow-xl shadow-orange-500/20"
+              >
+                <DollarSign className="w-4 h-4 md:mr-1 shrink-0" />
+                <span className="hidden sm:inline">List on OOX</span>
+                <span className="sm:hidden">List</span>
+              </button>
+
+              <button 
+                onClick={() => setIsMultiSendModalOpen(true)} 
+                className="flex items-center justify-center px-3 md:px-5 h-[42px] md:h-[48px] bg-white/10 text-white rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all border border-white/10"
+              >
+                <Send className="w-4 h-4 md:mr-1 shrink-0" />
+                <span>Send</span>
+              </button>
+
+              <button 
+                onClick={() => setIsMoveModalOpen(true)} 
+                className="flex items-center justify-center px-3 md:px-5 h-[42px] md:h-[48px] bg-white/10 text-white rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all border border-white/10"
+              >
                 <span>Move</span>
               </button>
+
+              <button 
+                onClick={() => setIsMultiBurnModalOpen(true)} 
+                className="flex items-center justify-center px-3 md:px-4 h-[42px] md:h-[48px] bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all border border-red-500/30"
+              >
+                <Flame className="w-4 h-4 md:mr-1 shrink-0" />
+                <span className="hidden sm:inline">Burn</span>
+              </button>
+
               {activeFolder && (
                 <button
                   onClick={() => setIsRemoveConfirmationOpen(true)}
-                  className="flex items-center justify-center w-[44px] h-[44px] md:w-auto md:h-[48px] md:px-6 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-[1.5rem] font-black text-sm md:text-base hover:scale-105 transition-all shrink-0"
+                  className="flex items-center justify-center w-[42px] h-[42px] md:w-auto md:h-[48px] md:px-4 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all shrink-0"
                 >
-                  <Trash2 className="w-5 h-5 md:mr-2" />
+                  <Trash2 className="w-4 h-4 md:mr-1" />
                   <span className="hidden md:inline">Remove</span>
                 </button>
               )}
@@ -2018,6 +2184,48 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           </div>
         </div>
       )}
+
+      {/* Multi-Sell Modal (OOX Marketplace Listing) */}
+      <MultiSellModal
+        isOpen={isMultiSellModalOpen}
+        onClose={() => setIsMultiSellModalOpen(false)}
+        selectedNfts={selectedNfts}
+        selectedPaymentToken={selectedPaymentToken}
+        setSelectedPaymentToken={setSelectedPaymentToken}
+        paymentTokens={OOX_PAYMENT_TOKENS}
+        onSellMultiple={async (items, paymentToken) => {
+          await _handleSellMultipleNfts(items, paymentToken, () => {
+            setSelectedNfts([]);
+            setIsSelectionMode(false);
+          });
+        }}
+      />
+
+      {/* Multi-Send Modal (Batch Transfer) */}
+      <MultiSendModal
+        isOpen={isMultiSendModalOpen}
+        onClose={() => setIsMultiSendModalOpen(false)}
+        selectedNfts={selectedNfts}
+        onSendMultiple={async (items, recipient) => {
+          await _handleSendMultipleNfts(items, recipient, () => {
+            setSelectedNfts([]);
+            setIsSelectionMode(false);
+          });
+        }}
+      />
+
+      {/* Multi-Burn Modal (Batch Destruction) */}
+      <MultiBurnModal
+        isOpen={isMultiBurnModalOpen}
+        onClose={() => setIsMultiBurnModalOpen(false)}
+        selectedNfts={selectedNfts}
+        onBurnMultiple={async (items) => {
+          await _handleBurnMultipleNfts(items, () => {
+            setSelectedNfts([]);
+            setIsSelectionMode(false);
+          });
+        }}
+      />
 
       {/* Remove Confirmation Modal */}
       <RemoveConfirmationModal
