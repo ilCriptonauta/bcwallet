@@ -2341,22 +2341,22 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           </div>
 
           {/* Desktop Floating Bar (>= md) */}
-          <div className="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 z-[9999] animate-in fade-in slide-in-from-bottom-6 duration-300">
-            <div className="bg-[#121215]/95 dark:bg-[#121215]/95 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-full px-6 py-3.5 shadow-2xl shadow-orange-500/30 flex items-center gap-6">
+          <div className="hidden md:flex fixed bottom-8 inset-x-0 z-[9999] justify-center pointer-events-none">
+            <div className="pointer-events-auto bg-[#121215] border border-white/10 rounded-full px-6 py-3.5 shadow-2xl shadow-orange-500/30 flex items-center gap-6 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-6 duration-300">
               <div className="flex items-center gap-4">
                 <button 
                   onClick={cancelSelection} 
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white"
                   aria-label="Annulla selezione"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 text-white" />
                 </button>
-                <div className="h-6 w-px bg-gray-200 dark:bg-white/10" />
+                <div className="h-6 w-px bg-white/10" />
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm font-black text-gray-900 dark:text-white">
+                  <span className="text-sm font-black text-white">
                     {selectedNfts.length} Selected
                   </span>
-                  <span className="text-[10px] text-orange-500 font-extrabold uppercase tracking-widest bg-orange-500/10 px-2.5 py-0.5 rounded-full border border-orange-500/20">
+                  <span className="text-[10px] text-orange-400 font-extrabold uppercase tracking-widest bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/30">
                     Multi-Select
                   </span>
                 </div>
@@ -2365,42 +2365,42 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => setIsMultiSellModalOpen(true)} 
-                  className="flex items-center justify-center px-5 h-[44px] bg-gradient-to-r from-orange-500 to-yellow-500 text-gray-950 rounded-full font-black text-sm hover:scale-105 transition-all shadow-lg shadow-orange-500/20 gap-1.5"
+                  className="flex items-center justify-center px-5 h-[44px] bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-gray-950 rounded-full font-black text-sm hover:scale-105 transition-all shadow-lg shadow-orange-500/25 gap-1.5"
                 >
                   <DollarSign className="w-4 h-4 stroke-[2.5] shrink-0" />
-                  <span>List on OOX</span>
+                  <span>List on OOX ({selectedNfts.length})</span>
                 </button>
 
                 <button 
                   onClick={() => setIsMultiSendModalOpen(true)} 
-                  className="flex items-center justify-center px-5 h-[44px] bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-900 dark:text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-gray-200 dark:border-white/10 gap-1.5"
+                  className="flex items-center justify-center px-5 h-[44px] bg-white/10 hover:bg-white/15 text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-white/10 gap-1.5"
                 >
-                  <Send className="w-4 h-4 text-orange-500 shrink-0" />
+                  <Send className="w-4 h-4 text-orange-400 shrink-0" />
                   <span>Send</span>
                 </button>
 
                 <button 
                   onClick={() => setIsMoveModalOpen(true)} 
-                  className="flex items-center justify-center px-5 h-[44px] bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-900 dark:text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-gray-200 dark:border-white/10 gap-1.5"
+                  className="flex items-center justify-center px-5 h-[44px] bg-white/10 hover:bg-white/15 text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-white/10 gap-1.5"
                 >
-                  <Folder className="w-4 h-4 text-amber-500 shrink-0" />
+                  <Folder className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>Move</span>
                 </button>
 
                 <button 
                   onClick={() => setIsMultiBurnModalOpen(true)} 
-                  className="flex items-center justify-center px-4 h-[44px] bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/20 gap-1.5"
+                  className="flex items-center justify-center px-4 h-[44px] bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/30 gap-1.5"
                 >
-                  <Flame className="w-4 h-4 text-red-500 shrink-0" />
+                  <Flame className="w-4 h-4 text-red-400 shrink-0" />
                   <span>Burn</span>
                 </button>
 
                 {activeFolder && (
                   <button
                     onClick={() => setIsRemoveConfirmationOpen(true)}
-                    className="flex items-center justify-center px-4 h-[44px] bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full font-bold text-sm hover:scale-105 transition-all gap-1.5 shrink-0"
+                    className="flex items-center justify-center px-4 h-[44px] bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/30 gap-1.5 shrink-0"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 text-red-400" />
                     <span>Remove</span>
                   </button>
                 )}
