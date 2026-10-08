@@ -320,7 +320,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* ── MOBILE RIGHT DRAWER (< md) ── */}
+      {/* ── MOBILE BOTTOM SHEET DRAWER (< md) ── */}
       {isLoggedIn && (
         <>
           {/* Backdrop */}
@@ -329,14 +329,16 @@ const Header: React.FC<HeaderProps> = ({
             onClick={() => setIsMenuOpen(false)}
           />
 
-          {/* Drawer panel */}
+          {/* Drawer panel anchored at bottom */}
           <div
             ref={drawerRef}
-            className={`md:hidden fixed top-0 right-0 z-[160] h-full w-[85vw] max-w-sm bg-white dark:bg-[#111] border-l border-slate-100 dark:border-white/10 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            className={`md:hidden fixed bottom-0 inset-x-0 z-[160] w-full max-h-[88dvh] bg-white dark:bg-[#111114] border-t border-slate-200 dark:border-white/10 rounded-t-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] flex flex-col transition-transform duration-300 ease-out p-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] ${isMenuOpen ? 'translate-y-0' : 'translate-y-full'}`}
           >
+            {/* Drag Handle Indicator */}
+            <div className="w-12 h-1.5 bg-slate-300 dark:bg-white/20 rounded-full mx-auto mb-3 shrink-0" />
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto py-2">
+            <div className="flex-1 overflow-y-auto px-1 custom-scrollbar">
               {renderMenuContent()}
             </div>
           </div>
