@@ -44,7 +44,7 @@ const Splash: React.FC<SplashProps> = ({ onLogin }) => {
               Bacon Wallet
             </h1>
             <p className="text-brand-orange font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] text-[10px] sm:text-xs mt-3 opacity-80 max-w-sm mx-auto leading-relaxed">
-              manage and create <span className="text-white">NFTs</span>
+              manage & create <span className="text-white">collectibles</span>
             </p>
           </div>
         </div>
