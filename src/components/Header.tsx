@@ -4,8 +4,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sun, Moon, LogIn, LogOut, User, ChevronDown, Wrench, Wallet2, Coins, Crown, TrendingUp, X, BadgeCheck, Vault } from 'lucide-react';
 import { useGetAccountInfo } from '@/lib';
-import { useOnxBalance, useAccountNfts, useNftsValue } from '@/helpers';
+import { useOnxBalance, useAccountNfts } from '@/helpers';
 import { useFirebaseFolders } from '@/hooks/useFirebaseFolders';
+import { usePortfolioTracker } from '@/hooks/usePortfolioTracker';
 import BigNumber from 'bignumber.js';
 
 interface HeaderProps {
@@ -41,9 +42,9 @@ const Header: React.FC<HeaderProps> = ({
     : '0.00';
   const username = account?.username || 'User';
 
-  // NFT portfolio value
+  // NFT portfolio value (shared persistent tracker)
   const { items: nfts } = useAccountNfts({ address, enabled: isLoggedIn });
-  const { totalEgld: nftsValue, isLoading: nftsValueLoading } = useNftsValue(nfts);
+  const { totalEgld: nftsValue, isLoading: nftsValueLoading } = usePortfolioTracker(nfts);
   const { preferences } = useFirebaseFolders(address);
   const avatarUrl = preferences?.avatarUrl;
 
