@@ -8,7 +8,7 @@ import {
   DollarSign, Send, Flame, Download, Heart, Settings,
   Zap, ArrowLeft, Lock, Trash2, Share2, Square, LayoutGrid,
   TrendingUp, TrendingDown, Clock, Users, User,
-  Copy, Check, ExternalLink, Filter
+  Copy, Check, ExternalLink, Filter, CheckSquare
 } from 'lucide-react';
 import { useGetAccountInfo, useGetNetworkConfig } from '@/lib';
 import { useAccountNfts, type NormalizedNft } from '@/helpers';
@@ -687,6 +687,19 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <span className={!hasProAccess ? "text-gray-400" : ""}>{hasProAccess ? "Set as Avatar" : "Pro Feature: Avatar"}</span>
             </div>
           </button>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenMenuId(null);
+              toggleSelection(nft);
+            }} 
+            className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95 transition-all"
+          >
+            <div className="flex items-center gap-4 md:gap-2">
+              <CheckSquare className="w-5 h-5 md:w-4 md:h-4 text-orange-500" />
+              <span>{selectedNfts.some(n => n.identifier === nft.identifier) ? 'Deseleziona' : 'Seleziona'}</span>
+            </div>
+          </button>
           <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-2 md:my-1" />
           <button onClick={(e) => openBurnModal(e, nft)} className="w-full flex items-center justify-between px-4 py-4 md:px-3 md:py-2.5 rounded-2xl md:rounded-xl text-sm md:text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 active:scale-95 transition-all">
             <div className="flex items-center gap-4 md:gap-2"><Flame className="w-5 h-5 md:w-4 md:h-4" /><span>Burn</span></div>
@@ -820,7 +833,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       isLongPressActive.current = false;
       return;
     }
-    if (isSelectionMode) {
+    if (isSelectionMode || selectedNfts.length > 0) {
       toggleSelection(nft);
       return;
     }
@@ -993,6 +1006,22 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                     >
                       <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
                     </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSelection(nft);
+                      }}
+                      className={`p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${
+                        selectedNfts.some(n => n.identifier === nft.identifier)
+                          ? 'bg-orange-500 text-white opacity-100 scale-100'
+                          : isSelectionMode || selectedNfts.length > 0
+                          ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
+                          : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
+                      }`}
+                      title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                    >
+                      <CheckSquare className="w-4 h-4" />
+                    </button>
                   </div>
                   <NftMedia
                     src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/400/400`}
@@ -1086,6 +1115,22 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                         className={`p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                       >
                         <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSelection(nft);
+                        }}
+                        className={`p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${
+                          selectedNfts.some(n => n.identifier === nft.identifier)
+                            ? 'bg-orange-500 text-white opacity-100 scale-100'
+                            : isSelectionMode || selectedNfts.length > 0
+                            ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
+                            : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
+                        }`}
+                        title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                      >
+                        <CheckSquare className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -1237,6 +1282,22 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                         >
                           <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
                         </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSelection(nft);
+                          }}
+                          className={`p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${
+                            selectedNfts.some(n => n.identifier === nft.identifier)
+                              ? 'bg-orange-500 text-white opacity-100 scale-100'
+                              : isSelectionMode || selectedNfts.length > 0
+                              ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
+                              : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
+                          }`}
+                          title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                        >
+                          <CheckSquare className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                     <div className="p-4 md:p-5 flex items-start justify-between gap-2 overflow-visible relative">
@@ -1322,6 +1383,22 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                       className={`p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                     >
                       <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSelection(nft);
+                      }}
+                      className={`p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${
+                        selectedNfts.some(n => n.identifier === nft.identifier)
+                          ? 'bg-orange-500 text-white opacity-100 scale-100'
+                          : isSelectionMode || selectedNfts.length > 0
+                          ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
+                          : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
+                      }`}
+                      title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                    >
+                      <CheckSquare className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -1416,12 +1493,28 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
 
-                      <div className="absolute top-3 left-3 z-30">
+                      <div className="absolute top-3 left-3 z-30 flex items-center gap-2">
                         <button
                           onClick={(e) => toggleFavorite(e, nft)}
                           className="p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg bg-orange-500 text-white"
                         >
                           <Heart className="w-4 h-4 fill-current" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSelection(nft);
+                          }}
+                          className={`p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${
+                            selectedNfts.some(n => n.identifier === nft.identifier)
+                              ? 'bg-orange-500 text-white opacity-100 scale-100'
+                              : isSelectionMode || selectedNfts.length > 0
+                              ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
+                              : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
+                          }`}
+                          title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                        >
+                          <CheckSquare className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -1506,6 +1599,22 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                         className={`p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'bg-orange-500 text-white' : 'bg-black/40 text-white/70 hover:text-white'}`}
                       >
                         <Heart className={`w-4 h-4 ${firebaseFavorites.some((f) => f.identifier === nft.identifier) ? 'fill-current' : ''}`} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSelection(nft);
+                        }}
+                        className={`p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${
+                          selectedNfts.some(n => n.identifier === nft.identifier)
+                            ? 'bg-orange-500 text-white opacity-100 scale-100'
+                            : isSelectionMode || selectedNfts.length > 0
+                            ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
+                            : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
+                        }`}
+                        title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                      >
+                        <CheckSquare className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -1743,6 +1852,24 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 className={`relative z-10 p-2 rounded-full transition-colors duration-300 ${isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
               >
                 <Square className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => {
+                  if (isSelectionMode || selectedNfts.length > 0) {
+                    cancelSelection();
+                  } else {
+                    setIsSelectionMode(true);
+                  }
+                  haptics.trigger('selection');
+                }}
+                className={`relative z-10 p-2 rounded-full transition-all duration-300 ${
+                  isSelectionMode || selectedNfts.length > 0 
+                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' 
+                    : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+                title={isSelectionMode || selectedNfts.length > 0 ? "Annulla selezione multipla" : "Attiva selezione multipla"}
+              >
+                <CheckSquare className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -2214,8 +2341,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           </div>
 
           {/* Desktop Floating Bar (>= md) */}
-          <div className="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 z-[9999] animate-in slide-in-from-bottom-10 duration-500">
-            <div className="bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-full px-6 py-3.5 shadow-2xl shadow-orange-500/20 flex items-center gap-6">
+          <div className="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 z-[9999] animate-in fade-in slide-in-from-bottom-6 duration-300">
+            <div className="bg-[#121215]/95 dark:bg-[#121215]/95 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-full px-6 py-3.5 shadow-2xl shadow-orange-500/30 flex items-center gap-6">
               <div className="flex items-center gap-4">
                 <button 
                   onClick={cancelSelection} 
