@@ -30,129 +30,18 @@ import { NftMedia } from './NftMedia';
 import { useWebHaptics } from 'web-haptics/react';
 import { usePortfolioTracker } from '@/hooks/usePortfolioTracker';
 import { PortfolioSummaryCard } from './PortfolioSummaryCard';
-type ViewMode = 'Collectibles' | 'Management';
-type TabId = 'Overview' | 'SFTs' | 'Collections' | string;
+import { 
+  type ViewMode, 
+  type TabId, 
+  type SelectedItem, 
+  type UserFolder, 
+  type TabSystemProps, 
+  OOX_CONTRACT_ADDRESS, 
+  OOX_PAYMENT_TOKENS 
+} from './tab/types';
+import { NftActivityHistory } from './tab/NftActivityHistory';
+import { MultiSelectFloatingBar } from './tab/MultiSelectFloatingBar';
 
-const OOX_CONTRACT_ADDRESS = "erd1qqqqqqqqqqqqqpgqwp73w2a9eyzs64eltupuz3y3hv798vlv899qrjnflg";
-
-export const OOX_PAYMENT_TOKENS = [
-  { identifier: 'EGLD', ticker: 'EGLD', decimals: 18 },
-  { identifier: 'USDC-c76f1f', ticker: 'USDC', decimals: 6 },
-  { identifier: 'ONX-3e51c8', ticker: 'ONX', decimals: 18 },
-];
-
-interface SelectedItem {
-  id: number;
-  tab: string;
-  imageUrl: string;
-  originalImageUrl?: string | null;
-  thumbnailUrl?: string | null;
-  mimeType?: string;
-  identifier?: string;
-  collection?: string;
-  name?: string;
-  attributes?: { trait_type: string; value: string }[];
-  description?: string;
-  tags?: string[];
-  floorPrice?: string;
-  type?: 'NFT' | 'SFT' | 'MetaESDT';
-  balance?: string;
-}
-
-interface UserFolder {
-  id: number | string;
-  name: string;
-  description?: string;
-  itemCount: number;
-  previewImages: string[];
-}
-
-interface TabSystemProps {
-  isFullVersion: boolean;
-}
-
-const NftActivityHistory = ({ identifier }: { identifier: string }) => {
-  const [activities, setActivities] = useState<{ type: 'list' | 'delist'; hash: string; timestamp: number }[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { network } = useGetNetworkConfig();
-
-  useEffect(() => {
-    let active = true;
-    if (!identifier) return;
-
-    fetch(`${network.apiAddress}/nfts/${identifier}/transactions?size=50`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!active || !Array.isArray(data)) return;
-
-        const filtered = data.map((tx: any) => {
-          const fn = (tx.function || '').toLowerCase();
-          const actionName = (tx.action?.name || '').toLowerCase();
-
-          let type: 'list' | 'delist' | null = null;
-
-          if (fn.includes('list') || fn.includes('sell') || actionName.includes('list') || actionName.includes('sell')) {
-            type = 'list';
-          } else if (fn.includes('withdraw') || fn.includes('delist') || fn.includes('cancel') || actionName.includes('withdraw') || actionName.includes('delist') || actionName.includes('cancel')) {
-            type = 'delist';
-          }
-
-          return type ? { type, hash: tx.txHash, timestamp: tx.timestamp } : null;
-        }).filter(Boolean) as { type: 'list' | 'delist'; hash: string; timestamp: number }[];
-
-        // Remove duplicates and sort descending
-        const unique = Array.from(new Map(filtered.map(item => [item.hash, item])).values())
-          .sort((a, b) => b.timestamp - a.timestamp);
-
-        setActivities(unique);
-        setLoading(false);
-      })
-      .catch(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => { active = false; };
-  }, [identifier]);
-
-  if (loading || activities.length === 0) return null;
-
-  return (
-    <div className="space-y-4">
-      <h3 className="text-[10px] items-center flex gap-1.5 font-black uppercase tracking-[0.2em] text-gray-400">
-        <Clock className="w-3 h-3" /> Trading Activity
-      </h3>
-      <div className="space-y-2">
-        {activities.map((act) => (
-          <a
-            key={act.hash}
-            href={`https://explorer.multiversx.com/transactions/${act.hash}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-[#1a1a1a] shadow-sm border border-gray-100 dark:border-white/5 hover:border-orange-500/50 transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              {act.type === 'list' ? (
-                <div className="p-1.5 bg-green-500/10 rounded-full">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                </div>
-              ) : (
-                <div className="p-1.5 bg-red-500/10 rounded-full">
-                  <TrendingDown className="w-4 h-4 text-red-500" />
-                </div>
-              )}
-              <span className={`text-[10px] font-black uppercase tracking-widest ${act.type === 'list' ? 'text-green-500' : 'text-red-500'}`}>
-                {act.type === 'list' ? 'Listed' : 'Delisted'}
-              </span>
-            </div>
-            <span className="text-[10px] font-bold text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
-              {new Date(act.timestamp * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-            </span>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const haptics = useWebHaptics();
@@ -2299,152 +2188,17 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
 
-      {/* Selection Action Bar (Mobile Bottom Sheet & Desktop Floating Bar) */}
-      {(isSelectionMode || selectedNfts.length > 0) && (
-        <>
-          {/* Mobile Bottom Sheet Modal (< md) */}
-          <div className="md:hidden fixed bottom-0 inset-x-0 z-[9999] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 rounded-t-[2.5rem] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-[0_-15px_40px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-full duration-300">
-            {/* Drag Handle Indicator */}
-            <div className="w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full mx-auto mb-4" />
+      <MultiSelectFloatingBar
+        selectedNfts={selectedNfts}
+        activeFolder={activeFolder}
+        cancelSelection={cancelSelection}
+        onOpenMultiSell={() => setIsMultiSellModalOpen(true)}
+        onOpenMultiSend={() => setIsMultiSendModalOpen(true)}
+        onOpenMoveModal={() => setIsMoveModalOpen(true)}
+        onOpenMultiBurn={() => setIsMultiBurnModalOpen(true)}
+        onOpenRemoveConfirmation={() => setIsRemoveConfirmationOpen(true)}
+      />
 
-            {/* Header Info & Close */}
-            <div className="flex items-center justify-between mb-4 px-1">
-              <div className="flex items-center gap-2.5">
-                <span className="text-base font-black text-gray-900 dark:text-white">
-                  {selectedNfts.length} {selectedNfts.length === 1 ? 'NFT Selected' : 'NFTs Selected'}
-                </span>
-                <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest bg-orange-500/10 dark:bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/20">
-                  Multi-Select
-                </span>
-              </div>
-              <button 
-                onClick={cancelSelection} 
-                className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 rounded-full transition-all active:scale-95"
-                aria-label="Cancel selection"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Action Buttons Grid */}
-            <div className="space-y-2.5">
-              {/* Primary Action: List on OOX */}
-              <button 
-                onClick={() => setIsMultiSellModalOpen(true)} 
-                className="w-full h-12 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-gray-950 font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 active:scale-[0.98] transition-all"
-              >
-                <DollarSign className="w-5 h-5 stroke-[2.5]" />
-                <span>List on OOX ({selectedNfts.length})</span>
-              </button>
-
-              {/* Secondary Actions Grid */}
-              <div className={`grid ${activeFolder ? 'grid-cols-4' : 'grid-cols-3'} gap-2`}>
-                <button 
-                  onClick={() => setIsMultiSendModalOpen(true)} 
-                  className="flex flex-col items-center justify-center py-2.5 px-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-900 dark:text-white font-bold text-xs rounded-2xl border border-gray-200 dark:border-white/10 active:scale-95 transition-all gap-1"
-                >
-                  <Send className="w-4 h-4 text-orange-500" />
-                  <span>Send</span>
-                </button>
-
-                <button 
-                  onClick={() => setIsMoveModalOpen(true)} 
-                  className="flex flex-col items-center justify-center py-2.5 px-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-900 dark:text-white font-bold text-xs rounded-2xl border border-gray-200 dark:border-white/10 active:scale-95 transition-all gap-1"
-                >
-                  <Folder className="w-4 h-4 text-amber-500" />
-                  <span>Move</span>
-                </button>
-
-                <button 
-                  onClick={() => setIsMultiBurnModalOpen(true)} 
-                  className="flex flex-col items-center justify-center py-2.5 px-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 font-bold text-xs rounded-2xl border border-red-500/20 active:scale-95 transition-all gap-1"
-                >
-                  <Flame className="w-4 h-4 text-red-500" />
-                  <span>Burn</span>
-                </button>
-
-                {activeFolder && (
-                  <button
-                    onClick={() => setIsRemoveConfirmationOpen(true)}
-                    className="flex flex-col items-center justify-center py-2.5 px-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 font-bold text-xs rounded-2xl border border-red-500/20 active:scale-95 transition-all gap-1"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                    <span>Remove</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Floating Bar (>= md) */}
-          <div className="max-md:hidden fixed bottom-8 inset-x-0 z-[9999] flex justify-center pointer-events-none px-4">
-            <div className="pointer-events-auto bg-[#121215] dark:bg-[#121215] border border-white/20 rounded-full px-6 py-3.5 shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex items-center gap-6 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-6 duration-300">
-              <div className="flex items-center gap-4">
-                <button 
-                  onClick={cancelSelection} 
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white"
-                  aria-label="Cancel selection"
-                >
-                  <X className="w-5 h-5 text-white" />
-                </button>
-                <div className="h-6 w-px bg-white/20" />
-                <div className="flex items-center gap-2.5">
-                  <span className="text-sm font-black text-white whitespace-nowrap">
-                    {selectedNfts.length} Selected
-                  </span>
-                  <span className="text-[10px] text-orange-400 font-extrabold uppercase tracking-widest bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/30 whitespace-nowrap">
-                    Multi-Select
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <button 
-                  onClick={() => setIsMultiSellModalOpen(true)} 
-                  className="flex items-center justify-center px-5 h-[44px] bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-gray-950 rounded-full font-black text-sm hover:scale-105 transition-all shadow-lg shadow-orange-500/25 gap-1.5 whitespace-nowrap"
-                >
-                  <DollarSign className="w-4 h-4 stroke-[2.5] shrink-0" />
-                  <span>List on OOX ({selectedNfts.length})</span>
-                </button>
-
-                <button 
-                  onClick={() => setIsMultiSendModalOpen(true)} 
-                  className="flex items-center justify-center px-5 h-[44px] bg-white/10 hover:bg-white/15 text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-white/10 gap-1.5 whitespace-nowrap"
-                >
-                  <Send className="w-4 h-4 text-orange-400 shrink-0" />
-                  <span>Send</span>
-                </button>
-
-                <button 
-                  onClick={() => setIsMoveModalOpen(true)} 
-                  className="flex items-center justify-center px-5 h-[44px] bg-white/10 hover:bg-white/15 text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-white/10 gap-1.5 whitespace-nowrap"
-                >
-                  <Folder className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Move</span>
-                </button>
-
-                <button 
-                  onClick={() => setIsMultiBurnModalOpen(true)} 
-                  className="flex items-center justify-center px-4 h-[44px] bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/30 gap-1.5 whitespace-nowrap"
-                >
-                  <Flame className="w-4 h-4 text-red-400 shrink-0" />
-                  <span>Burn</span>
-                </button>
-
-                {activeFolder && (
-                  <button
-                    onClick={() => setIsRemoveConfirmationOpen(true)}
-                    className="flex items-center justify-center px-4 h-[44px] bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/30 gap-1.5 shrink-0 whitespace-nowrap"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-400" />
-                    <span>Remove</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
 
       {/* Multi-Sell Modal (OOX Marketplace Listing) */}
       <MultiSellModal
