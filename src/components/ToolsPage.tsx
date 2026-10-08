@@ -689,7 +689,7 @@ const ToolsPage: React.FC<ToolsPageProps> = ({ isFullVersion }) => {
                 onClick={() => setMintSuccessData(null)}
                 className="w-full py-4 bg-slate-100 dark:bg-white/5 text-gray-900 dark:text-white font-black rounded-2xl hover:bg-slate-200 dark:hover:bg-white/10 transition-all active:scale-95"
               >
-                Chiudi
+                Close
               </button>
             </div>
           </div>

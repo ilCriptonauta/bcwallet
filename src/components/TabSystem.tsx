@@ -697,7 +697,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           >
             <div className="flex items-center gap-4 md:gap-2">
               <CheckSquare className="w-5 h-5 md:w-4 md:h-4 text-orange-500" />
-              <span>{selectedNfts.some(n => n.identifier === nft.identifier) ? 'Deseleziona' : 'Seleziona'}</span>
+              <span>{selectedNfts.some(n => n.identifier === nft.identifier) ? 'Deselect' : 'Select'}</span>
             </div>
           </button>
           <div className="h-[1px] bg-gray-100 dark:bg-white/5 my-2 md:my-1" />
@@ -1018,7 +1018,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                           ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
                           : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
                       }`}
-                      title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                      title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deselect" : "Select"}
                     >
                       <CheckSquare className="w-4 h-4" />
                     </button>
@@ -1128,7 +1128,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                             ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
                             : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
                         }`}
-                        title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                        title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deselect" : "Select"}
                       >
                         <CheckSquare className="w-4 h-4" />
                       </button>
@@ -1294,7 +1294,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                               ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
                               : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
                           }`}
-                          title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                          title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deselect" : "Select"}
                         >
                           <CheckSquare className="w-4 h-4" />
                         </button>
@@ -1396,7 +1396,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                           ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
                           : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
                       }`}
-                      title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                      title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deselect" : "Select"}
                     >
                       <CheckSquare className="w-4 h-4" />
                     </button>
@@ -1512,7 +1512,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                               ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
                               : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
                           }`}
-                          title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                          title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deselect" : "Select"}
                         >
                           <CheckSquare className="w-4 h-4" />
                         </button>
@@ -1612,7 +1612,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                             ? 'bg-black/60 text-white/70 hover:text-white opacity-100 scale-100'
                             : 'bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100 scale-95 hover:scale-100'
                         }`}
-                        title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deseleziona" : "Seleziona"}
+                        title={selectedNfts.some(n => n.identifier === nft.identifier) ? "Deselect" : "Select"}
                       >
                         <CheckSquare className="w-4 h-4" />
                       </button>
@@ -1845,14 +1845,14 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <button
                 onClick={() => setIsLargeGrid(false)}
                 className={`relative z-10 p-2 rounded-full transition-colors duration-300 ${!isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-                title="Griglia Compatta"
+                title="Compact Grid"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setIsLargeGrid(true)}
                 className={`relative z-10 p-2 rounded-full transition-colors duration-300 ${isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-                title="Griglia Grande"
+                title="Large Grid"
               >
                 <Square className="w-4 h-4" />
               </button>
@@ -1873,7 +1873,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                   ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20 scale-105' 
                   : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
-              title={isSelectionMode || selectedNfts.length > 0 ? "Annulla selezione multipla" : "Attiva selezione multipla"}
+              title={isSelectionMode || selectedNfts.length > 0 ? "Cancel Multi-Select" : "Enable Multi-Select"}
             >
               <CheckSquare className="w-4 h-4" />
             </button>
@@ -2280,7 +2280,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             <div className="flex items-center justify-between mb-4 px-1">
               <div className="flex items-center gap-2.5">
                 <span className="text-base font-black text-gray-900 dark:text-white">
-                  {selectedNfts.length} {selectedNfts.length === 1 ? 'NFT Selezionato' : 'NFT Selezionati'}
+                  {selectedNfts.length} {selectedNfts.length === 1 ? 'NFT Selected' : 'NFTs Selected'}
                 </span>
                 <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest bg-orange-500/10 dark:bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/20">
                   Multi-Select
@@ -2289,7 +2289,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <button 
                 onClick={cancelSelection} 
                 className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 rounded-full transition-all active:scale-95"
-                aria-label="Annulla selezione"
+                aria-label="Cancel selection"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2352,7 +2352,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 <button 
                   onClick={cancelSelection} 
                   className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white"
-                  aria-label="Annulla selezione"
+                  aria-label="Cancel selection"
                 >
                   <X className="w-5 h-5 text-white" />
                 </button>
