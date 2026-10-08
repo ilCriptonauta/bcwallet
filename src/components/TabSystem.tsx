@@ -2264,10 +2264,10 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       />
 
       {/* Selection Action Bar (Mobile Bottom Sheet & Desktop Floating Bar) */}
-      {(isSelectionMode || selectedNfts.length > 0) && mounted && createPortal(
+      {(isSelectionMode || selectedNfts.length > 0) && (
         <>
           {/* Mobile Bottom Sheet Modal (< md) */}
-          <div className="md:hidden fixed bottom-0 inset-x-0 z-[200] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 rounded-t-[2.5rem] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-[0_-15px_40px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-full duration-300">
+          <div className="md:hidden fixed bottom-0 inset-x-0 z-[9999] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 rounded-t-[2.5rem] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-[0_-15px_40px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-full duration-300">
             {/* Drag Handle Indicator */}
             <div className="w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full mx-auto mb-4" />
 
@@ -2341,8 +2341,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           </div>
 
           {/* Desktop Floating Bar (>= md) */}
-          <div className="hidden md:flex fixed bottom-8 inset-x-0 z-[9999] justify-center pointer-events-none">
-            <div className="pointer-events-auto bg-[#121215] border border-white/10 rounded-full px-6 py-3.5 shadow-2xl shadow-orange-500/30 flex items-center gap-6 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-6 duration-300">
+          <div className="hidden md:flex fixed bottom-8 inset-x-0 z-[9999] justify-center pointer-events-none px-4">
+            <div className="pointer-events-auto bg-[#121215] dark:bg-[#121215] border border-white/20 rounded-full px-6 py-3.5 shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex items-center gap-6 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-6 duration-300">
               <div className="flex items-center gap-4">
                 <button 
                   onClick={cancelSelection} 
@@ -2351,21 +2351,21 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 >
                   <X className="w-5 h-5 text-white" />
                 </button>
-                <div className="h-6 w-px bg-white/10" />
+                <div className="h-6 w-px bg-white/20" />
                 <div className="flex items-center gap-2.5">
-                  <span className="text-sm font-black text-white">
+                  <span className="text-sm font-black text-white whitespace-nowrap">
                     {selectedNfts.length} Selected
                   </span>
-                  <span className="text-[10px] text-orange-400 font-extrabold uppercase tracking-widest bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/30">
+                  <span className="text-[10px] text-orange-400 font-extrabold uppercase tracking-widest bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/30 whitespace-nowrap">
                     Multi-Select
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button 
                   onClick={() => setIsMultiSellModalOpen(true)} 
-                  className="flex items-center justify-center px-5 h-[44px] bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-gray-950 rounded-full font-black text-sm hover:scale-105 transition-all shadow-lg shadow-orange-500/25 gap-1.5"
+                  className="flex items-center justify-center px-5 h-[44px] bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-gray-950 rounded-full font-black text-sm hover:scale-105 transition-all shadow-lg shadow-orange-500/25 gap-1.5 whitespace-nowrap"
                 >
                   <DollarSign className="w-4 h-4 stroke-[2.5] shrink-0" />
                   <span>List on OOX ({selectedNfts.length})</span>
@@ -2373,7 +2373,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
                 <button 
                   onClick={() => setIsMultiSendModalOpen(true)} 
-                  className="flex items-center justify-center px-5 h-[44px] bg-white/10 hover:bg-white/15 text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-white/10 gap-1.5"
+                  className="flex items-center justify-center px-5 h-[44px] bg-white/10 hover:bg-white/15 text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-white/10 gap-1.5 whitespace-nowrap"
                 >
                   <Send className="w-4 h-4 text-orange-400 shrink-0" />
                   <span>Send</span>
@@ -2381,7 +2381,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
                 <button 
                   onClick={() => setIsMoveModalOpen(true)} 
-                  className="flex items-center justify-center px-5 h-[44px] bg-white/10 hover:bg-white/15 text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-white/10 gap-1.5"
+                  className="flex items-center justify-center px-5 h-[44px] bg-white/10 hover:bg-white/15 text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-white/10 gap-1.5 whitespace-nowrap"
                 >
                   <Folder className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>Move</span>
@@ -2389,7 +2389,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
                 <button 
                   onClick={() => setIsMultiBurnModalOpen(true)} 
-                  className="flex items-center justify-center px-4 h-[44px] bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/30 gap-1.5"
+                  className="flex items-center justify-center px-4 h-[44px] bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/30 gap-1.5 whitespace-nowrap"
                 >
                   <Flame className="w-4 h-4 text-red-400 shrink-0" />
                   <span>Burn</span>
@@ -2398,7 +2398,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 {activeFolder && (
                   <button
                     onClick={() => setIsRemoveConfirmationOpen(true)}
-                    className="flex items-center justify-center px-4 h-[44px] bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/30 gap-1.5 shrink-0"
+                    className="flex items-center justify-center px-4 h-[44px] bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/30 gap-1.5 shrink-0 whitespace-nowrap"
                   >
                     <Trash2 className="w-4 h-4 text-red-400" />
                     <span>Remove</span>
@@ -2407,8 +2407,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
             </div>
           </div>
-        </>,
-        document.body
+        </>
       )}
 
       {/* Multi-Sell Modal (OOX Marketplace Listing) */}
