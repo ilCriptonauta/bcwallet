@@ -2341,7 +2341,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           </div>
 
           {/* Desktop Floating Bar (>= md) */}
-          <div className="hidden md:flex fixed bottom-8 inset-x-0 z-[9999] justify-center pointer-events-none px-4">
+          <div className="max-md:hidden fixed bottom-8 inset-x-0 z-[9999] flex justify-center pointer-events-none px-4">
             <div className="pointer-events-auto bg-[#121215] dark:bg-[#121215] border border-white/20 rounded-full px-6 py-3.5 shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex items-center gap-6 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-6 duration-300">
               <div className="flex items-center gap-4">
                 <button 
