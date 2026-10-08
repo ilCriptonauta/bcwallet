@@ -113,6 +113,7 @@ const fetcher = async (url: string) => {
 
 export const useAccountNfts = ({
   address,
+  collection,
   enabled = true,
   pageSize = 30,
 }: UseAccountNftsOptions) => {
@@ -124,7 +125,8 @@ export const useAccountNfts = ({
 
     // API uses from/size
     const from = pageIndex * pageSize;
-    return `${network.apiAddress}/accounts/${address}/nfts?from=${from}&size=${pageSize}&type=NonFungibleESDT,SemiFungibleESDT`;
+    const colParam = collection ? `&collection=${collection}` : '';
+    return `${network.apiAddress}/accounts/${address}/nfts?from=${from}&size=${pageSize}&type=NonFungibleESDT,SemiFungibleESDT${colParam}`;
   };
 
   const { data, error, size, setSize, isLoading, isValidating, mutate } = useSWRInfinite<MultiversxNftApiItem[]>(

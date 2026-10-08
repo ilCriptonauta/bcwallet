@@ -199,9 +199,13 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     updatePreferences: fbUpdatePreferences
   } = useFirebaseFolders(walletAddress);
 
+  const [filterType, setFilterType] = useState<'ALL' | 'NFT' | 'SFT'>('ALL');
+  const [selectedCollectionFilter, setSelectedCollectionFilter] = useState<string | null>(null);
+
   const isMainTabActive = viewMode === 'Collectibles' && (activeTab === 'Overview' || activeTab === 'SFTs' || activeTab === 'Collections');
   const nftsQuery = useAccountNfts({
     address: walletAddress,
+    collection: selectedCollectionFilter || undefined,
     enabled: isMainTabActive,
     pageSize: 30
   });
@@ -240,7 +244,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     }
   }, [firebasePreferences]);
 
-
   const setActiveTab = (t: TabId) => {
     setActiveTabState(t);
     localStorage.setItem('bcw_activeTab', t);
@@ -252,8 +255,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     fbUpdatePreferences({ isLargeGrid: v });
   };
 
-
-
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -263,10 +264,19 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [isMultiSellModalOpen, setIsMultiSellModalOpen] = useState(false);
   const [isMultiSendModalOpen, setIsMultiSendModalOpen] = useState(false);
   const [isMultiBurnModalOpen, setIsMultiBurnModalOpen] = useState(false);
-  const [filterType, setFilterType] = useState<'ALL' | 'NFT' | 'SFT'>('ALL');
-  const [selectedCollectionFilter, setSelectedCollectionFilter] = useState<string | null>(null);
 
+  // Available collections covering 100% of the logged-in wallet
   const availableCollections = useMemo(() => {
+    if (portfolio.collectionStats && portfolio.collectionStats.length > 0) {
+      return portfolio.collectionStats
+        .filter(c => c.collection !== 'BCNPASS-40e72d')
+        .map(c => ({
+          id: c.collection,
+          name: c.collectionName,
+          count: c.count
+        }));
+    }
+
     const map = new Map<string, { id: string; name: string; count: number }>();
     for (const item of nftsQuery.items) {
       if (!item.collection || item.collection === 'BCNPASS-40e72d') continue;
@@ -283,7 +293,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       }
     }
     return Array.from(map.values());
-  }, [nftsQuery.items]);
+  }, [portfolio.collectionStats, nftsQuery.items]);
   const [nftToSell, setNftToSell] = useState<NormalizedNft | null>(null);
   const [isBurnModalOpen, setIsBurnModalOpen] = useState(false);
   const [nftToBurn, setNftToBurn] = useState<NormalizedNft | null>(null);
