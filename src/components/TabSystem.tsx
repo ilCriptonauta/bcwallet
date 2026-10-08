@@ -520,6 +520,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         if (filtered.length === 0) setIsSelectionMode(false);
         return filtered;
       } else {
+        setIsSelectionMode(true);
         return [...prev, nft];
       }
     });
@@ -1650,7 +1651,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   };
 
   return (
-    <div className={`min-h-[100dvh] bg-gray-50 dark:bg-[#0c0c0e] transition-all duration-300 ${isSelectionMode ? 'pb-60 md:pb-28' : ''}`}>
+    <div className={`min-h-[100dvh] bg-gray-50 dark:bg-[#0c0c0e] transition-all duration-300 ${isSelectionMode || selectedNfts.length > 0 ? 'pb-60 md:pb-28' : ''}`}>
 
       {/* Header Section */}
       <div className="bg-gray-50/90 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 pt-6 pb-4 w-full px-4">
@@ -2136,7 +2137,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       />
 
       {/* Selection Action Bar (Mobile Bottom Sheet & Desktop Floating Bar) */}
-      {isSelectionMode && mounted && createPortal(
+      {(isSelectionMode || selectedNfts.length > 0) && mounted && createPortal(
         <>
           {/* Mobile Bottom Sheet Modal (< md) */}
           <div className="md:hidden fixed bottom-0 inset-x-0 z-[200] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 rounded-t-[2.5rem] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-[0_-15px_40px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-full duration-300">
@@ -2213,7 +2214,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           </div>
 
           {/* Desktop Floating Bar (>= md) */}
-          <div className="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-bottom-10 duration-500">
+          <div className="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 z-[9999] animate-in slide-in-from-bottom-10 duration-500">
             <div className="bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-full px-6 py-3.5 shadow-2xl shadow-orange-500/20 flex items-center gap-6">
               <div className="flex items-center gap-4">
                 <button 
