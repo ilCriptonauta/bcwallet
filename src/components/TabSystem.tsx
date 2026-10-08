@@ -257,7 +257,21 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const [showValueCard, setShowValueCard] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+
+  useEffect(() => {
+    const handleToggleValue = (e: Event) => {
+      const customEv = e as CustomEvent;
+      if (customEv.detail?.show !== undefined) {
+        setShowValueCard(customEv.detail.show);
+      } else {
+        setShowValueCard(prev => !prev);
+      }
+    };
+    window.addEventListener('toggle-nfts-value-card', handleToggleValue);
+    return () => window.removeEventListener('toggle-nfts-value-card', handleToggleValue);
+  }, []);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const [nftToSend, setNftToSend] = useState<NormalizedNft | null>(null);
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
@@ -1772,10 +1786,10 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </div>
           </div>
 
-          {/* Portfolio Valuation & Floor Price Tracker Card */}
-          {viewMode === 'Collectibles' && activeTab === 'Overview' && (
-            <div className="w-full max-w-4xl mx-auto my-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <PortfolioSummaryCard portfolio={portfolio} />
+          {/* Portfolio Valuation & Floor Price Tracker Card (Hidden by default, shown when user clicks NFTs Value option in menu) */}
+          {viewMode === 'Collectibles' && activeTab === 'Overview' && showValueCard && (
+            <div className="w-full max-w-4xl mx-auto my-2 animate-in fade-in slide-in-from-top-4 duration-500">
+              <PortfolioSummaryCard portfolio={portfolio} onClose={() => setShowValueCard(false)} />
             </div>
           )}
 
@@ -1876,6 +1890,23 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               title={isSelectionMode || selectedNfts.length > 0 ? "Cancel Multi-Select" : "Enable Multi-Select"}
             >
               <CheckSquare className="w-4 h-4" />
+            </button>
+
+            {/* Toggle Portfolio Value Card Button */}
+            <button
+              onClick={() => {
+                setShowValueCard(!showValueCard);
+                haptics.trigger('selection');
+              }}
+              className={`px-3 py-2 rounded-full border transition-all duration-300 shrink-0 shadow-sm flex items-center gap-1.5 text-xs font-black ${
+                showValueCard 
+                  ? 'bg-orange-500/15 text-orange-500 border-orange-500/30' 
+                  : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400 hover:text-orange-500'
+              }`}
+              title={showValueCard ? "Hide Portfolio Value" : "Show Portfolio Value"}
+            >
+              <TrendingUp className="w-4 h-4 text-orange-500" />
+              <span className="hidden sm:inline">Value</span>
             </button>
           </div>
 

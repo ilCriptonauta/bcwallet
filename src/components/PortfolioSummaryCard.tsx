@@ -10,15 +10,17 @@ import {
   BarChart3,
   Sparkles,
   Box,
-  Folder
+  Folder,
+  X
 } from 'lucide-react';
 import { type PortfolioTrackerData } from '@/hooks/usePortfolioTracker';
 
 interface PortfolioSummaryCardProps {
   portfolio: PortfolioTrackerData;
+  onClose?: () => void;
 }
 
-export const PortfolioSummaryCard: React.FC<PortfolioSummaryCardProps> = ({ portfolio }) => {
+export const PortfolioSummaryCard: React.FC<PortfolioSummaryCardProps> = ({ portfolio, onClose }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const {
@@ -76,14 +78,26 @@ export const PortfolioSummaryCard: React.FC<PortfolioSummaryCardProps> = ({ port
           </div>
         </div>
 
-        <button
-          onClick={refresh}
-          disabled={isLoading}
-          className="p-2.5 rounded-2xl bg-gray-100 dark:bg-white/5 hover:bg-orange-500/10 dark:hover:bg-orange-500/20 text-gray-400 hover:text-orange-500 transition-all active:scale-95 disabled:opacity-50"
-          title="Refresh Floor Prices"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-orange-500' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={refresh}
+            disabled={isLoading}
+            className="p-2.5 rounded-2xl bg-gray-100 dark:bg-white/5 hover:bg-orange-500/10 dark:hover:bg-orange-500/20 text-gray-400 hover:text-orange-500 transition-all active:scale-95 disabled:opacity-50"
+            title="Refresh Floor Prices"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-orange-500' : ''}`} />
+          </button>
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-2.5 rounded-2xl bg-gray-100 dark:bg-white/5 hover:bg-red-500/10 dark:hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all active:scale-95"
+              title="Close Value Section"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Value Display */}

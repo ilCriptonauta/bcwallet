@@ -164,10 +164,18 @@ const Header: React.FC<HeaderProps> = ({
             {BigNumber(onxBalance).toFormat(0)}
           </span>
         </div>
-        <div className="flex items-center justify-between px-3 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-transparent dark:border-white/5">
+        <div 
+          onClick={() => {
+            if (currentPage !== 'home') onNavigate('home');
+            window.dispatchEvent(new CustomEvent('toggle-nfts-value-card', { detail: { show: true } }));
+            setIsMenuOpen(false);
+          }}
+          className="flex items-center justify-between px-3 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-transparent dark:border-white/5 hover:border-orange-500/30 hover:bg-orange-500/5 cursor-pointer transition-all active:scale-[0.98] group"
+          title="Click to view detailed NFT Portfolio Value"
+        >
           <div className="flex items-center space-x-2">
-            <TrendingUp className="w-4 h-4 text-green-500" />
-            <span className="text-xs font-bold">NFTs Value</span>
+            <TrendingUp className="w-4 h-4 text-green-500 group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-bold group-hover:text-brand-orange transition-colors">NFTs Value</span>
           </div>
           <span className="text-sm font-black text-slate-900 dark:text-white">
             {nftsValueLoading
