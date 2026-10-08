@@ -1832,6 +1832,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 </button>
               )}
             </div>
+            {/* Grid Layout Toggle (2-Option Sliding Pill) */}
             <div className="relative flex items-center p-1 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 shadow-sm shrink-0">
               {/* Sliding pill */}
               <div
@@ -1844,34 +1845,38 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               <button
                 onClick={() => setIsLargeGrid(false)}
                 className={`relative z-10 p-2 rounded-full transition-colors duration-300 ${!isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                title="Griglia Compatta"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setIsLargeGrid(true)}
                 className={`relative z-10 p-2 rounded-full transition-colors duration-300 ${isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                title="Griglia Grande"
               >
                 <Square className="w-4 h-4" />
               </button>
-              <button
-                onClick={() => {
-                  if (isSelectionMode || selectedNfts.length > 0) {
-                    cancelSelection();
-                  } else {
-                    setIsSelectionMode(true);
-                  }
-                  haptics.trigger('selection');
-                }}
-                className={`relative z-10 p-2 rounded-full transition-all duration-300 ${
-                  isSelectionMode || selectedNfts.length > 0 
-                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' 
-                    : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
-                title={isSelectionMode || selectedNfts.length > 0 ? "Annulla selezione multipla" : "Attiva selezione multipla"}
-              >
-                <CheckSquare className="w-4 h-4" />
-              </button>
             </div>
+
+            {/* Multi-Select Toggle Button */}
+            <button
+              onClick={() => {
+                if (isSelectionMode || selectedNfts.length > 0) {
+                  cancelSelection();
+                } else {
+                  setIsSelectionMode(true);
+                }
+                haptics.trigger('selection');
+              }}
+              className={`p-2.5 rounded-full border transition-all duration-300 shrink-0 shadow-sm ${
+                isSelectionMode || selectedNfts.length > 0 
+                  ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20 scale-105' 
+                  : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+              title={isSelectionMode || selectedNfts.length > 0 ? "Annulla selezione multipla" : "Attiva selezione multipla"}
+            >
+              <CheckSquare className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Advanced Filter Toolbar (Type & Collection Pills) */}
