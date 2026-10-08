@@ -2136,10 +2136,10 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       />
 
       {/* Selection Action Bar (Mobile Bottom Sheet & Desktop Floating Bar) */}
-      {isSelectionMode && (
+      {isSelectionMode && mounted && createPortal(
         <>
           {/* Mobile Bottom Sheet Modal (< md) */}
-          <div className="md:hidden fixed bottom-0 inset-x-0 z-[100] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 rounded-t-[2.5rem] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-[0_-15px_40px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-full duration-300">
+          <div className="md:hidden fixed bottom-0 inset-x-0 z-[200] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 rounded-t-[2.5rem] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-[0_-15px_40px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-full duration-300">
             {/* Drag Handle Indicator */}
             <div className="w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full mx-auto mb-4" />
 
@@ -2213,8 +2213,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
           </div>
 
           {/* Desktop Floating Bar (>= md) */}
-          <div className="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-10 duration-500">
-            <div className="bg-white/90 dark:bg-[#121215]/90 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-full px-6 py-3.5 shadow-2xl shadow-orange-500/10 flex items-center gap-6">
+          <div className="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-bottom-10 duration-500">
+            <div className="bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-full px-6 py-3.5 shadow-2xl shadow-orange-500/20 flex items-center gap-6">
               <div className="flex items-center gap-4">
                 <button 
                   onClick={cancelSelection} 
@@ -2279,7 +2279,8 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {/* Multi-Sell Modal (OOX Marketplace Listing) */}
