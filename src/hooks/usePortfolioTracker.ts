@@ -48,6 +48,8 @@ export interface PortfolioTrackerData {
   totalEgld: number;
   totalUsd: number;
   egldPriceUsd: number;
+  nftCount: number;
+  sftCount: number;
   isLoading: boolean;
   collectionStats: CollectionFloorStat[];
   refresh: () => Promise<void>;
@@ -199,10 +201,28 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
     };
   }, [computePortfolio]);
 
+  const { nftCount, sftCount } = useMemo(() => {
+    let nftsQty = 0;
+    let sftsQty = 0;
+
+    for (const nft of nfts || []) {
+      const qty = nft.balance ? parseInt(nft.balance, 10) || 1 : 1;
+      if (nft.type === 'SFT' || nft.type === 'MetaESDT') {
+        sftsQty += qty;
+      } else {
+        nftsQty += qty;
+      }
+    }
+
+    return { nftCount: nftsQty, sftCount: sftsQty };
+  }, [nfts]);
+
   return {
     totalEgld,
     totalUsd,
     egldPriceUsd,
+    nftCount,
+    sftCount,
     isLoading,
     collectionStats,
     refresh: computePortfolio,
