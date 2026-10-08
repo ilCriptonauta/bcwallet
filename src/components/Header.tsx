@@ -47,6 +47,25 @@ const Header: React.FC<HeaderProps> = ({
   const { preferences } = useFirebaseFolders(address);
   const avatarUrl = preferences?.avatarUrl;
 
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+
+  // Hide header on scroll down, show only when at top of page (scrollY <= 15)
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY <= 15) {
+        setIsHeaderVisible(true);
+      } else {
+        setIsHeaderVisible(false);
+      }
+    };
+
+    handleScroll();
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Close dropdown on outside click (desktop only)
   useEffect(() => {
     const closeMenu = (e: MouseEvent) => {
@@ -233,7 +252,7 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-[100] h-20 border-b border-slate-200 dark:border-white/5 bg-white/70 dark:bg-[#0a0a0a]/80 backdrop-blur-xl">
+      <header className={`fixed top-0 left-0 w-full z-[100] h-20 border-b border-slate-200 dark:border-white/5 bg-white/70 dark:bg-[#0a0a0a]/80 backdrop-blur-xl transition-transform duration-300 ease-in-out ${isHeaderVisible || isMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
 
           <div
