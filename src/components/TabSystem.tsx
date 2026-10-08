@@ -1640,7 +1640,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-gray-50 dark:bg-[#0c0c0e]">
+    <div className={`min-h-[100dvh] bg-gray-50 dark:bg-[#0c0c0e] transition-all duration-300 ${isSelectionMode ? 'pb-60 md:pb-28' : ''}`}>
 
       {/* Header Section */}
       <div className="bg-gray-50/90 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 pt-6 pb-4 w-full px-4">
@@ -2125,64 +2125,151 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
 
-      {/* Selection Floating Bar */}
+      {/* Selection Action Bar (Mobile Bottom Sheet & Desktop Floating Bar) */}
       {isSelectionMode && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-xl animate-in slide-in-from-bottom-10 duration-500">
-          <div className="bg-white/80 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-4 shadow-2xl flex items-center justify-between shadow-orange-500/10">
-            <div className="flex items-center gap-6 px-4">
-              <button onClick={cancelSelection} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"><X className="w-5 h-5 text-gray-500" /></button>
-              <div className="h-6 w-px bg-gray-200 dark:bg-white/10" />
-              <div>
-                <p className="text-sm font-black dark:text-white">{selectedNfts.length} Selected</p>
-                <p className="text-[10px] text-gray-500 dark:text-orange-500 font-bold uppercase tracking-widest">Multi-Select Mode</p>
+        <>
+          {/* Mobile Bottom Sheet Modal (< md) */}
+          <div className="md:hidden fixed bottom-0 inset-x-0 z-[100] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 rounded-t-[2.5rem] p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-[0_-15px_40px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom-full duration-300">
+            {/* Drag Handle Indicator */}
+            <div className="w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full mx-auto mb-4" />
+
+            {/* Header Info & Close */}
+            <div className="flex items-center justify-between mb-4 px-1">
+              <div className="flex items-center gap-2.5">
+                <span className="text-base font-black text-gray-900 dark:text-white">
+                  {selectedNfts.length} {selectedNfts.length === 1 ? 'NFT Selezionato' : 'NFT Selezionati'}
+                </span>
+                <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest bg-orange-500/10 dark:bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/20">
+                  Multi-Select
+                </span>
               </div>
+              <button 
+                onClick={cancelSelection} 
+                className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-white/10 rounded-full transition-all active:scale-95"
+                aria-label="Annulla selezione"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="flex items-center gap-1.5 md:gap-2">
+            {/* Action Buttons Grid */}
+            <div className="space-y-2.5">
+              {/* Primary Action: List on OOX */}
               <button 
                 onClick={() => setIsMultiSellModalOpen(true)} 
-                className="flex items-center justify-center px-3 md:px-5 h-[42px] md:h-[48px] bg-gradient-to-r from-orange-500 to-yellow-500 text-gray-900 rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all shadow-xl shadow-orange-500/20"
+                className="w-full h-12 bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-gray-950 font-black text-sm rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 active:scale-[0.98] transition-all"
               >
-                <DollarSign className="w-4 h-4 md:mr-1 shrink-0" />
-                <span className="hidden sm:inline">List on OOX</span>
-                <span className="sm:hidden">List</span>
+                <DollarSign className="w-5 h-5 stroke-[2.5]" />
+                <span>List on OOX ({selectedNfts.length})</span>
               </button>
 
-              <button 
-                onClick={() => setIsMultiSendModalOpen(true)} 
-                className="flex items-center justify-center px-3 md:px-5 h-[42px] md:h-[48px] bg-white/10 text-white rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all border border-white/10"
-              >
-                <Send className="w-4 h-4 md:mr-1 shrink-0" />
-                <span>Send</span>
-              </button>
-
-              <button 
-                onClick={() => setIsMoveModalOpen(true)} 
-                className="flex items-center justify-center px-3 md:px-5 h-[42px] md:h-[48px] bg-white/10 text-white rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all border border-white/10"
-              >
-                <span>Move</span>
-              </button>
-
-              <button 
-                onClick={() => setIsMultiBurnModalOpen(true)} 
-                className="flex items-center justify-center px-3 md:px-4 h-[42px] md:h-[48px] bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all border border-red-500/30"
-              >
-                <Flame className="w-4 h-4 md:mr-1 shrink-0" />
-                <span className="hidden sm:inline">Burn</span>
-              </button>
-
-              {activeFolder && (
-                <button
-                  onClick={() => setIsRemoveConfirmationOpen(true)}
-                  className="flex items-center justify-center w-[42px] h-[42px] md:w-auto md:h-[48px] md:px-4 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-[1.5rem] font-black text-xs md:text-sm hover:scale-105 transition-all shrink-0"
+              {/* Secondary Actions Grid */}
+              <div className={`grid ${activeFolder ? 'grid-cols-4' : 'grid-cols-3'} gap-2`}>
+                <button 
+                  onClick={() => setIsMultiSendModalOpen(true)} 
+                  className="flex flex-col items-center justify-center py-2.5 px-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-900 dark:text-white font-bold text-xs rounded-2xl border border-gray-200 dark:border-white/10 active:scale-95 transition-all gap-1"
                 >
-                  <Trash2 className="w-4 h-4 md:mr-1" />
-                  <span className="hidden md:inline">Remove</span>
+                  <Send className="w-4 h-4 text-orange-500" />
+                  <span>Send</span>
                 </button>
-              )}
+
+                <button 
+                  onClick={() => setIsMoveModalOpen(true)} 
+                  className="flex flex-col items-center justify-center py-2.5 px-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-900 dark:text-white font-bold text-xs rounded-2xl border border-gray-200 dark:border-white/10 active:scale-95 transition-all gap-1"
+                >
+                  <Folder className="w-4 h-4 text-amber-500" />
+                  <span>Move</span>
+                </button>
+
+                <button 
+                  onClick={() => setIsMultiBurnModalOpen(true)} 
+                  className="flex flex-col items-center justify-center py-2.5 px-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 font-bold text-xs rounded-2xl border border-red-500/20 active:scale-95 transition-all gap-1"
+                >
+                  <Flame className="w-4 h-4 text-red-500" />
+                  <span>Burn</span>
+                </button>
+
+                {activeFolder && (
+                  <button
+                    onClick={() => setIsRemoveConfirmationOpen(true)}
+                    className="flex flex-col items-center justify-center py-2.5 px-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 font-bold text-xs rounded-2xl border border-red-500/20 active:scale-95 transition-all gap-1"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                    <span>Remove</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Desktop Floating Bar (>= md) */}
+          <div className="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-10 duration-500">
+            <div className="bg-white/90 dark:bg-[#121215]/90 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-full px-6 py-3.5 shadow-2xl shadow-orange-500/10 flex items-center gap-6">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={cancelSelection} 
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  aria-label="Annulla selezione"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="h-6 w-px bg-gray-200 dark:bg-white/10" />
+                <div className="flex items-center gap-2.5">
+                  <span className="text-sm font-black text-gray-900 dark:text-white">
+                    {selectedNfts.length} Selected
+                  </span>
+                  <span className="text-[10px] text-orange-500 font-extrabold uppercase tracking-widest bg-orange-500/10 px-2.5 py-0.5 rounded-full border border-orange-500/20">
+                    Multi-Select
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setIsMultiSellModalOpen(true)} 
+                  className="flex items-center justify-center px-5 h-[44px] bg-gradient-to-r from-orange-500 to-yellow-500 text-gray-950 rounded-full font-black text-sm hover:scale-105 transition-all shadow-lg shadow-orange-500/20 gap-1.5"
+                >
+                  <DollarSign className="w-4 h-4 stroke-[2.5] shrink-0" />
+                  <span>List on OOX</span>
+                </button>
+
+                <button 
+                  onClick={() => setIsMultiSendModalOpen(true)} 
+                  className="flex items-center justify-center px-5 h-[44px] bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-900 dark:text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-gray-200 dark:border-white/10 gap-1.5"
+                >
+                  <Send className="w-4 h-4 text-orange-500 shrink-0" />
+                  <span>Send</span>
+                </button>
+
+                <button 
+                  onClick={() => setIsMoveModalOpen(true)} 
+                  className="flex items-center justify-center px-5 h-[44px] bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-900 dark:text-white rounded-full font-bold text-sm hover:scale-105 transition-all border border-gray-200 dark:border-white/10 gap-1.5"
+                >
+                  <Folder className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>Move</span>
+                </button>
+
+                <button 
+                  onClick={() => setIsMultiBurnModalOpen(true)} 
+                  className="flex items-center justify-center px-4 h-[44px] bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 rounded-full font-bold text-sm hover:scale-105 transition-all border border-red-500/20 gap-1.5"
+                >
+                  <Flame className="w-4 h-4 text-red-500 shrink-0" />
+                  <span>Burn</span>
+                </button>
+
+                {activeFolder && (
+                  <button
+                    onClick={() => setIsRemoveConfirmationOpen(true)}
+                    className="flex items-center justify-center px-4 h-[44px] bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full font-bold text-sm hover:scale-105 transition-all gap-1.5 shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Remove</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Multi-Sell Modal (OOX Marketplace Listing) */}

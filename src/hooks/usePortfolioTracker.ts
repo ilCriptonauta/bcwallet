@@ -1,9 +1,39 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
 import { useGetNetworkConfig } from '@/lib';
 import type { NormalizedNft } from '@/helpers';
 
 const OOX_API = 'https://api.oox.art';
+const LOCAL_STORAGE_CACHE_KEY = 'bcw_floor_prices_v1';
+
+// In-memory persistent cache across component re-renders
+const globalFloorCache = new Map<string, number>();
+
+// Hydrate global cache from localStorage on module load
+if (typeof window !== 'undefined') {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_CACHE_KEY);
+    if (saved) {
+      const parsed: Record<string, number> = JSON.parse(saved);
+      for (const [col, val] of Object.entries(parsed)) {
+        if (typeof val === 'number' && val > 0) {
+          globalFloorCache.set(col, val);
+        }
+      }
+    }
+  } catch {}
+}
+
+function saveGlobalCacheToStorage() {
+  if (typeof window === 'undefined') return;
+  try {
+    const obj: Record<string, number> = {};
+    for (const [col, val] of globalFloorCache.entries()) {
+      obj[col] = val;
+    }
+    localStorage.setItem(LOCAL_STORAGE_CACHE_KEY, JSON.stringify(obj));
+  } catch {}
+}
 
 export interface CollectionFloorStat {
   collection: string;
@@ -44,21 +74,40 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
     }
   }, []);
 
-  // Fetch OOX floor price for a collection
+  // Resilient OOX floor price fetcher with cache fallback
   const fetchCollectionFloor = useCallback(async (collection: string, signal: AbortSignal): Promise<number> => {
     try {
       const res = await fetch(`${OOX_API}/collections/${collection}/auction/stats`, {
         signal,
         headers: { Accept: 'application/json' },
       });
-      if (!res.ok) return 0;
-      const data = await res.json();
-      if (!data?.minPrice || data.minPrice === '0') return 0;
-      return new BigNumber(data.minPrice).dividedBy(1e18).toNumber();
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.minPrice && data.minPrice !== '0') {
+          const val = new BigNumber(data.minPrice).dividedBy(1e18).toNumber();
+          if (val > 0) {
+            globalFloorCache.set(collection, val);
+            saveGlobalCacheToStorage();
+            return val;
+          }
+        }
+      }
     } catch {
-      return 0;
+      // Network failure or rate limit hit — fallback to known cache below
     }
+
+    // Return cached non-zero floor price if available
+    return globalFloorCache.get(collection) || 0;
   }, []);
+
+  // Create a stable string signature of NFTs to prevent redundant computations
+  const nftsSignature = useMemo(() => {
+    return nfts
+      .map(n => `${n.identifier}:${n.balance || 1}`)
+      .sort()
+      .join('|');
+  }, [nfts]);
 
   const computePortfolio = useCallback(async () => {
     if (!nfts || nfts.length === 0) {
@@ -79,7 +128,7 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
 
     // 1. Fetch EGLD USD Price
     const egldPrice = await fetchEgldPrice(apiAddr, controller.signal);
-    if (!controller.signal.aborted) {
+    if (!controller.signal.aborted && egldPrice > 0) {
       setEgldPriceUsd(egldPrice);
     }
 
@@ -103,8 +152,8 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
     const stats: CollectionFloorStat[] = [];
     let sumEgld = 0;
 
-    // Fetch floor prices in parallel batches
-    const BATCH_SIZE = 6;
+    // Fetch floor prices in sequential small batches to respect rate limits
+    const BATCH_SIZE = 4;
     for (let i = 0; i < collectionsList.length; i += BATCH_SIZE) {
       if (controller.signal.aborted) break;
 
@@ -113,7 +162,7 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
         batch.map(async ([col, info]) => {
           const floor = await fetchCollectionFloor(col, controller.signal);
           const totalColEgld = floor * info.count;
-          const totalColUsd = totalColEgld * egldPrice;
+          const totalColUsd = totalColEgld * (egldPrice || egldPriceUsd);
           return {
             collection: col,
             collectionName: info.name,
@@ -135,12 +184,13 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
       // Sort collections by total value descending
       stats.sort((a, b) => b.totalEgld - a.totalEgld);
 
+      const effectivePrice = egldPrice || egldPriceUsd;
       setCollectionStats(stats);
       setTotalEgld(sumEgld);
-      setTotalUsd(sumEgld * egldPrice);
+      setTotalUsd(sumEgld * effectivePrice);
       setIsLoading(false);
     }
-  }, [nfts, network?.apiAddress, fetchEgldPrice, fetchCollectionFloor]);
+  }, [nfts, nftsSignature, network?.apiAddress, fetchEgldPrice, fetchCollectionFloor, egldPriceUsd]);
 
   useEffect(() => {
     computePortfolio();
