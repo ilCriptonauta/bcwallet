@@ -221,7 +221,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     OOX_CONTRACT_ADDRESS,
   });
 
-  const portfolio = usePortfolioTracker(nftsQuery.items);
+  const portfolio = usePortfolioTracker(nftsQuery.items, walletAddress);
 
   // Sync Firestore preferences → local state (cross-device sync)
   const prefsAppliedRef = React.useRef(false);

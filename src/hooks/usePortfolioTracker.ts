@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import BigNumber from 'bignumber.js';
-import { useGetNetworkConfig } from '@/lib';
+import { useGetNetworkConfig, useGetAccountInfo } from '@/lib';
 import type { NormalizedNft } from '@/helpers';
 
 const OOX_API = 'https://api.oox.art';
@@ -55,11 +55,16 @@ export interface PortfolioTrackerData {
   refresh: () => Promise<void>;
 }
 
-export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData {
+export function usePortfolioTracker(nftsInput?: NormalizedNft[], overrideAddress?: string): PortfolioTrackerData {
   const { network } = useGetNetworkConfig();
+  const accountAddress = useGetAccountInfo()?.account?.address;
+  const targetAddress = overrideAddress || accountAddress;
+
   const [totalEgld, setTotalEgld] = useState<number>(0);
   const [totalUsd, setTotalUsd] = useState<number>(0);
   const [egldPriceUsd, setEgldPriceUsd] = useState<number>(0);
+  const [nftCount, setNftCount] = useState<number>(0);
+  const [sftCount, setSftCount] = useState<number>(0);
   const [collectionStats, setCollectionStats] = useState<CollectionFloorStat[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -99,27 +104,10 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
       // Network failure or rate limit hit — fallback to known cache below
     }
 
-    // Return cached non-zero floor price if available
     return globalFloorCache.get(collection) || 0;
   }, []);
 
-  // Create a stable string signature of NFTs to prevent redundant computations
-  const nftsSignature = useMemo(() => {
-    return nfts
-      .map(n => `${n.identifier}:${n.balance || 1}`)
-      .sort()
-      .join('|');
-  }, [nfts]);
-
   const computePortfolio = useCallback(async () => {
-    if (!nfts || nfts.length === 0) {
-      setTotalEgld(0);
-      setTotalUsd(0);
-      setCollectionStats([]);
-      setIsLoading(false);
-      return;
-    }
-
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -134,9 +122,95 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
       setEgldPriceUsd(egldPrice);
     }
 
-    // 2. Group NFTs by Collection
+    let allNfts: { collection: string; collectionName: string; type: string; balance?: string }[] = [];
+    let exactNftCount = 0;
+    let exactSftCount = 0;
+
+    if (targetAddress) {
+      // Fetch exact NFT & SFT counts from API count endpoints
+      try {
+        const [nftCountRes, sftCountRes] = await Promise.all([
+          fetch(`${apiAddr}/accounts/${targetAddress}/nfts/count?type=NonFungibleESDT`, { signal: controller.signal }),
+          fetch(`${apiAddr}/accounts/${targetAddress}/nfts/count?type=SemiFungibleESDT,MetaESDT`, { signal: controller.signal }),
+        ]);
+
+        if (nftCountRes.ok) {
+          const txt = await nftCountRes.text();
+          exactNftCount = parseInt(txt, 10) || 0;
+        }
+        if (sftCountRes.ok) {
+          const txt = await sftCountRes.text();
+          exactSftCount = parseInt(txt, 10) || 0;
+        }
+      } catch {
+        // Fallback to manual computation if count endpoint fails
+      }
+
+      // Fetch ALL NFTs for this target address across pages (using size=500)
+      const pageSize = 500;
+      let from = 0;
+      let hasMore = true;
+
+      while (hasMore && !controller.signal.aborted) {
+        try {
+          const res = await fetch(
+            `${apiAddr}/accounts/${targetAddress}/nfts?from=${from}&size=${pageSize}&type=NonFungibleESDT,SemiFungibleESDT,MetaESDT`,
+            { signal: controller.signal, headers: { Accept: 'application/json' } }
+          );
+          if (!res.ok) break;
+          const data = await res.json();
+          if (!Array.isArray(data) || data.length === 0) break;
+
+          for (const item of data) {
+            allNfts.push({
+              collection: item.collection || '',
+              collectionName: item.collectionName ? item.collectionName.split('-')[0].trim() : (item.collection ? item.collection.split('-')[0].trim() : 'Unknown Collection'),
+              type: item.type === 'SemiFungibleESDT' ? 'SFT' : item.type === 'MetaESDT' ? 'MetaESDT' : 'NFT',
+              balance: item.balance,
+            });
+          }
+
+          if (data.length < pageSize) {
+            hasMore = false;
+          } else {
+            from += pageSize;
+          }
+        } catch {
+          break;
+        }
+      }
+    } else if (nftsInput && nftsInput.length > 0) {
+      allNfts = nftsInput;
+    }
+
+    if (controller.signal.aborted) return;
+
+    // Calculate fallback counts if API count endpoints failed
+    if (exactNftCount === 0 && exactSftCount === 0) {
+      for (const item of allNfts) {
+        const qty = item.balance ? parseInt(item.balance, 10) || 1 : 1;
+        if (item.type === 'SFT' || item.type === 'MetaESDT') {
+          exactSftCount += qty;
+        } else {
+          exactNftCount += qty;
+        }
+      }
+    }
+
+    setNftCount(exactNftCount);
+    setSftCount(exactSftCount);
+
+    if (allNfts.length === 0) {
+      setTotalEgld(0);
+      setTotalUsd(0);
+      setCollectionStats([]);
+      setIsLoading(false);
+      return;
+    }
+
+    // Group NFTs by collection counting quantities (SFTs may have balance > 1)
     const collectionsMap = new Map<string, { count: number; name: string }>();
-    for (const nft of nfts) {
+    for (const nft of allNfts) {
       if (!nft.collection) continue;
       const qty = nft.balance ? parseInt(nft.balance, 10) || 1 : 1;
       const existing = collectionsMap.get(nft.collection);
@@ -154,13 +228,13 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
     const stats: CollectionFloorStat[] = [];
     let sumEgld = 0;
 
-    // Fetch floor prices in sequential small batches to respect rate limits
+    // Fetch floor prices in small sequential batches to respect rate limits
     const BATCH_SIZE = 4;
     for (let i = 0; i < collectionsList.length; i += BATCH_SIZE) {
       if (controller.signal.aborted) break;
 
       const batch = collectionsList.slice(i, i + BATCH_SIZE);
-      const batchResults = await Promise.all(
+      const results = await Promise.all(
         batch.map(async ([col, info]) => {
           const floor = await fetchCollectionFloor(col, controller.signal);
           const totalColEgld = floor * info.count;
@@ -176,9 +250,9 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
         })
       );
 
-      for (const res of batchResults) {
-        stats.push(res);
-        sumEgld += res.totalEgld;
+      for (const item of results) {
+        stats.push(item);
+        sumEgld += item.totalEgld;
       }
     }
 
@@ -192,30 +266,14 @@ export function usePortfolioTracker(nfts: NormalizedNft[]): PortfolioTrackerData
       setTotalUsd(sumEgld * effectivePrice);
       setIsLoading(false);
     }
-  }, [nfts, nftsSignature, network?.apiAddress, fetchEgldPrice, fetchCollectionFloor, egldPriceUsd]);
+  }, [targetAddress, nftsInput, network?.apiAddress, fetchEgldPrice, fetchCollectionFloor, egldPriceUsd]);
 
   useEffect(() => {
     computePortfolio();
     return () => {
       abortRef.current?.abort();
     };
-  }, [computePortfolio]);
-
-  const { nftCount, sftCount } = useMemo(() => {
-    let nftsQty = 0;
-    let sftsQty = 0;
-
-    for (const nft of nfts || []) {
-      const qty = nft.balance ? parseInt(nft.balance, 10) || 1 : 1;
-      if (nft.type === 'SFT' || nft.type === 'MetaESDT') {
-        sftsQty += qty;
-      } else {
-        nftsQty += qty;
-      }
-    }
-
-    return { nftCount: nftsQty, sftCount: sftsQty };
-  }, [nfts]);
+  }, [targetAddress, nftsInput?.length]);
 
   return {
     totalEgld,
