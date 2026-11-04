@@ -4,7 +4,7 @@ import { X, Share2, Copy, Check, ExternalLink } from 'lucide-react';
 interface ShareFolderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  folderToShare: { name: string } | null;
+  folderToShare: { name: string; itemCount?: number } | null;
   accountInfo: any; // Using any or specific type if imported
   walletAddress: string | null;
   shareLinkCopied: boolean;
@@ -28,7 +28,9 @@ export const ShareFolderModal: React.FC<ShareFolderModalProps> = ({
     : walletAddress || '';
   const folderSlug = slugify(folderToShare.name);
   const shareUrl = `https://baconwallet.vercel.app/gallery/${ownerSlug}/${folderSlug}`;
-  const shareText = `Check out my "${folderToShare.name}" NFT collection on Bacon Wallet 🥓`;
+  const itemCount = folderToShare.itemCount ?? 0;
+  const itemLabel = itemCount === 1 ? 'item' : 'items';
+  const shareText = `Check out my "${folderToShare.name}" NFT collection (${itemCount} ${itemLabel}) on Bacon Wallet 🥓`;
   
   // Need to ensure the URI doesn't error out if undefined
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;

@@ -416,7 +416,7 @@ export default function GalleryPage({ params }: { params: Promise<PageParams> })
                 />
               </div>
               {/* Hover overlay on desktop */}
-              <div className="absolute bottom-10 left-10 right-10 z-20 hidden md:block opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0 duration-500">
+              <div className="absolute bottom-10 left-10 right-10 z-20 max-md:hidden block opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0 duration-500">
                 <h2 className="text-2xl font-black text-white drop-shadow-2xl">{selectedNft.name}</h2>
                 <p className="text-orange-500 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 drop-shadow-lg">{selectedNft.collection}</p>
               </div>
@@ -459,7 +459,7 @@ export default function GalleryPage({ params }: { params: Promise<PageParams> })
                   {/* Close (Desktop) */}
                   <button
                     onClick={() => setSelectedNft(null)}
-                    className="p-3 bg-white/5 rounded-2xl text-gray-400 hover:text-orange-500 hover:bg-orange-500/10 transition-all hidden md:block"
+                    className="p-3 bg-white/5 rounded-2xl text-gray-400 hover:text-orange-500 hover:bg-orange-500/10 transition-all max-md:hidden block"
                   >
                     <X className="w-6 h-6" />
                   </button>

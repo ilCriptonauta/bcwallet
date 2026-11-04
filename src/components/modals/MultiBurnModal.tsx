@@ -64,7 +64,7 @@ export const MultiBurnModal: React.FC<MultiBurnModalProps> = ({
     <div className="fixed inset-0 z-[250] flex items-end md:items-center justify-center p-0 md:p-4 animate-in fade-in duration-300 overscroll-contain" style={{ touchAction: 'none' }}>
       <div className="absolute inset-0 bg-black/85 backdrop-blur-xl" onClick={onClose} />
       <div 
-        className="relative w-full max-w-xl bg-white dark:bg-[#151518] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-2xl border-t border-red-500/20 md:border p-6 md:p-8 animate-in slide-in-from-bottom-full md:zoom-in-95 duration-300 max-h-[90dvh] flex flex-col"
+        className="relative w-full max-w-xl bg-white dark:bg-[#151518] rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-2xl border-t border-red-500/20 md:border p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:p-8 animate-in slide-in-from-bottom-full md:zoom-in-95 duration-300 max-h-[90dvh] flex flex-col overflow-hidden"
         style={{ touchAction: 'auto' }}
       >
         {/* Mobile Drag Bar */}
@@ -97,7 +97,7 @@ export const MultiBurnModal: React.FC<MultiBurnModalProps> = ({
         </div>
 
         {/* Selected Items List */}
-        <div className="flex-1 overflow-y-auto pr-1 space-y-3 mb-5 scrollbar-hide">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1 space-y-3 mb-5 scrollbar-hide" style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}>
           {items.map((item) => {
             const maxQty = parseInt(item.nft.balance || '1', 10);
             return (

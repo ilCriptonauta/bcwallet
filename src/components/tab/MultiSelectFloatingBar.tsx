@@ -31,7 +31,7 @@ export const MultiSelectFloatingBar: React.FC<MultiSelectFloatingBarProps> = ({
   return (
     <>
       {/* Mobile Bottom Sheet (< md) */}
-      <div className="md:hidden fixed inset-x-0 bottom-0 z-[9999] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom duration-300">
+      <div className="md:hidden fixed inset-x-0 bottom-0 z-[120] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-10px_40px_rgba(0,0,0,0.3)] animate-in slide-in-from-bottom duration-300">
         <div className="max-w-md mx-auto space-y-3">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
@@ -97,7 +97,7 @@ export const MultiSelectFloatingBar: React.FC<MultiSelectFloatingBarProps> = ({
       </div>
 
       {/* Desktop Floating Bar (>= md) */}
-      <div className="max-md:hidden fixed bottom-8 inset-x-0 z-[9999] flex justify-center pointer-events-none px-4">
+      <div className="max-md:hidden fixed bottom-8 inset-x-0 z-[120] flex justify-center pointer-events-none px-4">
         <div className="pointer-events-auto bg-[#121215] dark:bg-[#121215] border border-white/20 rounded-full px-6 py-3.5 shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex items-center gap-6 backdrop-blur-2xl animate-in fade-in slide-in-from-bottom-6 duration-300">
           <div className="flex items-center gap-4">
             <button

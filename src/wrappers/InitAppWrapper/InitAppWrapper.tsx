@@ -9,15 +9,26 @@ if (typeof window !== 'undefined') {
   // Suppress empty object {} console errors often thrown by WalletConnect/xPortal/sdk-dapp
   const originalConsoleError = console.error;
   console.error = (...args: unknown[]) => {
-    const isEmptyObject = (val: unknown): boolean => {
-      if (typeof val !== 'object' || val === null) return false;
-      if (val instanceof Error) {
-        return !val.message && !val.stack;
+    const isEmptyErrorArg = (val: unknown): boolean => {
+      if (val === undefined || val === null) return true;
+      if (typeof val === 'string') {
+        const trimmed = val.trim();
+        return trimmed === '' || trimmed === '{}';
       }
-      return Object.keys(val).length === 0 && Object.getOwnPropertyNames(val).length === 0;
+      if (typeof val !== 'object') return false;
+      if (val instanceof Error) {
+        return !val.message || val.message.trim() === '' || val.message.trim() === '{}';
+      }
+      if (Object.keys(val).length === 0) return true;
+      try {
+        if (JSON.stringify(val) === '{}') return true;
+      } catch {
+        // Ignore circular references
+      }
+      return false;
     };
 
-    if (args.length === 0 || args.every(isEmptyObject)) {
+    if (args.length === 0 || args.every(isEmptyErrorArg)) {
       return; // Suppress empty object logging
     }
 

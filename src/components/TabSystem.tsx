@@ -229,7 +229,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   // No longer needed: local localStorage effects removed since we use Firebase real-time sync.
 
   // Lock body scroll when any modal is open (prevents iOS scroll-through)
-  const isAnyModalOpen = !!(selectedItem || isSendModalOpen || isSellModalOpen || isBurnModalOpen || isMoveModalOpen || isCreateModalOpen || isShareModalOpen || isRemoveConfirmationOpen);
+  const isAnyModalOpen = !!(selectedItem || isSendModalOpen || isSellModalOpen || isBurnModalOpen || isMoveModalOpen || isCreateModalOpen || isShareModalOpen || isRemoveConfirmationOpen || isMultiSellModalOpen || isMultiSendModalOpen || isMultiBurnModalOpen);
   useEffect(() => {
     if (isAnyModalOpen) {
       const scrollY = window.scrollY;
@@ -810,6 +810,30 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     // If viewing a specific collection
     if (activeCollectionId) {
       const collectionItems = collectionsMap.get(activeCollectionId) || [];
+      const allCollectionSelected =
+        collectionItems.length > 0 &&
+        collectionItems.every((item) => selectedNfts.some((s) => s.identifier === item.identifier));
+
+      const handleToggleSelectAllCollection = () => {
+        if (collectionItems.length === 0) return;
+        if (allCollectionSelected) {
+          const collectionIds = new Set(collectionItems.map((i) => i.identifier));
+          setSelectedNfts((prev) => {
+            const next = prev.filter((n) => !collectionIds.has(n.identifier));
+            if (next.length === 0) setIsSelectionMode(false);
+            return next;
+          });
+        } else {
+          setIsSelectionMode(true);
+          setSelectedNfts((prev) => {
+            const existingIds = new Set(prev.map((n) => n.identifier));
+            const toAdd = collectionItems.filter((i) => !existingIds.has(i.identifier));
+            return [...prev, ...toAdd];
+          });
+        }
+        haptics.trigger('medium');
+      };
+
       return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center space-x-4">
@@ -843,35 +867,69 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             )}
           </div>
 
-          {collectionDetails && (
+          {(collectionDetails || collectionItems.length > 0) && (
             <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 space-y-4">
-              {collectionDetails.description && (
+              {collectionDetails?.description && (
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl">
                   {collectionDetails.description}
                 </p>
               )}
-              <div className="flex flex-wrap items-center gap-6">
-                {collectionDetails.nftCount && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                      <LayoutGrid className="w-4 h-4 text-blue-500" />
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-6">
+                  {collectionDetails?.nftCount && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                        <LayoutGrid className="w-4 h-4 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Total Items</p>
+                        <p className="text-sm font-black dark:text-white">{collectionDetails.nftCount.toLocaleString()}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Total Items</p>
-                      <p className="text-sm font-black dark:text-white">{collectionDetails.nftCount.toLocaleString()}</p>
+                  )}
+                  {collectionDetails?.holderCount && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                        <Users className="w-4 h-4 text-green-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Holders</p>
+                        <p className="text-sm font-black dark:text-white">{collectionDetails.holderCount.toLocaleString()}</p>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {collectionDetails.holderCount && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
-                      <Users className="w-4 h-4 text-green-500" />
+                  )}
+                </div>
+
+                {collectionItems.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleToggleSelectAllCollection}
+                    className={`ml-auto px-4 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2.5 transition-all duration-200 active:scale-95 cursor-pointer border ${
+                      allCollectionSelected
+                        ? 'bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/25 hover:bg-orange-600'
+                        : 'bg-white dark:bg-white/5 text-gray-800 dark:text-white border-gray-200 dark:border-white/10 hover:border-orange-500/40 hover:bg-orange-500/10 hover:text-orange-500 dark:hover:text-orange-400 shadow-sm'
+                    }`}
+                  >
+                    <div
+                      className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
+                        allCollectionSelected
+                          ? 'bg-white/20 text-white'
+                          : 'bg-orange-500/10 text-orange-500 border border-orange-500/20'
+                      }`}
+                    >
+                      <CheckSquare className="w-3.5 h-3.5" />
                     </div>
-                    <div>
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Holders</p>
-                      <p className="text-sm font-black dark:text-white">{collectionDetails.holderCount.toLocaleString()}</p>
-                    </div>
-                  </div>
+                    <span>{allCollectionSelected ? 'Deselect All' : 'Select All'}</span>
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                        allCollectionSelected
+                          ? 'bg-black/20 text-white'
+                          : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/60'
+                      }`}
+                    >
+                      {collectionItems.length}
+                    </span>
+                  </button>
                 )}
               </div>
             </div>
@@ -2188,16 +2246,18 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
 
-      <MultiSelectFloatingBar
-        selectedNfts={selectedNfts}
-        activeFolder={activeFolder}
-        cancelSelection={cancelSelection}
-        onOpenMultiSell={() => setIsMultiSellModalOpen(true)}
-        onOpenMultiSend={() => setIsMultiSendModalOpen(true)}
-        onOpenMoveModal={() => setIsMoveModalOpen(true)}
-        onOpenMultiBurn={() => setIsMultiBurnModalOpen(true)}
-        onOpenRemoveConfirmation={() => setIsRemoveConfirmationOpen(true)}
-      />
+      {!isAnyModalOpen && (
+        <MultiSelectFloatingBar
+          selectedNfts={selectedNfts}
+          activeFolder={activeFolder}
+          cancelSelection={cancelSelection}
+          onOpenMultiSell={() => setIsMultiSellModalOpen(true)}
+          onOpenMultiSend={() => setIsMultiSendModalOpen(true)}
+          onOpenMoveModal={() => setIsMoveModalOpen(true)}
+          onOpenMultiBurn={() => setIsMultiBurnModalOpen(true)}
+          onOpenRemoveConfirmation={() => setIsRemoveConfirmationOpen(true)}
+        />
+      )}
 
 
       {/* Multi-Sell Modal (OOX Marketplace Listing) */}
