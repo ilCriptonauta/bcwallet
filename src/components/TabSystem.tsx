@@ -48,6 +48,9 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('Collectibles');
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const [activeTab, setActiveTabState] = useState<TabId>(() => {
     if (typeof window !== 'undefined') {
@@ -538,10 +541,13 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) setOpenMenuId(null);
       if (folderMenuRef.current && !folderMenuRef.current.contains(event.target as Node)) setOpenFolderMenuId(null);
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchExpanded((prev) => (searchQuery.trim() === '' ? false : prev));
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [searchQuery]);
 
 
 
@@ -1777,12 +1783,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       <div className="bg-gray-50/90 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 pt-6 pb-4 w-full px-4">
         <div className="max-w-7xl mx-auto flex flex-col items-center justify-center gap-5 md:gap-6">
 
-          <div className="flex items-center gap-4">
-            <div className="inline-flex items-center justify-center h-7 px-4 bg-orange-500/10 border border-orange-500/20 rounded-full">
-              <span className="text-[10px] text-orange-500 font-black uppercase tracking-[0.2em] pl-[0.2em] mb-[1px] leading-none">Asset Hub</span>
-            </div>
-          </div>
-
           {/* Portfolio Valuation & Floor Price Tracker Card (Hidden by default, shown when user clicks NFTs Value option in menu) */}
           {viewMode === 'Collectibles' && activeTab === 'Overview' && showValueCard && (
             <div className="w-full max-w-4xl mx-auto my-2 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -1824,45 +1824,87 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </button>
           </div>
 
-          <div className="flex items-center justify-center gap-2 w-full max-w-md">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <div className="flex items-center justify-center gap-2.5 w-full max-w-md">
+            <div
+              ref={searchContainerRef}
+              onClick={() => {
+                if (!isSearchExpanded) {
+                  setIsSearchExpanded(true);
+                  setTimeout(() => searchInputRef.current?.focus(), 50);
+                }
+              }}
+              className={`relative flex items-center h-10 rounded-full bg-white dark:bg-white/5 border shadow-sm transition-all duration-300 ease-out origin-right overflow-hidden ${
+                isSearchExpanded || searchQuery
+                  ? 'w-48 sm:w-64 border-orange-500/50 ring-2 ring-orange-500/20 px-3.5 cursor-text'
+                  : 'w-10 justify-center border-gray-100 dark:border-white/10 hover:border-orange-500/40 cursor-pointer shrink-0'
+              }`}
+              title={!isSearchExpanded && !searchQuery ? 'Search items' : undefined}
+            >
+              <Search
+                className={`w-4 h-4 shrink-0 transition-colors duration-200 ${
+                  isSearchExpanded || searchQuery
+                    ? 'text-orange-500 mr-2'
+                    : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search items..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all dark:text-white shadow-sm"
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setSearchQuery('');
+                    setIsSearchExpanded(false);
+                    searchInputRef.current?.blur();
+                  }
+                }}
+                onBlur={() => {
+                  if (!searchQuery.trim()) {
+                    setIsSearchExpanded(false);
+                  }
+                }}
+                className={`bg-transparent text-sm font-bold focus:outline-none dark:text-white transition-all duration-300 ${
+                  isSearchExpanded || searchQuery
+                    ? 'w-full opacity-100 pr-5'
+                    : 'w-0 opacity-0 pointer-events-none p-0'
+                }`}
               />
-              {searchQuery && (
+              {(isSearchExpanded || searchQuery) && (
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchQuery('');
+                    setIsSearchExpanded(false);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
+
             {/* Grid Layout Toggle (2-Option Sliding Pill) */}
-            <div className="relative flex items-center p-1 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 shadow-sm shrink-0">
+            <div className="relative flex items-center h-10 p-1 bg-white dark:bg-white/5 rounded-full border border-gray-100 dark:border-white/10 shadow-sm shrink-0">
               {/* Sliding pill */}
               <div
-                className="absolute top-1 bottom-1 rounded-full bg-orange-500 shadow-md shadow-orange-500/20 transition-all duration-300 ease-out"
+                className="absolute top-1 bottom-1 w-8 rounded-full bg-orange-500 shadow-md shadow-orange-500/20 transition-all duration-300 ease-out"
                 style={{
-                  width: 'calc(50% - 4px)',
-                  left: !isLargeGrid ? '4px' : 'calc(50%)',
+                  left: !isLargeGrid ? '4px' : 'calc(100% - 36px)',
                 }}
               />
               <button
                 onClick={() => setIsLargeGrid(false)}
-                className={`relative z-10 p-2 rounded-full transition-colors duration-300 ${!isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                className={`relative z-10 w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-300 ${!isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                 title="Compact Grid"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setIsLargeGrid(true)}
-                className={`relative z-10 p-2 rounded-full transition-colors duration-300 ${isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                className={`relative z-10 w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-300 ${isLargeGrid ? 'text-white' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                 title="Large Grid"
               >
                 <Square className="w-4 h-4" />
@@ -1879,7 +1921,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 }
                 haptics.trigger('selection');
               }}
-              className={`p-2.5 rounded-full border transition-all duration-300 shrink-0 shadow-sm ${
+              className={`w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-300 shrink-0 shadow-sm ${
                 isSelectionMode || selectedNfts.length > 0 
                   ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20 scale-105' 
                   : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -1895,7 +1937,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
                 setShowValueCard(!showValueCard);
                 haptics.trigger('selection');
               }}
-              className={`px-3 py-2 rounded-full border transition-all duration-300 shrink-0 shadow-sm flex items-center gap-1.5 text-xs font-black ${
+              className={`w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-300 shrink-0 shadow-sm ${
                 showValueCard 
                   ? 'bg-orange-500/15 text-orange-500 border-orange-500/30' 
                   : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400 hover:text-orange-500'
@@ -1903,7 +1945,6 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
               title={showValueCard ? "Hide Portfolio Value" : "Show Portfolio Value"}
             >
               <TrendingUp className="w-4 h-4 text-orange-500" />
-              <span className="hidden sm:inline">Value</span>
             </button>
           </div>
 
