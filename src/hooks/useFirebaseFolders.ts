@@ -33,6 +33,7 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
     const [folders, setFolders] = useState<UserFolder[]>([]);
     const [folderContents, setFolderContents] = useState<Record<string, NormalizedNft[]>>({});
     const [favorites, setFavorites] = useState<NormalizedNft[]>([]);
+    const [favoriteCollections, setFavoriteCollections] = useState<string[]>([]);
     const [isPro, setIsPro] = useState(false);
     const [preferences, setPreferences] = useState<UserPreferences>({});
     const [loading, setLoading] = useState(true);
@@ -42,6 +43,7 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
             setFolders([]);
             setFolderContents({});
             setFavorites([]);
+            setFavoriteCollections([]);
             setLoading(false);
             return;
         }
@@ -53,11 +55,12 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
                 const data = snap.data();
                 setIsPro(data.isPro || false);
                 setFavorites(data.favorites || []);
+                setFavoriteCollections(data.favoriteCollections || []);
                 if (data.preferences) {
                     setPreferences(data.preferences);
                 }
             } else {
-                setDoc(userRef, { isPro: false, favorites: [] }, { merge: true });
+                setDoc(userRef, { isPro: false, favorites: [], favoriteCollections: [] }, { merge: true });
             }
         });
 
@@ -129,6 +132,36 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
             if (errMessage.includes("permissions") || errMessage.includes("Quota")) {
                 alert("Could not update favorites. Firebase limits or permissions errors.");
             }
+        }
+    };
+
+    const toggleFavoriteCollection = async (collectionId: string) => {
+        if (!walletAddress || !collectionId) return;
+
+        const prevFavCols = [...favoriteCollections];
+        const isFav = prevFavCols.includes(collectionId);
+
+        const nextFavColsUI = isFav
+            ? prevFavCols.filter(id => id !== collectionId)
+            : [...prevFavCols, collectionId];
+
+        setFavoriteCollections(nextFavColsUI);
+
+        try {
+            const userRef = doc(db, 'users', walletAddress);
+            const snap = await getDoc(userRef);
+
+            const currentFavCols: string[] = snap.exists() ? (snap.data().favoriteCollections || []) : [];
+            const isFavRemote = currentFavCols.includes(collectionId);
+
+            const nextFavCols = isFavRemote
+                ? currentFavCols.filter(id => id !== collectionId)
+                : [...currentFavCols, collectionId];
+
+            await setDoc(userRef, { favoriteCollections: nextFavCols }, { merge: true });
+        } catch (err: unknown) {
+            setFavoriteCollections(prevFavCols);
+            console.error("Firebase toggleFavoriteCollection error:", err);
         }
     };
 
@@ -328,5 +361,5 @@ export const useFirebaseFolders = (walletAddress: string | undefined) => {
         }
     };
 
-    return { folders, folderContents, favorites, isPro, preferences, loading, createFolder, deleteFolder, addItemToFolder, addItemsToFolder, removeItemFromFolder, removeItemsFromFolder, toggleFavorite, updatePreferences };
+    return { folders, folderContents, favorites, favoriteCollections, isPro, preferences, loading, createFolder, deleteFolder, addItemToFolder, addItemsToFolder, removeItemFromFolder, removeItemsFromFolder, toggleFavorite, toggleFavoriteCollection, updatePreferences };
 };

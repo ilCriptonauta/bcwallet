@@ -76,6 +76,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     folders: firebaseFolders,
     folderContents: firebaseFolderContents,
     favorites: firebaseFavorites,
+    favoriteCollections: firebaseFavoriteCollections,
     isPro: firebaseIsPro,
     preferences: firebasePreferences,
     createFolder: fbCreateFolder,
@@ -85,6 +86,7 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     removeItemFromFolder: fbRemoveItemFromFolder,
     removeItemsFromFolder: fbRemoveItemsFromFolder,
     toggleFavorite: fbToggleFavorite,
+    toggleFavoriteCollection: fbToggleFavoriteCollection,
     updatePreferences: fbUpdatePreferences
   } = useFirebaseFolders(walletAddress);
 
@@ -472,6 +474,12 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
     fbToggleFavorite(nft);
   };
 
+  const toggleFavoriteCollection = (e: React.MouseEvent, collectionId: string) => {
+    e.stopPropagation();
+    fbToggleFavoriteCollection(collectionId);
+    haptics.trigger('light');
+  };
+
   const [gridColumns, setGridColumns] = useState(2);
   const nftGridRef = useRef<HTMLDivElement>(null);
   const nftSentinelRef = useRef<HTMLDivElement>(null);
@@ -807,6 +815,15 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
       displayFolders.push({ type: 'folder', id, name: list[0].collectionName, items: list });
     }
 
+    displayFolders.sort((a, b) => {
+      const aFav = firebaseFavoriteCollections.includes(a.id);
+      const bFav = firebaseFavoriteCollections.includes(b.id);
+      if (aFav !== bFav) {
+        return aFav ? -1 : 1;
+      }
+      return (a.name || a.id).localeCompare(b.name || b.id, undefined, { sensitivity: 'base' });
+    });
+
     // If viewing a specific collection
     if (activeCollectionId) {
       const collectionItems = collectionsMap.get(activeCollectionId) || [];
@@ -843,13 +860,27 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             >
               <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             </button>
-            <div>
-              <h2 className="text-2xl font-black dark:text-white text-gray-900">
-                {collectionItems[0]?.collectionName || 'Collection'}
-              </h2>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">
-                {collectionItems.length} assets
-              </p>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="min-w-0">
+                <h2 className="text-2xl font-black dark:text-white text-gray-900 truncate">
+                  {collectionItems[0]?.collectionName || 'Collection'}
+                </h2>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">
+                  {collectionItems.length} assets
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => toggleFavoriteCollection(e, activeCollectionId)}
+                className={`p-2.5 rounded-2xl transition-all active:scale-90 border shrink-0 ${
+                  firebaseFavoriteCollections.includes(activeCollectionId)
+                    ? 'bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20'
+                    : 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-orange-500 border-transparent dark:border-white/5'
+                }`}
+                title={firebaseFavoriteCollections.includes(activeCollectionId) ? 'Remove collection from favorites' : 'Favorite collection'}
+              >
+                <Heart className={`w-4 h-4 ${firebaseFavoriteCollections.includes(activeCollectionId) ? 'fill-current' : ''}`} />
+              </button>
             </div>
             {collectionFloorPrice && (
               <a
@@ -1140,49 +1171,68 @@ const TabSystem: React.FC<TabSystemProps> = ({ isFullVersion }) => {
             </div>
           )}
           <div className={`grid ${isLargeGrid ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-6`}>
-            {displayFolders.map((folder) => (
-              <div
-                key={folder.id}
-                onClick={() => handleCollectionClick(folder.id)}
-                className="group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-orange-500/10"
-              >
-                <div className="aspect-square bg-transparent dark:bg-zinc-800/30 overflow-hidden relative p-2 md:p-4">
-                  {folder.items.slice(0, 3).reverse().map((nft, idx, arr) => {
-                    const isTop = idx === arr.length - 1;
-                    const rotation = isTop ? 'rotate-0' : idx === 0 ? '-rotate-6' : 'rotate-6';
-                    const scale = isTop ? 'scale-100' : idx === 0 ? 'scale-90' : 'scale-95';
-                    const zIndex = isTop ? 'z-20' : idx === 0 ? 'z-0' : 'z-10';
-                    const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
-                    return (
-                      <div key={idx} className={`absolute inset-2 rounded-[1.5rem] overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
-                        <NftMedia
-                          src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/200/200`}
-                          alt="preview"
-                          mimeType={nft.mimeType}
-                          thumbnailFallback={nft.thumbnailUrl || undefined}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        {isTop && (
-                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Folder className="w-10 h-10 text-white drop-shadow-lg" />
-                          </div>
-                        )}
+            {displayFolders.map((folder) => {
+              const isFavCollection = firebaseFavoriteCollections.includes(folder.id);
+              return (
+                <div
+                  key={folder.id}
+                  onClick={() => handleCollectionClick(folder.id)}
+                  className={`group relative cursor-pointer overflow-hidden rounded-[2rem] bg-white dark:bg-[#1a1a1a] border transition-all hover:shadow-2xl hover:shadow-orange-500/10 ${
+                    isFavCollection
+                      ? 'border-orange-500/40 dark:border-orange-500/30 shadow-lg shadow-orange-500/5'
+                      : 'border-gray-100 dark:border-white/5'
+                  }`}
+                >
+                  <div className="aspect-square bg-transparent dark:bg-zinc-800/30 overflow-hidden relative p-2 md:p-4">
+                    <button
+                      type="button"
+                      onClick={(e) => toggleFavoriteCollection(e, folder.id)}
+                      className={`absolute top-3 left-3 z-30 p-2.5 rounded-full backdrop-blur-xl transition-all active:scale-90 shadow-lg ${
+                        isFavCollection
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-black/40 text-white/70 hover:text-white'
+                      }`}
+                      title={isFavCollection ? 'Remove from prioritized collections' : 'Favorite collection'}
+                    >
+                      <Heart className={`w-4 h-4 ${isFavCollection ? 'fill-current' : ''}`} />
+                    </button>
+                    {folder.items.slice(0, 3).reverse().map((nft, idx, arr) => {
+                      const isTop = idx === arr.length - 1;
+                      const rotation = isTop ? 'rotate-0' : idx === 0 ? '-rotate-6' : 'rotate-6';
+                      const scale = isTop ? 'scale-100' : idx === 0 ? 'scale-90' : 'scale-95';
+                      const zIndex = isTop ? 'z-20' : idx === 0 ? 'z-0' : 'z-10';
+                      const opacity = isTop ? 'opacity-100' : 'opacity-40 group-hover:opacity-60';
+                      return (
+                        <div key={idx} className={`absolute inset-2 rounded-[1.5rem] overflow-hidden transition-all duration-500 shadow-2xl ${rotation} ${scale} ${zIndex} ${opacity}`}>
+                          <NftMedia
+                            src={nft.imageUrl || `https://picsum.photos/seed/${nft.identifier}/200/200`}
+                            alt="preview"
+                            mimeType={nft.mimeType}
+                            thumbnailFallback={nft.thumbnailUrl || undefined}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                          {isTop && (
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Folder className="w-10 h-10 text-white drop-shadow-lg" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {folder.items.length > 1 && (
+                      <div className="absolute top-3 right-3 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
+                        {folder.items.length} Assets
                       </div>
-                    );
-                  })}
-                  {folder.items.length > 1 && (
-                    <div className="absolute top-3 right-3 z-30 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#1a1a1a]">
-                      {folder.items.length} Assets
-                    </div>
-                  )}
+                    )}
+                  </div>
+                  <div className="px-4 pb-4 pt-2 flex items-center justify-between gap-2">
+                    <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
+                      {folder.name}
+                    </h3>
+                  </div>
                 </div>
-                <div className="px-4 pb-4 pt-2">
-                  <h3 className="text-sm font-black dark:text-white text-gray-900 group-hover:text-orange-500 transition-colors truncate">
-                    {folder.name}
-                  </h3>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div ref={nftSentinelRef} className="h-1" />
         </div>
